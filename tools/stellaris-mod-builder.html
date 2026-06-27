@@ -20555,13 +20555,9 @@ if(S._migrated){
   if(!hasData){ const b=document.getElementById('import-banner'); if(b) b.style.display='flex'; }
 }
 renderAll(); // initial content render
-// Auto-launch guided tour for first-time users (no saved data anywhere)
+// Auto-launch guided tour for first-time users
 (function(){
-  var _noMods=!Object.values(MOD_KEYS).some(function(k){return !!localStorage.getItem(k);});
-  var _noPkgs=!localStorage.getItem(PKG_KEY);
-  var _noMig =!localStorage.getItem('smb_v2_migrated');
-  if(_noMods&&_noPkgs&&_noMig){
-    // fire after splash fully fades (2500ms delay + 650ms CSS fade = 3150ms; add 350ms buffer)
+  if(!localStorage.getItem('smb_tour_seen')){
     setTimeout(function(){ if(typeof openTour==='function') openTour(); }, 3500);
   }
 })();
@@ -22843,6 +22839,7 @@ function openTour(){
 }
 
 function closeTour(){
+  localStorage.setItem('smb_tour_seen','1');
   tourState = null;
   document.getElementById('tour-overlay')?.remove();
   document.getElementById('tour-spotlight')?.remove();
