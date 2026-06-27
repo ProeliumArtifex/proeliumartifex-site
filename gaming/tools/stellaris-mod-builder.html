@@ -59,6 +59,11 @@
 
 
 
+
+
+
+
+
 *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
 /* ── Splash screen ── */
 #pa-splash{position:fixed;inset:0;z-index:99999;background:#06090f;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;transition:opacity .6s ease}
@@ -185,6 +190,8 @@ textarea{resize:vertical;line-height:1.6}
 #mod-hdr-left{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--t1)}
 #mod-hdr-left .si{font-size:16px}
 #mod-hdr-right{display:flex;align-items:center;gap:6px}
+.ver-chip{font-size:10px;font-weight:600;color:var(--t4);letter-spacing:.4px;padding:2px 9px;border-radius:12px;background:var(--s3);border:1px solid var(--b2);cursor:pointer;white-space:nowrap;transition:color .12s,border-color .12s}
+.ver-chip:hover{color:var(--t2);border-color:var(--b3)}
 .proj-badge{background:var(--s3);border:1px solid var(--b2);color:var(--t2);font-size:11px;font-weight:600;padding:2px 8px;border-radius:12px;cursor:pointer;white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis;transition:background .12s,color .12s;line-height:1.6}
 .proj-badge:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
 .proj-drop{position:fixed;z-index:500;background:var(--s2);border:1px solid var(--b2);border-radius:8px;box-shadow:var(--shadow);min-width:220px;max-width:300px;padding:6px 0;display:flex;flex-direction:column;animation:settPanelIn .1s ease}
@@ -380,6 +387,7 @@ body.pane-dragging{cursor:col-resize!important}
 
 /* ── CARDS (empire/export use) ── */
 .card{background:var(--s1);border:1px solid var(--b1);border-radius:14px;overflow:hidden;margin-bottom:14px}[data-theme="dark"] .card,[data-theme="midnight"] .card{box-shadow:0 2px 12px rgba(0,0,0,.3)}[data-theme="light"] .card{box-shadow:0 1px 5px rgba(0,0,0,.06)}[data-theme="stellaris"] .card{border-color:var(--b2)}[data-theme="pa"] .card{border-color:var(--b2);box-shadow:0 2px 12px rgba(0,0,0,.4)}
+[data-theme="pa"] .ver-chip{color:var(--accent);border-color:rgba(201,167,106,.3);background:rgba(201,167,106,.06);font-family:'Cinzel',serif;letter-spacing:.5px}
 
 /* ── LEFT PANE ITEMS ── */
 .list-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--b1);transition:background .1s;border-left:3px solid transparent}
@@ -393,6 +401,11 @@ body.pane-dragging{cursor:col-resize!important}
 
 /* ── PLANET ROWS (right pane) ── */
 .planet-row{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--b1);transition:background .1s;border-left:3px solid transparent}
+.rp-acc-hdr{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;cursor:pointer;user-select:none;transition:background .12s}
+.rp-acc-hdr:hover{background:var(--s2)}
+.rp-acc-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);display:flex;align-items:center;gap:6px}
+.rp-acc-chevron{font-size:9px;color:var(--t3);transition:transform .15s;display:inline-block}
+.rp-acc-hdr.open .rp-acc-chevron{transform:rotate(90deg)}
 .planet-row:hover{background:var(--s2)}
 .planet-row.active{background:var(--s3);border-left-color:var(--cyan)}
 .planet-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
@@ -623,38 +636,24 @@ details.details-row[open]>.details-summary{color:var(--t1);border-left-color:var
 .chk-ok{color:var(--green);font-size:14px}
 .chk-no{color:var(--t4);font-size:14px}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* ── GUIDED TOUR ──────────────────────────────────────────────── */
+.tour-tip{position:fixed;z-index:8002;width:310px;background:var(--s2);border:1px solid var(--accent);border-radius:14px;padding:20px 20px 16px;box-shadow:0 8px 40px rgba(0,0,0,.7),0 0 0 1px rgba(201,167,106,.12);font-family:Inter,'Segoe UI',system-ui,sans-serif}
+.tour-tip-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.tour-tip-dots{display:flex;gap:5px;align-items:center}
+.tour-dot{width:6px;height:6px;border-radius:50%;background:var(--b3);transition:background .2s}
+.tour-dot.active{background:var(--accent);width:18px;border-radius:6px}
+.tour-tip-skip{font-size:10px;color:var(--t3);background:none;border:none;cursor:pointer;padding:2px 4px;border-radius:4px;transition:color .15s}
+.tour-tip-skip:hover{color:var(--t2)}
+.tour-tip-title{font-size:15px;font-weight:700;color:var(--t1);margin-bottom:8px;line-height:1.3}
+[data-theme="pa"] .tour-tip-title{font-family:'Cinzel',serif;font-size:14px;color:var(--accent)}
+.tour-tip-body{font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:10px}
+.tour-tip-hint{font-size:11px;color:var(--t3);background:var(--s3);border-radius:6px;padding:7px 10px;margin-bottom:12px;line-height:1.5;border-left:2px solid var(--accent)}
+.tour-tip-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.tour-btn-back{font-size:12px;color:var(--t3);background:none;border:none;cursor:pointer;padding:6px 10px;border-radius:6px;transition:color .15s}
+.tour-btn-back:hover{color:var(--t2)}
+.tour-btn-next{font-size:13px;font-weight:600;color:#fff;background:var(--blue-m,var(--s4));border:1px solid var(--accent);padding:7px 18px;border-radius:8px;cursor:pointer;transition:background .15s,box-shadow .15s}
+[data-theme="pa"] .tour-btn-next{background:rgba(201,167,106,.15);color:var(--accent)}
+.tour-btn-next:hover{background:var(--accent);color:var(--s0)}
 
 
 
@@ -662,6 +661,11 @@ details.details-row[open]>.details-summary{color:var(--t1);border-left-color:var
 
 </style>
 <style>
+
+
+
+
+
 
 
 
@@ -679,7 +683,17 @@ details.details-row[open]>.details-summary{color:var(--t1);border-left-color:var
 
 
 
+
+
+
+
+
 </style>
+
+
+
+
+
 
 
 
@@ -1574,6 +1588,33 @@ Generator: compendium_gen.py v1.0.0
 */
 // ══ CHANGELOG ════════════════════════════════════════════════════════════════
 const CHANGELOG = [
+  {v:"0.35s", date:"2026-06-27", milestone:false, notes:[
+    "[Tour][Fix] EMPIRE STEP TOOLTIP POSITION: Ethics & Civics tour step now pins the tooltip to the left side of the screen (just right of the nav) rather than below the empire content area which was off-screen.",
+  ]},
+  {v:"0.35r", date:"2026-06-27", milestone:false, notes:[
+    "[Systems][Fix] ACCORDION DEFAULT-OPEN: right-pane accordion sections (Planets, Belts, Ambient, Bypasses) now default to open for users whose saved state pre-dates the accordion feature (S.rpAcc missing). Previously all sections appeared collapsed on load from older saves.",
+    "[Systems][Fix] ACCORDION TOGGLE: fixed toggle logic so sections always open/close correctly regardless of initial rpAcc state.",
+    "[Tour][Fix] ETHICS/CIVICS STEP: tour step 7 now correctly spotlights the empire content area (#body) instead of a non-existent #app-body element.",
+    "[Tour][Fix] TOUR FONT: tour tooltip body text uses Inter/system font instead of inheriting Cinzel in PA theme — body text in Cinzel is hard to read at small sizes.",
+  ]},
+  {v:"0.35q", date:"2026-06-27", milestone:false, notes:[
+    "[UI][New] GUIDED TOUR: New spotlight-style onboarding tour for first-time users. Overlays on the live UI — users see and interact with real elements while being guided. Covers System Builder (naming, adding planets, homeworld setup), Empire Builder (name, ethics, civics), and Package & Export (downloading the mod ZIP). Accessible via the Guided Tour button on the Home tab.",
+    "[Systems][New] RIGHT PANE ACCORDION: Planets, Asteroid Belts, Ambient Objects and Bypasses sections now collapse/expand individually. State persists per session.",
+    "[UI][New] VERSION BADGE: relocated to module header top-right as 'Alpha — v0.35q'. Burnished Bronze in PA theme. Clicking opens the changelog.",
+  ]},
+  {v:"0.35p", date:"2026-06-27", milestone:false, notes:[
+    "[UI][Fix] CHANGELOG BACKFILL: Changelog entry for v0.35o added — PA theme, SVG preview fix, favicon and logos, splash screen, Cinzel wordmark.",
+  ]},
+  {v:"0.35o", date:"2026-06-27", milestone:false, notes:[
+    "[UI][New] PA THEME: Proelium Artifex brand theme added — Obsidian (#0E1012) background, Warm Ivory (#F2F0EB) text, Burnished Bronze (#C9A76A) accents. Set as the default theme for new sessions. PA theme button added to theme switcher.",
+    "[UI][New] CINZEL TYPOGRAPHY: PA theme uses Cinzel serif as its display font. The wordmark 'Proelium Artifex' renders in Cinzel across all themes via the .pa-wordmark class.",
+    "[UI][New] PA BRANDING — FAVICON & NAV LOGO: PA app icon embedded as favicon and apple-touch-icon. Top-left nav logo replaced with the PA app icon; clicking it opens proeliumartifex.com/gaming.",
+    "[UI][New] PA BRANDING — SPLASH SCREEN: hex placeholder replaced with the PA mark (PA_mark_ivory_transparent). Splash duration extended from 2 s to 2.5 s (bar animation aligned to match).",
+    "[UI][New] PA BRANDING — HOME & PANELS: PA mark replaces hex emoji in the home tab footer and systems quick-start panel. Home footer anchored to bottom with flex layout.",
+    "[UI][Fix] SVG PREVIEW SYMBOLS: the v0.35n icon system patch replaced ~800 Unicode chars with <i class=si-*> HTML which cannot render inside SVG <text> elements. Restored raw Unicode glyphs in planetVisual(). Added svgGlyph() helper in 19_svg-preview.js to translate any residual si-* tokens for bypass/ambient emoji in buildSVG().",
+    "[UI][New] VERSION BADGE: relocated from sidebar to the module header top-right. Format changed to 'Alpha — <version>'. Styled in Burnished Bronze in PA theme.",
+    "[Systems][New] RIGHT PANE ACCORDION: Planets, Asteroid Belts, Ambient Objects and Bypasses sections in the system right pane are individually collapsible. State persists within the session.",
+  ]},
   {v:"0.35n", date:"2026-06-27", milestone:true, notes:[
     "MILESTONE — Consistency & polish pass: changelog backfill, unified icon system, version badge, Project/Package naming, settings & storage tidy.",
     "[UI][New] ICON SYSTEM: replaced ~800 inline emoji across every builder with a single themeable .si-* icon set (70+ glyphs). Icons now share consistent sizing, alignment and theme colour instead of rendering as OS emoji at inconsistent baselines.",
@@ -4390,7 +4431,7 @@ const mkMoon = i=>({
 const SAVE_KEY="smb_v2";
 const S={
   tab:"home", systems:[mkSys()], activeSys:null, activePlanet:null,
-  showPreview:false, showLeftPane:true, showRightPane:false, showSettings:false, showSysRandomiser:false, sysRandSeed:null, sysRandOpts:{}, exportMode:"full", rpFilter:'all', activeBypass:null,
+  showPreview:false, showLeftPane:true, showRightPane:false, showSettings:false, showSysRandomiser:false, sysRandSeed:null, sysRandOpts:{}, exportMode:"full", rpFilter:'all', activeBypass:null, rpAcc:{planets:true,belts:true,ambient:true,bypasses:true},
   mobTab:"sys-list",
   settingsTab:"general", leftPaneW:280, rightPaneW:280,
   saveStatus:"ok",
@@ -8001,7 +8042,6 @@ function initNav(){
       <button class="nav-item" id="nav-save-btn" title="Save project"><span style="font-size:14px"><i class=si-save></i></span><span class="nav-item-label">Save</span><span class="nav-item-tip">Save Project</span><span id="nav-save-dot"></span></button>
       <button class="nav-item" id="nav-settings-btn" title="Settings"><i class="si si-gear"></i><span class="nav-item-label">Settings</span><span class="nav-item-tip">Settings</span></button>
       <button class="nav-item nav-storage-chip" id="nav-storage-btn" title="Storage usage — click to open Storage settings">${(()=>{try{const bd=storageBreakdown();const kb=(bd.totalBytes/1024).toFixed(0);const pct=Math.min(100,Math.round(bd.totalBytes/bd.quotaBytes*100));const col=pct>85?'var(--red,#e05)':pct>60?'var(--yel,#f90)':'var(--t4)';return `<span style="font-size:10px;color:${col};line-height:1.2"><i class=si-save></i><br><span class="nav-item-label" style="font-size:10px">${kb}KB</span></span><span class="nav-item-tip">Storage: ${kb}KB used</span>`;}catch(e){return '<span style="font-size:10px;color:var(--t4)"><i class=si-save></i></span><span class="nav-item-tip">Storage</span>';}})()}</button>
-      <button class="nav-item nav-version-chip" id="nav-version-btn" title="View changelog"><span class="si si-event" style="font-size:12px"></span><span class="nav-item-label" style="font-size:10px;color:var(--t4)">v${(typeof APP_VERSION!=='undefined')?APP_VERSION:''}</span><span class="nav-item-tip">v${(typeof APP_VERSION!=='undefined')?APP_VERSION:''} — changelog</span></button>
       <div class="nav-sep"></div>
       <button class="nav-collapse-btn" id="nav-toggle-btn" title="Expand/collapse sidebar"><span id="nav-toggle-icon" style="font-size:10px">${_navExpanded?'◀':'▶'}</span><span class="nav-item-label" style="font-size:10px;color:var(--t4)">Collapse</span></button>
     </div>`;
@@ -8014,7 +8054,7 @@ function initNav(){
     const item = e.target.closest("[data-tab]");
     if(item){ console.log("[NAV click] tab=",item.dataset.tab,"S.tab was:",S.tab); S.tab=item.dataset.tab; S.showLeftPane=true; S.showRightPane=false; renderAll(); return; }
     if(e.target.closest("#nav-settings-btn")){ S.showSettings=!S.showSettings; updateNav(); renderOverlays(S.showSettings); return; }
-    if(e.target.closest("#nav-version-btn")){ S.settingsTab="changelog"; S.showSettings=true; updateNav(); renderOverlays(true); return; }
+
     if(e.target.closest("#nav-storage-btn")){ S.showSettings=true; S.settingsTab='storage'; updateNav(); renderOverlays(true); return; }
     if(e.target.closest("#nav-save-btn")){ exportProject(); return; }
     if(e.target.closest("#nav-toggle-btn")){
@@ -8109,10 +8149,12 @@ function updateNav(){
     modHdr.innerHTML = `
       <div id="mod-hdr-left"><i class="si ${meta.icon}"></i> ${meta.label} ${_projBadge}</div>
       <div id="mod-hdr-right">
+        <button class="ver-chip" id="hdr-version-btn" title="View changelog — v${(typeof APP_VERSION!=='undefined')?APP_VERSION:''}">Alpha — ${(typeof APP_VERSION!=='undefined')?APP_VERSION:''}</button>
         <span id="hdr-ready" class="tag ${ready===cl.length?"tag-ok":"tag-warn"}">${ready}/${cl.length}</span>
         <button class="btn btn-ok btn-sm" id="btn-save-file" title="Download project as JSON — open next version and import to restore"><i class=si-save></i> ${S.tab==="export"&&getActivePkg()?("Save · "+getActivePkg().name):"Save"}</button>
       </div>`;
     document.getElementById("btn-save-file")?.addEventListener("click", ()=>exportProject());
+    document.getElementById("hdr-version-btn")?.addEventListener("click",()=>{ S.settingsTab="changelog"; S.showSettings=true; updateNav(); renderOverlays(true); });
     if(_modKey) document.getElementById("proj-switch-btn")?.addEventListener("click",e=>{e.stopPropagation();openProjectSwitcher(_modKey,document.getElementById("proj-switch-btn"));});
   }
   // Nav save dot
@@ -9797,9 +9839,9 @@ function renderHome(body){
       <div style="padding:14px 18px;background:var(--s1);border:1px solid var(--b1);border-radius:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
         <div>
           <div style="font-size:13px;font-weight:700;color:var(--t1)">New to Stellaris modding?</div>
-          <div style="font-size:12px;color:var(--t3);margin-top:2px">The Setup Wizard walks you through building your first complete mod step by step.</div>
+          <div style="font-size:12px;color:var(--t3);margin-top:2px">The Guided Tour walks you through your first system, empire, and export in about 5 minutes — launches automatically on your first visit.</div>
         </div>
-        <button class="btn btn-ghost btn-sm" id="home-wizard-btn">⬡ Launch Wizard</button>
+        <button class="btn btn-ghost btn-sm" id="home-wizard-btn"><i class=si-star></i> Guided Tour</button>
       </div>
     </div>
 
@@ -9827,7 +9869,7 @@ function renderHome(body){
   body.querySelectorAll(".home-evt-card").forEach(card=>{
     card.addEventListener("click",()=>{S.tab="events";S._eventsSubTab=card.dataset.evtSubtab;S.showLeftPane=true;S.showRightPane=false;renderAll();});
   });
-  document.getElementById("home-wizard-btn")?.addEventListener("click",()=>openWizard());
+  document.getElementById("home-wizard-btn")?.addEventListener("click",()=>openTour());
 }
 
 // ── MOBILE RENDER ─────────────────────────────────────────────────────────────
@@ -12766,13 +12808,13 @@ function renderRightPane(sys,ap){
         <button class="btn btn-sm${S.rpFilter==='objects'?' btn-pri':' btn-ghost'}" id="rp-filter-objects" style="font-size:10px;padding:2px 7px">Objects</button>
       </div>
     </div>
-    ${_showO?`<!-- Asteroid Belts in right pane -->
+    ${_showO?`<!-- Objects sections (accordion) -->
     <div style="border-bottom:1px solid var(--b1)">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 14px">
-        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t3)">Asteroid Belts <span class="tag tag-ghost" style="font-size:10px">${(sys.asteroid_belts||[]).length}</span></span>
-        <button class="btn btn-ghost btn-sm" id="rp-add-belt" style="font-size:10px">+ Belt</button>
+      <div class="rp-acc-hdr${!(S.rpAcc&&S.rpAcc.belts===false)?' open':''}" data-rp-acc="belts">
+        <span class="rp-acc-title">Belts <span class="tag tag-ghost" style="font-size:10px">${(sys.asteroid_belts||[]).length}</span></span>
+        <div style="display:flex;align-items:center;gap:5px"><button class="btn btn-ghost btn-sm" id="rp-add-belt" style="font-size:10px" onclick="event.stopPropagation()">+ Belt</button><span class="rp-acc-chevron">▸</span></div>
       </div>
-      ${(sys.asteroid_belts||[]).length?`<div style="padding:0 14px 8px">`+
+      ${!(S.rpAcc&&S.rpAcc.belts===false)?`${(sys.asteroid_belts||[]).length?`<div style="padding:0 14px 8px">`+
         (sys.asteroid_belts||[]).map((b,bi)=>`
           <div style="margin-bottom:7px">
             <div style="display:flex;gap:6px;align-items:center;margin-bottom:3px">
@@ -12789,17 +12831,16 @@ function renderRightPane(sys,ap){
             </div>
           </div>`).join('')+`</div>`
         :`<div style="padding:0 14px 8px;font-size:11px;color:var(--t4);font-style:italic">None yet</div>`}
+    </div>`:''}
     </div>
-    ${(function(){
+    <div style="border-bottom:1px solid var(--b1)">${(function(){
       const aos=sys.ambient_objects||[];
-      if(!aos.length) return '';
       const _bypassDist=(sys.bypasses||[]).map(b=>b.orbit_distance!=null?b.orbit_distance:120);
       const _allDists=[...aos.map(a=>a.orbit_distance!=null?a.orbit_distance:150),..._bypassDist];
       const _distCount={}; _allDists.forEach(d=>{_distCount[d]=(_distCount[d]||0)+1;});
-      return '<div style="border-bottom:1px solid var(--b1)">'+(_allDists.length!==new Set(_allDists).size?'<div style="padding:4px 14px 6px;font-size:10px;color:var(--amber);display:flex;align-items:center;gap:5px"><i class=si-warn></i> Some objects share orbit distance — they may visually overlap in-game</div>':'')+
-        '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 14px">'+
-          '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t3)">Ambient Objects <span class="tag tag-ghost" style="font-size:10px">'+aos.length+'</span></span>'+
-        '</div>'+
+      const hasOverlap=_allDists.length!==new Set(_allDists).size;
+      const bodyHtml=!(S.rpAcc&&S.rpAcc.ambient===false)?
+        (hasOverlap?'<div style="padding:4px 14px 6px;font-size:10px;color:var(--amber);display:flex;align-items:center;gap:5px"><i class=si-warn></i> Some objects share orbit distance — they may visually overlap in-game</div>':'')+
         aos.map(function(a){
           const type=a.type||a;
           const def=AMBIENT_OBJECTS.find(function(x){return x.k===type;})||{emoji:'⬡',l:type};
@@ -12813,10 +12854,19 @@ function renderRightPane(sys,ap){
             '</div>'+
             '<button class="btn-icon" data-del-ambient="'+aid+'" title="Remove">×</button>'+
           '</div>';
-        }).join('')+
-      '</div>';
-    })()}
-    <div style="border-bottom:1px solid var(--b1)"><div style="display:flex;align-items:center;justify-content:space-between;padding:7px 14px"><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t3)">Bypasses <span class="tag tag-ghost" style="font-size:10px">${(sys.bypasses||[]).length}</span></span></div><div style="padding:0 14px 10px;display:flex;flex-direction:column;gap:6px">
+        }).join('')
+        :'';
+      return '<div class="rp-acc-hdr'+(!(S.rpAcc&&S.rpAcc.ambient===false)?' open':'')+'" data-rp-acc="ambient">'+
+        '<span class="rp-acc-title">Ambient Objects <span class="tag tag-ghost" style="font-size:10px">'+aos.length+'</span></span>'+
+        '<span class="rp-acc-chevron">▸</span>'+
+        '</div>'+bodyHtml;
+    })()}</div>
+    <div style="border-bottom:1px solid var(--b1)">
+      <div class="rp-acc-hdr${!(S.rpAcc&&S.rpAcc.bypasses===false)?' open':''}" data-rp-acc="bypasses">
+        <span class="rp-acc-title">Bypasses <span class="tag tag-ghost" style="font-size:10px">${(sys.bypasses||[]).length}</span></span>
+        <span class="rp-acc-chevron">▸</span>
+      </div>
+      ${!(S.rpAcc&&S.rpAcc.bypasses===false)?`<div style="padding:0 14px 10px;display:flex;flex-direction:column;gap:6px">
       ${(sys.bypasses||[]).map(function(bobj){
         const btype=bobj.type||bobj;
         const bdef=BYPASSES.find(x=>x.k===btype)||{emoji:'<i class=si-galaxy></i>',l:btype,desc:''};
@@ -12842,12 +12892,18 @@ function renderRightPane(sys,ap){
       <div style="padding:4px 0 2px;display:flex;flex-wrap:wrap;gap:4px">
         ${BYPASSES.filter(b=>!(sys.bypasses||[]).some(x=>(x.type||x)===b.k)).map(b=>`<button class="btn btn-ghost btn-sm" title="${b.desc}${b.dlc?' ['+b.dlc+' DLC]':''}${b.warns&&b.warns.length?' '+b.warns[0]:''}" data-rp-bypass="${b.k}" style="font-size:11px">${b.emoji} + ${b.l}</button>`).join('')}
       </div>
-    </div></div>
+    </div></div>`:''}
+    </div>
 
-    `:''}${_showP?`    ${!sys.planets.length?`<div class="notice n-ghost" style="margin:0;border-radius:0;font-size:11px;border-left:none;border-right:none">
+    `:''}${_showP?`<div style="border-bottom:1px solid var(--b1)">
+      <div class="rp-acc-hdr${!(S.rpAcc&&S.rpAcc.planets===false)?' open':''}" data-rp-acc="planets">
+        <span class="rp-acc-title">Planets <span class="tag tag-ghost" style="font-size:10px">${sys.planets.filter(function(p){return p.cat!=='structure';}).length}</span><span class="tag" style="font-size:10px;margin-left:3px;background:rgba(255,180,50,.15);color:var(--amber)">${sys.planets.filter(function(p){return p.cat==='structure';}).length} struct</span></span>
+        <span class="rp-acc-chevron">▸</span>
+      </div>
+    </div>
+    ${!(S.rpAcc&&S.rpAcc.planets===false)?`${!sys.planets.length?`<div class="notice n-ghost" style="margin:0;border-radius:0;font-size:11px;border-left:none;border-right:none">
       <strong>No planets yet.</strong> Click <strong>+ Planet</strong> to add one, or <strong>⬡ Object</strong> for asteroids, ruins, gas giants and more.
-    </div>`:""}
-    ${planetRows}`:''}` ;
+    </div>`:""}\n    ${planetRows}`:''}`:''}` ;
 
   document.getElementById("drawer-right")?.addEventListener("click",()=>{S.showRightPane=!S.showRightPane;renderRightPane(sys,ap);});
   document.getElementById("rp-filter-all")?.addEventListener("click",()=>{S.rpFilter='all';renderRightPane(sys,ap);});
@@ -12856,6 +12912,17 @@ function renderRightPane(sys,ap){
 
   document.getElementById("rp-rand-sys-planets")?.addEventListener("click",()=>openSystemPlanetRandomiser(S.activeSys||null));
   document.getElementById("rp-rand-planet")?.addEventListener("click",()=>openRandomiser('planet', S.activeSys||null, null));
+  // Accordion section toggles
+  document.querySelectorAll("[data-rp-acc]").forEach(function(hdr){
+    hdr.addEventListener("click",function(e){
+      if(e.target.closest(".btn,.btn-icon,button,input,select"))return;
+      var k=hdr.dataset.rpAcc;
+      if(!S.rpAcc)S.rpAcc={};
+      var _isOpen=!(S.rpAcc&&S.rpAcc[k]===false);
+      S.rpAcc[k]=_isOpen?false:true;
+      renderRightPane(sys,ap);
+    });
+  });
   // Belt controls in right pane
   // (lp-bypass / lp-ambient / lp-flag handlers live in renderLeftPane)
   document.querySelectorAll("[data-rp-bypass]").forEach(btn=>btn.addEventListener("click",()=>{
@@ -20488,6 +20555,12 @@ if(S._migrated){
   if(!hasData){ const b=document.getElementById('import-banner'); if(b) b.style.display='flex'; }
 }
 renderAll(); // initial content render
+// Auto-launch guided tour for first-time users
+(function(){
+  if(!localStorage.getItem('smb_tour_seen')){
+    setTimeout(function(){ if(typeof openTour==='function') openTour(); }, 3500);
+  }
+})();
 // reflow on resize (desktop ↔ mobile)
 let _resizeTimer=null;
 window.addEventListener("resize",()=>{clearTimeout(_resizeTimer);_resizeTimer=setTimeout(renderAll,120);});
@@ -22645,6 +22718,302 @@ function renderArks(body) {
     });
   }
 }
+// ══ GUIDED TOUR ══════════════════════════════════════════════════════════════
+// Spotlight-style onboarding tour for new users.
+// Overlays on the live UI — user sees and interacts with real elements.
+// State is transient (not persisted). Triggered from home page "Start Tour".
+
+var tourState = null; // { step: 0 }
+
+// ── TOUR STEPS ───────────────────────────────────────────────────────────────
+// sel:    CSS selector for spotlight target (null = centred card, no spotlight)
+// nav:    ensure this tab is active before rendering this step
+// title:  step heading
+// body:   HTML body text
+// btn:    button label for primary action
+// tip:    optional extra tip line shown below body
+
+var TOUR_STEPS = [
+  {
+    sel:   null,
+    nav:   null,
+    title: "Welcome to Stellaris Mod Builder",
+    body:  "This quick tour walks you through creating your first mod — a custom star system with a home planet, a playable empire, and a downloadable mod file.<br><br>It takes about 5 minutes. You can skip at any time.",
+    btn:   "Let's start →"
+  },
+  {
+    sel:   '[data-tab="systems"]',
+    nav:   null,
+    title: "1 of 3 — System Builder",
+    body:  "The <strong>System Builder</strong> is where you design the star systems that appear on Stellaris's galaxy map.<br><br>The <strong>Systems</strong> tab is highlighted — click it to open the builder.",
+    btn:   "I'm in Systems →",
+    tip:   "You already have a default system ready to edit."
+  },
+  {
+    sel:   '#sys-name',
+    nav:   'systems',
+    title: "Name your system",
+    body:  "This is your system's name — it appears on the galaxy map and in system view in-game.<br><br>Click the field and give your home system a memorable name.",
+    btn:   "Named it →",
+    tip:   "Tip: Stellaris system names are usually two words, like \"Sol\" or \"Alpha Centauri\"."
+  },
+  {
+    sel:   '#add-planet',
+    nav:   'systems',
+    title: "Add a planet",
+    body:  "Every empire needs a home world. Click <strong>+ Planet</strong> in the right panel to add one to your system.",
+    btn:   "Planet added →",
+    tip:   "You can add moons, asteroid belts and more later — just start with one planet."
+  },
+  {
+    sel:   '#pane-mid',
+    nav:   'systems',
+    title: "Configure your homeworld",
+    body:  "The centre panel shows your planet's settings.<br><br><strong>Name</strong> it, choose a <strong>Planet Class</strong> (Continental is ideal for a starting world), and set a <strong>Size</strong> between 15–25.<br><br>Check the <strong>Home World</strong> box to mark it as your empire's starting location.",
+    btn:   "Planet ready →",
+    tip:   "Continental worlds have the best district balance for new empires."
+  },
+  {
+    sel:   '[data-tab="empire"]',
+    nav:   null,
+    title: "2 of 3 — Empire Builder",
+    body:  "Now let's define the civilisation that starts in your system.<br><br>Click the <strong>Empire</strong> tab.",
+    btn:   "I'm in Empire →",
+    tip:   "The empire you build here will appear in the new-game screen in Stellaris."
+  },
+  {
+    sel:   '#e-name',
+    nav:   'empire',
+    title: "Name your empire",
+    body:  "Enter an <strong>Empire Name</strong> and a <strong>Species Name</strong> — these appear in diplomacy panels, on ships, and in the game's pre-scripted empire list.<br><br>Fill in both fields before moving on.",
+    btn:   "Named →",
+    tip:   "Adjective and plural fields below are optional but add nice flavour in-game."
+  },
+  {
+    sel:   '#body',
+    nav:   'empire',
+    tipPos:'left',
+    title: "Ethics & Civics",
+    body:  "Scroll down in the Empire tab to find:<br><br><strong>Ethics</strong> — your empire's worldview (pick 1–3 points worth). Fanatic counts as 2 points.<br><br><strong>Civics</strong> — special government traits that give unique bonuses (pick 2).<br><br>Don't overthink it — any combination works.",
+    btn:   "Done →",
+    tip:   "Ethics and Civics can be changed freely in the builder — nothing is locked in until you export."
+  },
+  {
+    sel:   '[data-tab="export"]',
+    nav:   null,
+    title: "3 of 3 — Package & Export",
+    body:  "Almost done. Click the <strong>Package & Export</strong> tab to bundle your mod into files Stellaris can read.",
+    btn:   "I'm in Export →",
+    tip:   "Your package can include systems, empires, origins and events all in one ZIP."
+  },
+  {
+    sel:   '#mod-name',
+    nav:   'export',
+    title: "Name your mod",
+    body:  "The <strong>Mod Name</strong> is what players see in the Stellaris launcher.<br><br>It\'s pre-filled from your empire name — update it if you\'d like something different.",
+    btn:   "Named →",
+    tip:   "Tip: keep it short and unique so it\'s easy to spot in the launcher\'s mod list."
+  },
+  {
+    sel:   '#dl-zip',
+    nav:   'export',
+    title: "Download your mod",
+    body:  "Click <strong>Download ZIP</strong> to get your mod files.<br><br>Extract the ZIP into your Stellaris mods folder:<br><code style=\"font-size:11px;background:var(--s3);padding:2px 6px;border-radius:4px;display:inline-block;margin-top:4px\">Documents/Paradox Interactive/Stellaris/mod/</code><br><br>Then enable your mod in the Stellaris launcher and start a new game.",
+    btn:   "Got it →",
+    tip:   "The mod appears in the launcher's Mods tab — just tick the box and launch."
+  },
+  {
+    sel:   null,
+    nav:   null,
+    title: "You're ready to play!",
+    body:  "That's everything. Your custom empire should appear in the new-game empire picker in Stellaris.<br><br>Come back to the builder anytime to add more systems, events, origins, and more.",
+    btn:   "Close tour"
+  }
+];
+
+// ── OPEN / CLOSE ─────────────────────────────────────────────────────────────
+
+function openTour(){
+  tourState = { step: 0 };
+  _renderTour();
+}
+
+function closeTour(){
+  localStorage.setItem('smb_tour_seen','1');
+  tourState = null;
+  document.getElementById('tour-overlay')?.remove();
+  document.getElementById('tour-spotlight')?.remove();
+}
+
+// ── NAVIGATE TO STEP ─────────────────────────────────────────────────────────
+
+function _tourGoto(n){
+  if(!tourState) return;
+  if(n >= TOUR_STEPS.length){ closeTour(); return; }
+  tourState.step = n;
+  var step = TOUR_STEPS[n];
+  // Auto-navigate tab if needed
+  if(step.nav && S.tab !== step.nav){
+    S.tab = step.nav;
+    S.showLeftPane = true;
+    S.showRightPane = false;
+    renderAll();
+    // Small delay so DOM catches up before positioning
+    setTimeout(_renderTour, 80);
+    return;
+  }
+  _renderTour();
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────────────
+
+function _renderTour(){
+  if(!tourState) return;
+  var step   = TOUR_STEPS[tourState.step];
+  var total  = TOUR_STEPS.length;
+  var cur    = tourState.step;
+  var isLast = cur === total - 1;
+
+  // ── Spotlight ─────────────────────────────────────────────────────────────
+  var spotlight = document.getElementById('tour-spotlight');
+  if(!spotlight){
+    spotlight = document.createElement('div');
+    spotlight.id = 'tour-spotlight';
+    document.body.appendChild(spotlight);
+  }
+
+  var target = step.sel ? document.querySelector(step.sel) : null;
+  var pad = 8;
+  if(target){
+    var r = target.getBoundingClientRect();
+    spotlight.style.cssText = (
+      'position:fixed;z-index:8001;pointer-events:none;border-radius:8px;' +
+      'box-shadow:0 0 0 9999px rgba(0,0,0,.76),0 0 0 2px var(--accent),0 0 18px rgba(201,167,106,.35);' +
+      'transition:top .28s cubic-bezier(.4,0,.2,1),left .28s cubic-bezier(.4,0,.2,1),width .28s cubic-bezier(.4,0,.2,1),height .28s cubic-bezier(.4,0,.2,1);' +
+      'top:'+(r.top-pad)+'px;left:'+(r.left-pad)+'px;' +
+      'width:'+(r.width+pad*2)+'px;height:'+(r.height+pad*2)+'px'
+    );
+  } else {
+    // No target — just a translucent backdrop
+    spotlight.style.cssText = (
+      'position:fixed;z-index:8001;pointer-events:none;inset:0;' +
+      'background:rgba(0,0,0,.62);transition:none'
+    );
+  }
+
+  // ── Tooltip card ──────────────────────────────────────────────────────────
+  var ol = document.getElementById('tour-overlay');
+  if(!ol){
+    ol = document.createElement('div');
+    ol.id = 'tour-overlay';
+    document.body.appendChild(ol);
+  }
+  ol.style.cssText = 'position:fixed;z-index:8002;pointer-events:none;inset:0';
+
+  var dots = '';
+  for(var i=0;i<total;i++){
+    dots += '<span class="tour-dot'+(i===cur?' active':'')+'"></span>';
+  }
+
+  var tipHtml = (
+    '<div class="tour-tip" id="tour-tip">' +
+      '<div class="tour-tip-header">' +
+        '<div class="tour-tip-dots">' + dots + '</div>' +
+        '<button class="tour-tip-skip" id="tour-skip">Skip tour</button>' +
+      '</div>' +
+      '<div class="tour-tip-title">' + step.title + '</div>' +
+      '<div class="tour-tip-body">' + step.body + '</div>' +
+      (step.tip ? '<div class="tour-tip-hint">' + step.tip + '</div>' : '') +
+      '<div class="tour-tip-footer">' +
+        (cur > 0 ? '<button class="tour-btn-back" id="tour-back">‹ Back</button>' : '<span></span>') +
+        '<button class="tour-btn-next" id="tour-next">' + (isLast ? step.btn : step.btn) + '</button>' +
+      '</div>' +
+    '</div>'
+  );
+  ol.innerHTML = tipHtml;
+  ol.style.pointerEvents = 'none';
+  document.getElementById('tour-tip').style.pointerEvents = 'all';
+
+  // Position tooltip relative to spotlight target
+  _positionTourTip(target, pad, step.tipPos);
+
+  // Bind buttons
+  document.getElementById('tour-skip')?.addEventListener('click', closeTour);
+  document.getElementById('tour-back')?.addEventListener('click', function(){ _tourGoto(cur-1); });
+  document.getElementById('tour-next')?.addEventListener('click', function(){ _tourGoto(cur+1); });
+}
+
+// ── POSITION TIP ─────────────────────────────────────────────────────────────
+
+function _positionTourTip(target, pad, tipPos){
+  var tip = document.getElementById('tour-tip');
+  if(!tip) return;
+  var vw = window.innerWidth;
+  var vh = window.innerHeight;
+  var tw = tip.offsetWidth  || 300;
+  var th = tip.offsetHeight || 200;
+  var margin = 14;
+  var navW = (document.getElementById('app-nav')||{offsetWidth:60}).offsetWidth||60;
+
+  // tipPos:'left' — pin to left side of screen (just right of nav), y-centred
+  if(tipPos==='left'){
+    tip.style.left = (navW + margin) + 'px';
+    tip.style.top  = Math.round(Math.max(margin, (vh - th) / 2)) + 'px';
+    return;
+  }
+
+  if(!target){
+    // Centre on screen
+    tip.style.left = Math.round((vw - tw) / 2) + 'px';
+    tip.style.top  = Math.round((vh - th) / 2) + 'px';
+    return;
+  }
+
+  var r = target.getBoundingClientRect();
+  var cx = r.left + r.width  / 2;
+  var cy = r.top  + r.height / 2;
+
+  // Prefer: below → above → right → left
+  var positions = [
+    // below
+    { left: Math.min(vw - tw - margin, Math.max(margin, cx - tw/2)),
+      top:  r.bottom + pad + margin },
+    // above
+    { left: Math.min(vw - tw - margin, Math.max(margin, cx - tw/2)),
+      top:  r.top - pad - margin - th },
+    // right
+    { left: r.right + pad + margin,
+      top:  Math.min(vh - th - margin, Math.max(margin, cy - th/2)) },
+    // left
+    { left: r.left - pad - margin - tw,
+      top:  Math.min(vh - th - margin, Math.max(margin, cy - th/2)) },
+  ];
+
+  // Pick first position that fits on screen
+  var chosen = positions[0];
+  for(var i=0;i<positions.length;i++){
+    var p = positions[i];
+    if(p.left >= margin && p.top >= margin &&
+       p.left + tw <= vw - margin &&
+       p.top  + th <= vh - margin){
+      chosen = p; break;
+    }
+  }
+
+  tip.style.left = Math.round(chosen.left) + 'px';
+  tip.style.top  = Math.round(chosen.top)  + 'px';
+}
+
+// ── RESIZE HANDLER ───────────────────────────────────────────────────────────
+
+(function(){
+  var _rt = null;
+  window.addEventListener('resize', function(){
+    if(!tourState) return;
+    clearTimeout(_rt);
+    _rt = setTimeout(_renderTour, 120);
+  });
+})();
 </script>
 </body>
 </script>
