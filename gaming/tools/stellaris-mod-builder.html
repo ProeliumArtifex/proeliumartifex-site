@@ -64,6 +64,13 @@
 
 
 
+
+
+
+
+
+
+
 *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
 /* ── Splash screen ── */
 #pa-splash{position:fixed;inset:0;z-index:99999;background:#06090f;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;transition:opacity .6s ease}
@@ -131,7 +138,7 @@
   /* Proelium Artifex — Obsidian + Warm Ivory + Burnished Bronze */
   --bg:#0e1012;--s0:#08090b;--s1:#14161a;--s2:#1a1c20;--s3:#202326;--s4:#27292d;
   --b1:#1e2124;--b2:#2c2f34;--b3:#4b535a;
-  --t1:#f2f0eb;--t2:#b8b6b0;--t3:#6e6c66;--t4:#3a3c40;
+  --t1:#f2f0eb;--t2:#c0bdb6;--t3:#9a9790;--t4:#606268;
   --blue:#c9a76a;--blue-d:#2a1e0a;--blue-m:#3a2c12;
   --cyan:#e8d8a8;--green:#8fbe6a;--green-d:#162210;
   --amber:#c9a76a;--amber-d:#281e08;--red:#cc6b6b;--red-d:#280e0e;
@@ -659,8 +666,22 @@ details.details-row[open]>.details-summary{color:var(--t1);border-left-color:var
 
 
 
+
+
+
+
+
+
+
 </style>
 <style>
+
+
+
+
+
+
+
 
 
 
@@ -688,7 +709,21 @@ details.details-row[open]>.details-summary{color:var(--t1);border-left-color:var
 
 
 
+
+
+
+
+
+
+
 </style>
+
+
+
+
+
+
+
 
 
 
@@ -1576,6 +1611,68 @@ const HELP = {
     body:"Some content in the builder requires specific DLC. Using DLC content without the DLC installed will cause the game to skip or error that content.\n\nLeviathans Story Pack:\n• Space fauna: Tiyanki, Void Cloud, Crystalline Entity\n• Enigmatic Fortress (ring_of_pain_01)\n• Curator and Enclaves\n\nDistant Stars Story Pack:\n• L-Gates and the L-Cluster\n• Hive Asteroid ambient\n• Ancient Probe ambient\n• Distant Stars system initializers\n\nAncient Relics Story Pack:\n• pc_relic (relic worlds)\n• Precursor ruins (d_zroni_ruins, etc.)\n• Archaeological dig sites\n\nUtopia:\n• Habitats (pc_habitat)\n• Psionic ascension content, Shroud Rift ambient\n• Ring worlds (pc_ringworld_*)\n\nMegacorp:\n• Corporate authority (auth_corporate)\n• Caravaneer ambient objects\n• Ecumenopolis (pc_city)\n\nApocalypse:\n• pc_shielded (Shielded World)\n• Colossus weapon classes\n\nOverlord:\n• pc_orbital_ring_tier_1/2\n\nMachine Age / Synthetic Dawn:\n• pc_ai (AI World)\n• EHOF bypass\n• Gray Goo ambient\n\nTip: The builder does not block content by DLC. Add a DLC requirement note in your mod’s descriptor.mod if your mod requires specific DLC.",
     keys:["Leviathans","Distant Stars","Ancient Relics","Utopia","Megacorp","Apocalypse","Overlord","Machine Age"]
   },
+  // ══ BUILDER GUIDES ═══════════════════════════════════════════════════════════
+
+  guide_systems:{
+    title:"Guide — System Builder",
+    body:"The System Builder creates solar system initializers — the files that define custom star systems that can spawn in the galaxy or serve as your empire's home system.\n\nGETTING STARTED:\n1. Click + New System in the left pane.\n2. Give it a name (this becomes the internal key, e.g. my_sol_system).\n3. Choose a Star Class — sc_g (yellow/Sun-like) is the safest starting choice.\n4. Tick Home System if this will be your empire's starting system.\n5. Add planets via Add Planet. Every home system needs exactly one planet marked as Homeworld.\n\nPROJECTS — SYSTEMS AREA:\nProjects in the System Builder store only system data. Switching to the Empire Builder uses a separate project store — changes here don't affect your Empire project.\n\nEXPORT:\nSystems export to common/solar_system_initializers/custom_systems.txt. Each system gets its own named block inside that file. If Split Files is on, each system gets its own file.",
+    keys:["Home System","Star Class","Homeworld","Add Planet","Add Belt","Split Files"]
+  },
+
+  guide_empire:{
+    title:"Guide — Empire Builder",
+    body:"The Empire Builder creates prescripted countries — empires that appear in the new-game empire picker or spawn as AI empires.\n\nGETTING STARTED:\n1. Fill in Empire Name and Adjective (used in localisation — e.g. 'United Earth' / 'Terran').\n2. Pick Authority. This controls which Ethics and Civics are available.\n3. Add Ethics (up to 3 points — Fanatic ethics cost 2). Opposing pairs are blocked automatically.\n4. Add Civics — the list filters to match your authority and ethics.\n5. Fill in Species Name, Class and Portrait. Graphical Culture auto-fills from species class.\n6. Pick a Ship Set (graphical_culture for ships).\n7. Link your Home System under the Home System field.\n\nPROJECTS — EMPIRE AREA:\nThe Empire Builder has its own project store, independent from Systems. You can have multiple empire configurations saved as separate projects.\n\nEXPORT:\nEmpires export to prescripted_countries/custom_empire.txt (or per-empire files if Split Files is on). Names and descriptions go into localisation/english/.",
+    keys:["Authority","Ethics","Civics","Adjective","graphical_culture","Home System link","spawn_enabled"]
+  },
+
+  guide_origins:{
+    title:"Guide — Origins Builder",
+    body:"The Origins Builder creates custom origin civics — options that appear in the Origins list of the empire creation screen.\n\nHOW ORIGINS WORK IN STELLARIS:\nAn origin is a civic with is_origin = yes. It can lock your starting planet class, grant starting technologies, add buildings to the capital, or fire on_actions at game start.\n\nGETTING STARTED:\n1. Click + New Origin. Give it an internal key (must start with origin_, e.g. origin_lost_colony).\n2. Set a display Name and Description — these appear in the empire picker.\n3. Optionally set Starting Colony Class to lock the homeworld type (e.g. pc_gaia for a Gaia World start).\n4. Add Ethics/Authority requirements if the origin should only be available to certain empires.\n5. Add Starting Buildings, Technologies and Deposits in the appropriate panels.\n\nPROJECTS — ORIGINS AREA:\nOrigins have their own project store. You can save multiple origin sets as separate projects.\n\nEXPORT:\nOrigins export to common/governments/civics/custom_origins.txt plus an on_actions hook and a localisation file.",
+    keys:["is_origin = yes","origin_ prefix","Starting Colony Class","empire_init_capital_planet","give_technology","add_building","add_deposit"]
+  },
+
+  guide_events:{
+    title:"Guide — Events Builder",
+    body:"The Events Builder creates Stellaris event scripts — country events, planet events, archaeology sites, anomalies, special projects and astral rifts.\n\nEVENT TYPES:\n• Country Event — fires in the scope of an empire (country scope).\n• Planet Event — fires in the scope of a planet.\n• Ship / Leader / Pop Event — fires in the narrower scope.\n• Archaeology Site — multi-stage excavation with one event per dig stage.\n• Anomaly Category — anomaly spawning and research events.\n• Special Project — science ship project with a completion event.\n• Astral Rift Chain — DLC Astral Planes multi-stage event chain.\n\nGETTING STARTED (basic country event):\n1. Go to Events → Custom Events → + New Event.\n2. Set Event Type to country_event.\n3. Set is_triggered_only = yes (for events called from on_actions or other events).\n4. Add effects in the Effects panel (add_building, give_technology, add_modifier, etc.).\n5. For silent background events tick hide_window.\n\nPROJECTS — EVENTS AREA:\nAll event types (events, anomalies, archaeology, etc.) share the Events project store.\n\nEXPORT:\nEvents export to events/custom_events.txt. On_action hooks go to common/on_actions/custom_on_actions.txt.",
+    keys:["country_event","planet_event","is_triggered_only = yes","hide_window = yes","on_action","empire_init_capital_planet","add_building","give_technology","add_modifier"]
+  },
+
+  guide_library:{
+    title:"Guide — Library",
+    body:"The Library stores reusable blueprints — saved planets, systems, empires and events that you can load into any project.\n\nWHAT THE LIBRARY STORES:\n• Planet blueprints — saved planet configurations (class, deposits, buildings, species, event chains).\n• System blueprints — saved system configurations (star class, planets, belts, bypasses).\n• Empire blueprints — saved empire configurations.\n• Event blueprints — saved event definitions.\n\nSAVING TO THE LIBRARY:\nIn the Planet Builder, click Save to Library to store the current planet. In the System Builder, use the Library button in the toolbar. In the Empire Builder, use Save to Library.\n\nUSING LIBRARY ENTRIES:\nClick any entry to preview it. Click Load to apply it to your current work. Click Open in Builder to load a planet directly into the Planet Builder for editing.\n\nBUILT-IN TEMPLATES:\nThe Library ships with 5 read-only empire templates (United Earth, Galactic Empire, Systems Alliance, Covenant, Borg Collective). Click View to inspect, Save as Custom Copy to create your own editable version.\n\nPROJECTS — LIBRARY AREA:\nThe Library has its own project store for saving your blueprint sets.",
+    keys:["Save to Library","Load","Open in Builder","Save as Custom Copy","Built-in Templates"]
+  },
+
+  guide_arks:{
+    title:"Guide — Arks Builder",
+    body:"The Arks builder creates custom Star Arks — the massive colony ships introduced in Stellaris 4.x. Arks function as mobile bases that can colonise planets and provide bonuses while in orbit.\n\nGETTING STARTED:\n1. Click + New Ark in the left pane.\n2. Set the Ark Name and choose its starting system.\n3. Configure Ark Modules — each module provides specific bonuses or capabilities.\n4. Set the starting population, species and traits for the colonists aboard.\n5. Add any special buildings or technologies granted to empires that start with this ark.\n\nPROJECTS — ARKS AREA:\nArks have their own independent project store.\n\nEXPORT:\nArk definitions export to their appropriate common/ subfolders. Localisation for ark names and descriptions is generated automatically.",
+    keys:["Ark Name","Ark Modules","Starting Population","Starting System"]
+  },
+
+  guide_planets:{
+    title:"Guide — Planet Builder",
+    body:"The Planet Builder designs individual planets with full control over deposits, districts, buildings, species and orbital rings. Planets saved here can be loaded into any system via the Library.\n\nGETTING STARTED:\n1. Configure Planet Class (pc_continental, pc_ocean, etc.) and Size (12–25 for habitable worlds).\n2. Check Homeworld if this is your empire's starting planet.\n3. Add deposits under Deposits & Features — use planetary features (d_veiny_cliffs, d_hot_springs) to increase max districts on habitable worlds, and blockers (d_mountain_range_blocker) for challenge.\n4. Add Starting Buildings via the Buildings section — balance with available job slots.\n5. Click Save to Library to store the planet for reuse.\n\nEXPORT:\nPlanet data is embedded inside system initializers under common/solar_system_initializers/. Districts and buildings go into the planet's init_effect block.",
+    keys:["pc_continental","pc_gaia","size (4-35)","is_homeworld = yes","add_deposit","add_building","add_district"]
+  },
+
+  guide_import:{
+    title:"Guide — Import .txt",
+    body:"The Import tool parses existing Stellaris .txt files and loads their content into the relevant builder. Use it to edit vanilla systems, import community mod empires, or reverse-engineer existing content.\n\nSUPPORTED FILE TYPES:\n• System Initializer — common/solar_system_initializers/*.txt → loads into System Builder.\n• Prescripted Country — common/prescripted_countries/*.txt → loads into Empire Builder.\n• Event File — events/*.txt → loads into Event Builder.\n• Origin Definition — common/governments/civics/*.txt (is_origin = yes entries) → loads into Origins Builder.\n• Archaeology Site — common/archaeology/*.txt\n• Anomaly Category — common/anomalies/*.txt\n\nHOW TO IMPORT:\n1. Click the file type card that matches what you're importing.\n2. Paste the .txt contents into the text area (or drag-and-drop the file).\n3. The parser previews what it found. Select the entries to import.\n4. Click Import to add them to your active project.\n\nNOTE: Localisation YML can be pasted alongside to resolve display names and descriptions. Not all PDX script features are parseable — complex trigger conditions and on_action hooks may need manual adjustment after import.",
+    keys:["common/solar_system_initializers/","common/prescripted_countries/","events/","common/governments/civics/","is_origin = yes"]
+  },
+
+  guide_export:{
+    title:"Guide — Package & Export",
+    body:"The Package & Export tab generates all files needed to install your mod into Stellaris.\n\nEXPORT MODES:\n• Standalone Mod — complete mod with descriptor files. Use for a new standalone release. Extract the ZIP to Documents/Paradox Interactive/Stellaris/mod/.\n• System Files — system initializer + localisation only. Merge into an existing mod's common/solar_system_initializers/ folder.\n• Empire Files — prescripted country file only. Goes in prescripted_countries/ at the mod ROOT, not under common/.\n\nKEY STEPS:\n1. Set Mod Name and Version in the Metadata section.\n2. Check the Pre-export Checklist — all items should be green before downloading.\n3. Click Download ZIP to get the complete mod package, or Files to download individually.\n4. Extract the ZIP so your mod folder and .mod file sit inside Stellaris/mod/.\n5. Enable the mod in the Paradox Launcher and start a new game.\n\nCOMMON ISSUES:\n• Empire not appearing: prescripted_countries/ must be at mod root, not under common/.\n• Homeworld deposits stripped: Stellaris clears deposits at game start via generate_home_system_resources. Use a game_start event to re-apply them.\n• Civics not showing: authority/ethics mismatch, or a DLC civic is selected without the DLC.",
+    keys:["prescripted_countries/ (at root, NOT common/)","descriptor.mod","supported_version = v4.*.*","spawn_enabled = yes","generate_home_system_resources"]
+  },
+
+  guide_govspec:{
+    title:"Guide — Gov & Species Builder",
+    body:"The Gov & Species builder creates custom government components and species content — authorities, civics, species traits, ethics, edicts, policies, species classes, pop factions and more.\n\nSUB-BUILDERS AVAILABLE:\n• Authorities — custom authority types (e.g. a new democratic variant).\n• Civics — custom civic cards (standard, Hive Mind, Machine Intelligence, Corporate).\n• Species Traits — positive and negative trait cards with point costs.\n• Ethics — custom ethic options.\n• Ruler Traits & Councilors — leader trait definitions and government position councillors.\n• Focuses & Agendas — tradition focuses and policy agendas.\n• Edicts — empire edicts with cost and duration.\n• Policies — policy options and alternatives.\n• Species Classes — new species portraits and graphical culture groups.\n• Pop Factions — internal political factions with attraction and happiness formulas.\n\nGETTING STARTED:\n1. Pick a sub-builder from the left nav.\n2. Click + New to add an entry.\n3. Fill in the key (internal name), display name, description and relevant fields.\n4. Preview the generated PDX script with the Preview button.\n\nPROJECTS — GOV & SPECIES AREA:\nAll sub-builders share the Gov & Species project store.\n\nEXPORT:\nEach sub-type exports to its correct common/ subfolder (e.g. civics → common/governments/civics/, species classes → common/species_classes/, edicts → common/edicts/).",
+    keys:["Authorities","Civics","Species Traits","Ruler Traits","Edicts","Policies","Species Classes","Pop Factions"]
+  },
+
 };
 /*
 === APP COMPENDIUM (AUTO-GENERATED) ===
@@ -1588,6 +1685,79 @@ Generator: compendium_gen.py v1.0.0
 */
 // ══ CHANGELOG ════════════════════════════════════════════════════════════════
 const CHANGELOG = [
+  {v:"0.37", date:"2026-06-27", milestone:true, notes:[
+    "MILESTONE — Packages & Projects overhaul · Area-specific project clarity · Builder guides · Ko-fi support.",
+    "Packages now pull live data from each module's active project when no explicit pin is set. The Package panel shows all seven module dropdowns including Gov & Species. Five missing export keys (anomalies, special projects, archaeology, astral rifts, arks) were added to the swap layer so assembled data reaches the zip generator cleanly.",
+    "Every module's project badge now displays the area name alongside the project name, making it immediately clear that Systems, Empire, Origins, Events, Library, Arks and Gov & Species each maintain independent project stores.",
+    "Detailed walkthroughs added under Help → Builder Guides for all seven builder areas. The home page links to the guides.",
+  ]},
+  {v:"0.37l", date:"2026-06-28", milestone:false, notes:[
+    "[Changelog][Fix] LOG PAGE OVERLAPPING TEXT: changelog note strings containing literal angle-bracket placeholders (e.g. <key>, <namespace>, <id>, <root>, <details>, <text>) were injected into the DOM unescaped, so the browser parsed them as unknown, unclosed HTML elements. This corrupted the changelog's nesting and made entries fracture into overlapping narrow columns. Note text is now HTML-escaped via a clEsc() helper before insertion; the intentional inline icons (<i class=si-xxx></i>) are restored after escaping so they still render.",
+  ]},
+  {v:"0.37k", date:"2026-06-28", milestone:false, notes:[
+    "[Changelog][Fix] SETTINGS PANEL CRASH: the Settings overlay would not open — Uncaught TypeError 'Cannot read properties of undefined (reading map)' in renderOverlays. Seven changelog entries (0.37d–0.37j) were authored with a 'changes:' key instead of 'notes:' and no 'date:', so the changelog patch renderer's p.notes.map() threw and aborted the whole overlay render. All seven entries corrected to the standard {v, date, milestone, notes} shape.",
+    "[Changelog][Hardening] Changelog patch renderer now normalises p.notes with ||[] before .map()/.length, so a future entry missing its notes array can no longer take down the Settings panel.",
+  ]},
+  {v:"0.37j", date:"2026-06-28", milestone:false, notes:[
+     "[Validation][Fix] Multi-empire mods no longer trigger false 'Multiple home systems' and 'Multiple homeworld planets' errors — all homeworld/home-system checks now compare against the number of empires in the mod rather than hardcoding a limit of 1"
+   ]},
+  {v:"0.37i", date:"2026-06-28", milestone:false, notes:[
+     "[Randomiser][Fix] 'Error generating: Cannot read properties of undefined (reading includes)' — empire ethics/civics/traits arrays are now guarded with ||[] in all render paths so a corrupted or legacy save state cannot crash the UI",
+     "[Randomiser][Fix] System randomiser now generates zone-appropriate planet classes — ZONE_CLS weighted pick was double-extracting .v and always passing undefined to randomPlanet, so zone assignments were silently ignored",
+     "[Validation][Fix] Wormhole mod-system link check no longer crashes when the target system is not found in the mod — missing tgt declaration added with an early-exit guard",
+     "[Validation] validate() now normalises empire ethics/civics/traits to arrays on load so null or missing values from old saves cannot cause downstream errors"
+   ]},
+  {v:"0.37h", date:"2026-06-28", milestone:false, notes:[
+     "[Validation] Ark builder errors and warnings now appear in the Package & Export validation panel — no nomadic origin, missing nomad_init system, and unlinked arks are all reported",
+     "[Randomiser][Fix] Empire civic pool now filters by authority requirements — civics like Imperial Cult, Parliamentary System, Feudal Realm, Criminal Heritage will only appear for compatible authorities",
+     "[Randomiser][Fix] Empire civic pool now filters by required ethics — civics requiring Spiritualist, Militarist, Egalitarian etc. will only appear when those ethics are present",
+     "[Randomiser][Fix] Machine Intelligence empires now use robot/machine trait pool instead of biological traits",
+     "[Randomiser][Fix] Trait generation now respects the 2-point budget and checks opposing pairs (Strong+Weak, Nomadic+Sedentary etc.) — randomiser will not produce trait combinations that fail validation",
+     "[Randomiser][Fix] Orbital rings removed from planet randomiser — create_megastructure is not valid in init_effect in Stellaris 4.x and always produced a validation warning"
+   ]},
+  {v:"0.37g", date:"2026-06-28", milestone:false, notes:[
+     "Fixed: add_modifier in system initializer init_effect was missing days = -1, causing district max modifiers to not apply permanently in-game",
+     "Fixed: district max modifiers (smb_dmax_*) now generate localisation entries — they previously showed as raw keys in the planet modifier list",
+     "Localisation file generated alongside static_modifiers file in both combined and split export modes"
+   ]},
+  {v:"0.37f", date:"2026-06-28", milestone:false, notes:[
+     "Added Package & Export guide tour with 11 steps covering export modes, checklist, download, folder structure, gotchas, and in-game testing",
+     "Added id attributes to export checklist, folder structure, and known gotchas sections for spotlight targeting",
+     "Wired export tab to guide button system in module header",
+     "Added guide_export entry to Help topic list"
+   ]},
+  {v:"0.37e", date:"2026-06-28", milestone:false, notes:[
+     "Welcome tour: fixed Ethics step spotlight (was covering whole page, now targets ethics section directly)",
+     "Welcome tour: added Ethics and Civics as separate spotlight steps with correct selectors",
+     "Welcome tour: added per-module ? guide tip step before closing",
+     "Help data: added Planet Builder and Import .txt guide entries to Help topic list"
+   ]},
+  {v:"0.37d", date:"2026-06-28", milestone:false, notes:[
+     "Added per-module ? guide buttons for Planet Builder and Import .txt tabs",
+     "All module guides rewritten: verified DOM selectors, correct Stellaris file paths, per-sub-tab GovSpec coverage, Origins tooltip fix",
+     "Added empire section IDs (e-sec-ethics, e-sec-civics, e-sec-traits, e-sec-species) for proper spotlight highlighting",
+     "Origins guide: tooltip now pins left-side so it stays on-screen",
+     "GovSpec guide: covers all 11 sub-tabs with file path references",
+     "Ark guide: narration-only steps for ark type, tier, districts, buildings",
+     "Library guide: uses verified data-libnav selectors and lib-save-empire button"
+   ]},
+  {v:"0.37c", date:"2026-06-27", milestone:false, notes:[
+    "[Tour][New] PER-MODULE GUIDE TOURS: the ? button in each module header now launches an interactive spotlight tour for that area — step-by-step walkthroughs for Systems, Empire, Origins, Events, Library, Arks, and Gov & Species.",
+    "[Tour][New] PARAMETERISED TOUR ENGINE: the tour engine now supports swappable step arrays; openGuide(module) selects the right guide steps while openTour() still starts the welcome tour.",
+  ]},
+  {v:"0.37b", date:"2026-06-27", milestone:false, notes:[
+    "[Changelog][Fix] GROUPING BUG: the first patch version in each milestone group was being silently dropped from the patches list — the else branch in the CHANGELOG grouper was storing the entry as the milestone placeholder, which got overwritten when the real milestone arrived. Fixed by initialising groups with milestone:null and pushing the entry to patches immediately.",
+    "[UI][New] AREA GUIDE BUTTON: a ? guide button appears next to the project badge in every module header. Clicking it opens the relevant Builder Guide in the Help overlay (Systems Guide, Empire Guide, Origins Guide, Events Guide, Library Guide, Arks Guide, Gov & Species Guide).",
+  ]},
+  {v:"0.37a", date:"2026-06-27", milestone:false, notes:[
+    "[Packages][Fix] PROJECT FALLBACK: assembleExportState now falls back to the currently active project per module when no explicit package reference is pinned — packages no longer export empty data.",
+    "[Packages][New] GOVSPEC IN PACKAGES: Gov & Species added to the package module list with project pinning dropdown. Pre-selects the active project when no pin is set.",
+    "[Export][Fix] SWAP KEYS SWEEP: five missing keys (customAnomalies, customSpecialProjects, customArchaeology, customRifts, arks) added to _swapKeys in renderExport so assembled package state reaches buildZipMap correctly.",
+    "[UI][New] KO-FI BUTTON: 'Support the vision' link added to the header, linking to https://ko-fi.com/proeliumartifex.",
+    "[Projects][New] AREA-SPECIFIC LABELS: project badge in each module header now shows the area name (e.g. 'SYSTEMS · My Project ▾'), making it clear that each tab maintains its own independent project store.",
+    "[Help][New] BUILDER GUIDES: detailed walkthroughs added for each major builder area (Systems, Empire, Origins, Events, Library, Arks, Gov & Species) under Help → Builder Guides.",
+    "[UI][New] HOME GUIDES LINK: home page now includes a Guides & Help panel linking directly to the Help tab.",
+  ]},
   {v:"0.35s", date:"2026-06-27", milestone:false, notes:[
     "[Tour][Fix] EMPIRE STEP TOOLTIP POSITION: Ethics & Civics tour step now pins the tooltip to the left side of the screen (just right of the nav) rather than below the empire content area which was off-screen.",
   ]},
@@ -1615,7 +1785,7 @@ const CHANGELOG = [
     "[UI][New] VERSION BADGE: relocated from sidebar to the module header top-right. Format changed to 'Alpha — <version>'. Styled in Burnished Bronze in PA theme.",
     "[Systems][New] RIGHT PANE ACCORDION: Planets, Asteroid Belts, Ambient Objects and Bypasses sections in the system right pane are individually collapsible. State persists within the session.",
   ]},
-  {v:"0.35n", date:"2026-06-27", milestone:true, notes:[
+  {v:"0.35", date:"2026-06-27", milestone:true, notes:[
     "MILESTONE — Consistency & polish pass: changelog backfill, unified icon system, version badge, Project/Package naming, settings & storage tidy.",
     "[UI][New] ICON SYSTEM: replaced ~800 inline emoji across every builder with a single themeable .si-* icon set (70+ glyphs). Icons now share consistent sizing, alignment and theme colour instead of rendering as OS emoji at inconsistent baselines.",
     "[UI][New] VERSION BADGE: the sidebar now shows the current build version (single source derived from the changelog) — click it to open the changelog. The Changelog tab also shows a Current version badge.",
@@ -1624,7 +1794,7 @@ const CHANGELOG = [
     "[Settings][New] SPLIT EXPORT TOGGLE: the previously code-only splitExport option is now an actual toggle under Settings → Data & Storage.",
     "[Storage] LABELS: the storage breakdown now labels legacy keys (backup, migration flag) instead of showing raw key names.",
   ]},
-  {v:"0.35m", date:"2026-06-25", milestone:true, notes:[
+  {v:"0.35m", date:"2026-06-25", milestone:false, notes:[
     "MILESTONE — Home/Workshop redesign · Branded splash screen · Module launch cards.",
     "[UI][New] HOME WORKSHOP: the home tab was rebuilt around large clickable module cards (System Builder, Planet Builder, Empire Builder, Species & Government, Origins Builder, Library, Package & Export), each with icon, description and quick status — replacing the older link list.",
     "[UI][New] SPLASH SCREEN: added a branded Proelium Artifex loading splash (hex monogram + progress bar) shown on first paint.",
@@ -1663,7 +1833,7 @@ const CHANGELOG = [
   {v:"0.35d", date:"2026-06-21", milestone:false, notes:[
     "[Events][Fix] ORIGIN KEY LIST: ORIGIN_KEYS (has_origin trigger autocomplete) expanded to cover the remaining base and DLC origins.",
   ]},
-  {v:"0.35c", date:"2026-06-21", milestone:true, notes:[
+  {v:"0.35c", date:"2026-06-21", milestone:false, notes:[
     "MILESTONE — Species & Governments builder tab.",
     "[Species & Gov][New] SPECIES & GOV TAB: new top-level tab (si-gov icon, smb_gov_v1 storage) with sub-builders for Authority, Civics, Species Traits, Ethics, Ruler Traits, Gov Positions (Councilors), Focuses & Agendas, Edicts, Policies, Species Classes and Pop Factions, each exporting to its correct common/ subfolder.",
   ]},
@@ -1730,7 +1900,7 @@ const CHANGELOG = [
   {v:"0.34h", date:"2026-06-19", milestone:false, notes:[
     "[Ark Builder][New] SHIP TYPES & TILES: ark ship types (Civilian, Science, Military) plus ARK_DISTRICTS and ARK_BUILDINGS catalogues added for configuring arkship layouts.",
   ]},
-  {v:"0.34g", date:"2026-06-19", milestone:true, notes:[
+  {v:"0.34", date:"2026-06-19", milestone:true, notes:[
     "MILESTONE — Ark Builder.",
     "[Ark Builder][New] ARK BUILDER TAB: new builder for nomadic ark starts — ARK_TYPES data, genArkCountryEffect generator, _arkWarnings validation and renderArks UI, exporting ark effect snippets for prescripted_countries. Added smb_ark_v1 storage key.",
   ]},
@@ -1769,7 +1939,7 @@ const CHANGELOG = [
     "[Systems][Preview] SCROLL TO ZOOM: mouse wheel on the system SVG preview now zooms in/out (0.35×–3×, scaling from centre). Drag-to-reposition and click-to-select continue to work at any zoom level. Preview hint updated to show SCROLL TO ZOOM.",
     "[Systems] DEFAULT ORBIT DISTANCE: new planets added to a system now default to orbit distance 25 instead of the old cumulative 50+N×28 formula. placeOrbit still snaps the angle to a free gap at that distance.",
   ]},
-  {v:"0.34a", date:"2026-06-18", milestone:true, notes:[
+  {v:"0.34a", date:"2026-06-18", milestone:false, notes:[
     "MILESTONE — .txt Import · Planet delete confirm · Ringworld dialogs · Export active-only · Ringworld SVG preview.",
     "[Import][New] TXT FILE IMPORTER (27_txt-import.js): a new 490-line module adds a generic Paradox script tokeniser (parsePDX) that handles comments, quoted strings, repeated keys → arrays, and inline value arrays. importSystemTxt() parses solar_system_initializer .txt files back into the builder's system/planet structure. importEmpireTxt() parses prescripted_countries .txt files into empire objects (species, civics, ethics, traits, origin, flag, ruler, secondary species).",
     "[Import][New] IMPORT NAV TAB: a dedicated Import page (sibling to Package & Export) with two cards — System Initializer and Prescripted Country — each with a drag-drop zone, file input, live parse preview, and confirm-to-import action. Vanilla file location hints included.",
@@ -3773,6 +3943,25 @@ function genDistrictMaxMods(){
   const keys=Object.keys(seen);
   return keys.length?keys.map(function(k){return seen[k];}).join('\n\n'):'';
 }
+function genDistrictMaxModLoc(){
+  // Generates localisation lines for each unique smb_dmax_* static modifier key.
+  // Without these, the modifier shows as a raw key in the planet modifier list.
+  var seen={};
+  var lines=[];
+  (S.systems||[]).forEach(function(sy){(sy.planets||[]).forEach(function(p){
+    var key=districtMaxModKey(p); if(!key||seen[key]) return;
+    seen[key]=true;
+    var dm=p.districtMax||{};
+    var LABEL={district_mining:'Mining',district_generator:'Generator',district_farming:'Farming',
+                district_hab_mining:'Mining',district_hab_energy:'Energy',district_hab_science:'Science'};
+    var parts=Object.keys(dm).filter(function(k){return (parseInt(dm[k])||0)>0;}).sort()
+      .map(function(k){return '+'+(parseInt(dm[k])||0)+' '+(LABEL[k]||k.replace(/^district_/,'').replace(/_/g,' '));});
+    lines.push(' '+key+':0 "District Expansion"');
+    lines.push(' '+key+'_desc:0 "'+parts.join(' \u00b7 ')+' district slots"');
+  });});
+  return lines;
+}
+
 function genInit(sys){
   const k=toKey(sys.name);
   let _ringOrbitSet=false; // tracks whether change_orbit = 45 has been emitted yet
@@ -3857,7 +4046,7 @@ function genInit(sys){
     const pAnomaly=p.anomaly&&p.anomaly.trim()?`\n\t\t\tadd_anomaly = { category = ${p.anomaly.trim()} }`:``;
     const pSurveyed=p.surveyed?`\n\t\t\tset_surveyed = { surveyed = yes surveyor = Prev }`:``; 
     const _dmodKey=districtMaxModKey(p);
-    const distMod=_dmodKey?`\n\t\tadd_modifier = { modifier = ${_dmodKey} }`:'';
+    const distMod=_dmodKey?`\n\t\tadd_modifier = { modifier = ${_dmodKey} days = -1 }`:'';
     const pArchSite=p.arch_site&&p.arch_site.trim()?`
 		add_deposit = d_archaeological_site
 		set_planet_flag = has_ruins
@@ -4027,7 +4216,11 @@ function genSplitFiles(prefix,doSys,doEmp,doOri,doEvt){
     });
   }
   const _dmods=genDistrictMaxMods();
-  if(_dmods) out[prefix+"common/static_modifiers/custom_district_max.txt"]=_dmods;
+  if(_dmods){
+    out[prefix+"common/static_modifiers/custom_district_max.txt"]=_dmods;
+    var _dmodLoc=genDistrictMaxModLoc();
+    if(_dmodLoc.length) out[prefix+"localisation/english/custom_district_max_l_english.yml"]="\uFEFF"+"l_english:\n"+_dmodLoc.join("\n");
+  }
   return out;
 
 }
@@ -4056,6 +4249,7 @@ function genLoc(){
       lines.push(' EMPIRE_DESIGN_'+_ek+'_desc:0 "'+emp.bio.replace(/"/g,"'").replace(/\n/g,"\\n")+'"');
     }
   });
+  genDistrictMaxModLoc().forEach(function(l){lines.push(l);});
   return lines.join("\n");
 }
 
@@ -4354,7 +4548,11 @@ function genModFiles(){
   const countryCode=genAllCountries();
   files.push({path:`${k}/prescripted_countries/custom_empire.txt`,content:countryCode,note:"Prescripted country"});
   const districtMods=genDistrictMaxMods();
-  if(districtMods) files.push({path:`${k}/common/static_modifiers/${k}_district_max.txt`,content:districtMods,note:"District-slot max modifiers \u2014 base set in builder, deposits stack on top"});
+  if(districtMods){
+    files.push({path:`${k}/common/static_modifiers/${k}_district_max.txt`,content:districtMods,note:"District-slot max modifiers \u2014 base set in builder, deposits stack on top"});
+    const _dmodLoc2=genDistrictMaxModLoc();
+    if(_dmodLoc2.length) files.push({path:`${k}/localisation/english/${k}_district_max_l_english.yml`,content:"\uFEFF"+"l_english:\n"+_dmodLoc2.join("\n"),note:"Localisation for district max modifier display names"});
+  }
   const gameStartEvent=genGameStartEvent();
   if(gameStartEvent){
     const parts = gameStartEvent.split("\n---SPLIT---\n");
@@ -4716,31 +4914,33 @@ function assembleExportState(pkg){
     systems:[],
     empire:{name:'',adj:'',prefix:'',spName:'',spPlural:'',spClass:'MAM',portrait:'',flagIcon:'flag_human_1',flagBg:'00_solid',flagCol1:'blue',flagCol2:'blue',authority:'auth_democratic',ethics:[],civics:[],traits:[],origin:'',ship:'Humanoid',homeSys:null,graphicalCulture:'mammalian_01'},
     modMeta:pkg.modMeta?{...pkg.modMeta}:{},modDeps:pkg.modDeps||[],modOverrides:pkg.modOverrides||[],
-    customOrigins:[],customEvents:[],gameStartEvents:[],customAnomalies:[],customSpecialProjects:[],customArchaeology:[],customRifts:[],planetLibrary:[],systemLibrary:[],empireLibrary:[],originsLibrary:[],eventsLibrary:[],arksLibrary:[],modLibrary:[],customTemplates:[],
+    customOrigins:[],customEvents:[],gameStartEvents:[],customAnomalies:[],customSpecialProjects:[],customArchaeology:[],customRifts:[],planetLibrary:[],systemLibrary:[],empireLibrary:[],originsLibrary:[],eventsLibrary:[],arksLibrary:[],modLibrary:[],customTemplates:[],customAuthorities:[],customCivicsBuilt:[],customTraitsBuilt:[],customEthicsBuilt:[],customRulerTraits:[],customCouncilors:[],customFocuses:[],customEdicts:[],customPolicies:[],customSpeciesClasses:[],customPopFactions:[],
     arks:[],
     empires:null,activeEmpire:0,
     exportMode:pkg.exportMode||'full'};
-  if(pkg.refs?.systems){const p=getProjects('systems').find(x=>x.id===pkg.refs.systems);if(p?.data?.systems)state.systems=p.data.systems;}
-  if(pkg.refs?.empire){const p=getProjects('empire').find(x=>x.id===pkg.refs.empire);if(p?.data){
+  // For each module: use explicitly pinned ref, else fall back to currently active project
+  {const p=pkg.refs?.systems?getProjects('systems').find(x=>x.id===pkg.refs.systems):getActivePrj('systems');if(p?.data?.systems)state.systems=p.data.systems;}
+  {const p=pkg.refs?.empire?getProjects('empire').find(x=>x.id===pkg.refs.empire):getActivePrj('empire');if(p?.data){
     if(p.data.empires&&p.data.empires.length){state.empires=p.data.empires.map(x=>({..._blankEmpire(),...x}));state.activeEmpire=Math.min(p.data.activeEmpire||0,Math.max(0,state.empires.length-1));}
     else if(p.data.empire){state.empires=[{..._blankEmpire(),...p.data.empire}];state.activeEmpire=0;}
     if(state.empires&&state.empires.length)state.empire={...state.empire,...state.empires[state.activeEmpire]};
   }}
-  if(pkg.refs?.origins){const p=getProjects('origins').find(x=>x.id===pkg.refs.origins);if(p?.data?.customOrigins)state.customOrigins=p.data.customOrigins;}
-  if(pkg.refs?.events){const p=getProjects('events').find(x=>x.id===pkg.refs.events);if(p?.data){if(p.data.customEvents)state.customEvents=p.data.customEvents;if(p.data.gameStartEvents)state.gameStartEvents=p.data.gameStartEvents;if(p.data.customAnomalies)state.customAnomalies=p.data.customAnomalies;if(p.data.customSpecialProjects)state.customSpecialProjects=p.data.customSpecialProjects;if(p.data.customArchaeology)state.customArchaeology=p.data.customArchaeology;if(p.data.customRifts)state.customRifts=p.data.customRifts;}}
-  if(pkg.refs?.library){const p=getProjects('library').find(x=>x.id===pkg.refs.library);if(p?.data){if(p.data.planetLibrary)state.planetLibrary=p.data.planetLibrary;if(p.data.systemLibrary)state.systemLibrary=p.data.systemLibrary;if(p.data.empireLibrary)state.empireLibrary=p.data.empireLibrary;if(p.data.originsLibrary)state.originsLibrary=p.data.originsLibrary;if(p.data.eventsLibrary)state.eventsLibrary=p.data.eventsLibrary;if(p.data.arksLibrary)state.arksLibrary=p.data.arksLibrary;if(p.data.modLibrary)state.modLibrary=p.data.modLibrary;}}
-  if(pkg.refs?.arks){const p=getProjects('arks').find(x=>x.id===pkg.refs.arks);if(p?.data?.arks)state.arks=p.data.arks;}
+  {const p=pkg.refs?.origins?getProjects('origins').find(x=>x.id===pkg.refs.origins):getActivePrj('origins');if(p?.data?.customOrigins)state.customOrigins=p.data.customOrigins;}
+  {const p=pkg.refs?.events?getProjects('events').find(x=>x.id===pkg.refs.events):getActivePrj('events');if(p?.data){if(p.data.customEvents)state.customEvents=p.data.customEvents;if(p.data.gameStartEvents)state.gameStartEvents=p.data.gameStartEvents;if(p.data.customAnomalies)state.customAnomalies=p.data.customAnomalies;if(p.data.customSpecialProjects)state.customSpecialProjects=p.data.customSpecialProjects;if(p.data.customArchaeology)state.customArchaeology=p.data.customArchaeology;if(p.data.customRifts)state.customRifts=p.data.customRifts;}}
+  {const p=pkg.refs?.library?getProjects('library').find(x=>x.id===pkg.refs.library):getActivePrj('library');if(p?.data){if(p.data.planetLibrary)state.planetLibrary=p.data.planetLibrary;if(p.data.systemLibrary)state.systemLibrary=p.data.systemLibrary;if(p.data.empireLibrary)state.empireLibrary=p.data.empireLibrary;if(p.data.originsLibrary)state.originsLibrary=p.data.originsLibrary;if(p.data.eventsLibrary)state.eventsLibrary=p.data.eventsLibrary;if(p.data.arksLibrary)state.arksLibrary=p.data.arksLibrary;if(p.data.modLibrary)state.modLibrary=p.data.modLibrary;}}
+  {const p=pkg.refs?.arks?getProjects('arks').find(x=>x.id===pkg.refs.arks):getActivePrj('arks');if(p?.data?.arks)state.arks=p.data.arks;}
+  {const p=pkg.refs?.govspec?getProjects('govspec').find(x=>x.id===pkg.refs.govspec):getActivePrj('govspec');if(p?.data){if(p.data.customAuthorities)state.customAuthorities=p.data.customAuthorities;if(p.data.customCivicsBuilt)state.customCivicsBuilt=p.data.customCivicsBuilt;if(p.data.customTraitsBuilt)state.customTraitsBuilt=p.data.customTraitsBuilt;if(p.data.customEthicsBuilt)state.customEthicsBuilt=p.data.customEthicsBuilt;if(p.data.customRulerTraits)state.customRulerTraits=p.data.customRulerTraits;if(p.data.customCouncilors)state.customCouncilors=p.data.customCouncilors;if(p.data.customFocuses)state.customFocuses=p.data.customFocuses;if(p.data.customEdicts)state.customEdicts=p.data.customEdicts;if(p.data.customPolicies)state.customPolicies=p.data.customPolicies;if(p.data.customSpeciesClasses)state.customSpeciesClasses=p.data.customSpeciesClasses;if(p.data.customPopFactions)state.customPopFactions=p.data.customPopFactions;}}
   if(!state.empires||!state.empires.length){state.empires=[state.empire];state.activeEmpire=0;}
   return state;
 
 }
 function buildPkgPanel(pkg,pkgs){
-  const mods=['systems','empire','origins','events','library','arks'];
-  const labels={systems:'Systems',empire:'Empire',origins:'Origins',events:'Events',library:'Library',arks:'Arks'};
+  const mods=['systems','empire','origins','events','library','arks','govspec'];
+  const labels={systems:'Systems',empire:'Empire',origins:'Origins',events:'Events',library:'Library',arks:'Arks',govspec:'Gov & Species'};
   let selRows='';
   mods.forEach(function(mod){
     const projs=getProjects(mod);
-    const selId=(pkg.refs&&pkg.refs[mod])||'';
+    const selId=(pkg.refs&&pkg.refs[mod])||getActivePrj(mod)?.id||'';
     let opts='<option value="">— none —</option>';
     projs.forEach(function(p){opts+='<option value="'+p.id+'"'+(p.id===selId?' selected':'')+'>'+p.name+'</option>';});
     selRows+='<div>'
@@ -6076,6 +6276,10 @@ function validate(){
   if(!e.spPlural) warns.push(V("Empire",eName,"Species","Species plural is empty — defaults to singular name."));
   if(!e.spClass) errs.push(V("Empire",eName,"Species","Species class (phenotype) is required."));
   if(!e.authority) errs.push(V("Empire",eName,"Authority","Authority type is required."));
+  // Guard against null/undefined empire arrays (can occur with old saves or import)
+  if(!Array.isArray(e.ethics)) e.ethics=[];
+  if(!Array.isArray(e.civics)) e.civics=[];
+  if(!Array.isArray(e.traits)) e.traits=[];
   if(e.ethics.length===0) errs.push(V("Empire",eName,"Ethics","At least one ethic is required."));
   if(e.ethics.length>3) errs.push(V("Empire",eName,"Ethics",`Too many ethics (${e.ethics.length}/3 max).`));
 
@@ -6154,7 +6358,8 @@ function validate(){
   const _empList=(S.empires&&S.empires.length)?S.empires:[e];
   const _needsCustomHome=_empList.some(em=>!em.homeInitializer);
   if(_needsCustomHome&&homeSystems.length===0) errs.push(V("Systems","All","Home System","No home system defined, but an empire spawns in a custom system. Mark one system as Home — or set that empire's home system to a vanilla/auto option in the Empire tab."));
-  if(homeSystems.length>1) errs.push(V("Systems","All","Home System",`Multiple home systems (${homeSystems.length}). Only one allowed.`));
+  const _empCount=(S.empires&&S.empires.length>0)?S.empires.length:1;
+  if(homeSystems.length>_empCount) errs.push(V("Systems","All","Home System",`Too many home systems (${homeSystems.length}) for ${_empCount} empire(s). Each empire needs at most one custom home system.`));
 
   let totalHomePlanets=0;
   s.forEach(sys=>{
@@ -6296,8 +6501,8 @@ function validate(){
     });
   });
 
-  if(totalHomePlanets===0&&s.length>0) errs.push(V("Systems","All","Homeworld","No homeworld planet found across all systems. Mark a planet as Homeworld."));
-  if(totalHomePlanets>1) errs.push(V("Systems","All","Homeworld",`Multiple homeworld planets (${totalHomePlanets}) across systems. Only one allowed.`));
+  if(totalHomePlanets===0&&s.length>0) errs.push(V("Systems","All","Homeworld",`No homeworld planet found. Mark one planet per empire as Homeworld — ${_empCount} empire(s) need ${_empCount} homeworld(s).`));
+  if(totalHomePlanets>_empCount) errs.push(V("Systems","All","Homeworld",`${totalHomePlanets} homeworld planets for ${_empCount} empire(s). Each empire should have exactly one homeworld.`));
 
   // ── CUSTOM ORIGINS ─────────────────────────────────────────────────────────
   (S.customOrigins||[]).forEach((o,i)=>{
@@ -6316,36 +6521,198 @@ function validate(){
   });
 
   // ── CIVIC / AUTHORITY CONSISTENCY ─────────────────────────────────────────
-  // Civic prerequisites — specific ethics or authority requirements
+  // Civic prerequisites — verified against Stellaris 4.x common/governments/civics/
+  // Fields:
+  //   auth        — must have one of these authorities (error if not)
+  //   ethics_any  — must have at least one of these ethics (warning if not)
+  //   ethics_groups — array of groups; must have ≥1 from EACH group (AND-of-ORs, warning)
+  //   ethics_not  — must NOT have any of these (error if violated)
+  //   origins_not — must NOT have this origin (error if violated)
+  //   civics_not  — must NOT combine with these other civics (error if violated)
+  //   note        — message fragment used in error/warning text
   const CIVIC_PREREQS={
-    'Fanatic Purifiers':    {ethics:['Xenophobe','Fanatic Xenophobe'],ethicsOp:'any',note:'requires Xenophobe'},
-    'Inwards Perfection':   {ethics:['Xenophobe','Fanatic Xenophobe'],ethicsOp:'any',note:'requires Xenophobe'},
-    'Corvée System':        {ethics:['Authoritarian','Fanatic Authoritarian'],ethicsOp:'any',note:'requires Authoritarian'},
-    'Slaver Guilds':        {ethics:['Authoritarian','Fanatic Authoritarian'],ethicsOp:'any',note:'requires Authoritarian'},
-    'Police State':         {ethics:['Authoritarian','Fanatic Authoritarian'],ethicsOp:'any',note:'requires Authoritarian'},
-    'Shared Burdens':       {ethics_not:['Authoritarian','Fanatic Authoritarian'],note:'incompatible with Authoritarian'},
-    'Utopian Abundance':    {ethics_not:['Authoritarian','Fanatic Authoritarian'],note:'incompatible with Authoritarian'},
-    'Corporate Dominion':   {auth:['auth_corporate'],note:'requires Corporate authority'},
-    'Criminal Heritage':    {auth:['auth_corporate'],note:'requires Corporate authority'},
-    'Warrior Culture':      {ethics_not:['Pacifist','Fanatic Pacifist'],note:'incompatible with Pacifist'},
-    'Barbaric Despoilers':  {ethics_not:['Pacifist','Fanatic Pacifist'],note:'incompatible with Pacifist'},
-    'Agrarian Idyll':       {ethics_not:['Fanatic Materialist'],note:'incompatible with Fanatic Materialist'},
-    'Death Cult':           {ethics:['Spiritualist','Fanatic Spiritualist'],ethicsOp:'any',note:'requires Spiritualist'},
-    'Exalted Priesthood':   {ethics:['Spiritualist','Fanatic Spiritualist'],ethicsOp:'any',note:'requires Spiritualist'},
-    'Imperial Cult':        {ethics:['Spiritualist','Fanatic Spiritualist'],ethicsOp:'any',note:'requires Spiritualist'},
+    // ── Auth + Ethics ──────────────────────────────────────────────────────
+    'Imperial Cult':        {auth:['auth_imperial'],
+                             ethics_groups:[['Authoritarian','Fanatic Authoritarian'],['Spiritualist','Fanatic Spiritualist']],
+                             note:'requires Imperial authority, Authoritarian and Spiritualist ethics'},
+    'Exalted Priesthood':   {auth:['auth_oligarchic','auth_dictatorial'],
+                             ethics_any:['Spiritualist','Fanatic Spiritualist'],
+                             note:'requires Oligarchic or Dictatorial authority and Spiritualist ethics'},
+    'Aristocratic Elite':   {auth:['auth_oligarchic','auth_imperial'],
+                             ethics_not:['Egalitarian','Fanatic Egalitarian'],
+                             note:'requires Oligarchic or Imperial authority; incompatible with Egalitarian'},
+    'Beacon of Liberty':    {auth:['auth_democratic'],
+                             ethics_any:['Egalitarian','Fanatic Egalitarian'],
+                             ethics_not:['Xenophobe','Fanatic Xenophobe'],
+                             civics_not:['Crusader Spirit'],
+                             note:'requires Democratic authority and Egalitarian; incompatible with Xenophobe and Crusader Spirit'},
+    'Citizen Service':      {auth:['auth_democratic','auth_oligarchic'],
+                             ethics_any:['Militarist','Fanatic Militarist'],
+                             ethics_not:['Fanatic Xenophile'],
+                             note:'requires Democratic or Oligarchic authority and Militarist; incompatible with Fanatic Xenophile'},
+    'Corporate Dominion':   {auth:['auth_oligarchic'],
+                             ethics_not:['Xenophobe','Fanatic Xenophobe'],
+                             note:'requires Oligarchic authority; incompatible with Xenophobe'},
+    'Feudal Realm':         {auth:['auth_imperial'],
+                             note:'requires Imperial authority'},
+    'Meritocracy':          {auth:['auth_democratic','auth_oligarchic'],
+                             note:'requires Democratic or Oligarchic authority'},
+    'Parliamentary System': {auth:['auth_democratic'],
+                             note:'requires Democratic authority'},
+    'Philosopher King':     {auth:['auth_dictatorial','auth_imperial'],
+                             note:'requires Dictatorial or Imperial authority'},
+    'Shadow Council':       {auth:['auth_democratic','auth_oligarchic','auth_dictatorial'],
+                             note:'incompatible with Imperial and Corporate authority'},
+    // ── Ethics only ────────────────────────────────────────────────────────
+    'Agrarian Idyll':       {ethics_any:['Pacifist','Fanatic Pacifist'],
+                             origins_not:['Post-Apocalyptic','Post-Apocalyptic (Machines)','Shattered Ring','Void Dwellers','Void Dwellers (Machines)','Remnants'],
+                             civics_not:['Dystopian Society','Tankbound','Relentless Industrialists'],
+                             note:'requires Pacifist; incompatible with certain origins and civics'},
+    'Ascensionists':        {ethics_any:['Spiritualist','Fanatic Spiritualist'],
+                             note:'requires Spiritualist'},
+    'Barbaric Despoilers':  {ethics_groups:[['Militarist','Fanatic Militarist'],['Authoritarian','Fanatic Authoritarian','Xenophobe','Fanatic Xenophobe']],
+                             ethics_not:['Xenophile','Fanatic Xenophile'],
+                             civics_not:['Fanatic Purifiers','Scorched Earth'],
+                             origins_not:['Common Ground'],
+                             note:'requires Militarist and Authoritarian or Xenophobe; incompatible with Xenophile, Common Ground and certain civics'},
+    'Chosen':               {ethics_any:['Spiritualist','Fanatic Spiritualist'],
+                             origins_not:['Cybernetic Creed','Synthetic Fertility','Evolutionary Predators','Unplugged','Endbringers'],
+                             note:'requires Spiritualist; incompatible with certain origins'},
+    'Corvée System':        {ethics_not:['Egalitarian','Fanatic Egalitarian'],
+                             civics_not:['Free Haven'],
+                             note:'incompatible with Egalitarian and Free Haven'},
+    'Criminal Heritage':    {auth:['auth_corporate'],
+                             note:'requires Corporate authority'},
+    'Crowdsourcing':        {ethics_any:['Fanatic Authoritarian','Fanatic Egalitarian','Fanatic Xenophobe','Fanatic Xenophile','Fanatic Militarist','Fanatic Pacifist','Fanatic Spiritualist','Fanatic Materialist'],
+                             note:'requires any Fanatic ethic'},
+    'Crusader Spirit':      {ethics_any:['Militarist','Fanatic Militarist','Authoritarian','Fanatic Authoritarian','Spiritualist','Fanatic Spiritualist'],
+                             ethics_not:['Pacifist','Fanatic Pacifist'],
+                             civics_not:['Fanatic Purifiers','Scorched Earth','Beacon of Liberty'],
+                             note:'requires Militarist, Authoritarian or Spiritualist; incompatible with Pacifist and certain civics'},
+    'Death Cult':           {ethics_any:['Spiritualist','Fanatic Spiritualist'],
+                             origins_not:['Necrophage'],
+                             note:'requires Spiritualist; incompatible with Necrophage origin'},
+    'Death Cult Corporate': {ethics_any:['Spiritualist','Fanatic Spiritualist'],
+                             origins_not:['Necrophage'],
+                             note:'requires Spiritualist; incompatible with Necrophage origin'},
+    'Dimensional Worship':  {ethics_any:['Spiritualist','Fanatic Spiritualist'],
+                             note:'requires Spiritualist'},
+    'Distinguished Admiralty':{ethics_any:['Militarist','Fanatic Militarist'],
+                             note:'requires Militarist'},
+    'Dystopian Society':    {ethics_any:['Fanatic Authoritarian'],
+                             civics_not:['Agrarian Idyll','Warrior Culture'],
+                             note:'requires Fanatic Authoritarian'},
+    'Environmental Architects':{origins_not:['Remnants','Post-Apocalyptic','Post-Apocalyptic (Machines)','Void Dwellers','Void Dwellers (Machines)','Shattered Ring','Unplugged'],
+                             note:'incompatible with certain origins'},
+    'Fanatic Purifiers':    {ethics_any:['Fanatic Xenophobe'],
+                             ethics_groups:[['Militarist','Fanatic Militarist','Spiritualist','Fanatic Spiritualist']],
+                             civics_not:['Barbaric Despoilers','Pompous Purists','Crusader Spirit','Selective Kinship'],
+                             origins_not:['Syncretic Evolution','Common Ground','Hegemon','Knights of the Toxic God','Broken Shackles'],
+                             note:'requires Fanatic Xenophobe and Militarist or Spiritualist; incompatible with certain civics and origins'},
+    'Free Haven':           {ethics_any:['Xenophile','Fanatic Xenophile'],
+                             civics_not:['Corvée System'],
+                             note:'requires Xenophile; incompatible with Corvée System'},
+    'Guided Sapience':      {ethics_any:['Xenophobe','Fanatic Xenophobe'],
+                             origins_not:['Life Seeded','Syncretic Evolution','Unplugged'],
+                             note:'requires Xenophobe; incompatible with certain origins'},
+    'Idealistic Foundation':{ethics_any:['Egalitarian','Fanatic Egalitarian'],
+                             note:'requires Egalitarian'},
+    'Idyllic Bloom':        {origins_not:['Void Dwellers','Void Dwellers (Machines)','Evolutionary Predators','Unplugged'],
+                             note:'incompatible with certain origins'},
+    'Inwards Perfection':   {ethics_groups:[['Pacifist','Fanatic Pacifist'],['Xenophobe','Fanatic Xenophobe']],
+                             origins_not:['Common Ground','Hegemon','Fear of the Dark'],
+                             note:'requires Pacifist and Xenophobe; incompatible with Common Ground, Hegemon and Fear of the Dark'},
+    'Machine Anglers':      {origins_not:['Post-Apocalyptic (Machines)','Shattered Ring','Void Dwellers (Machines)'],
+                             note:'incompatible with certain origins'},
+    'Nationalistic Zeal':   {ethics_any:['Militarist','Fanatic Militarist'],
+                             note:'requires Militarist'},
+    'Natural Design':       {origins_not:['Clone Army','Overtuned','Shroudwalker Enclave','Cybernetic Creed','Synthetic Fertility','Evolutionary Predators','Unplugged','Endbringers'],
+                             note:'incompatible with certain origins'},
+    'Police State':         {ethics_not:['Fanatic Egalitarian'],
+                             civics_not:['Civil Education'],
+                             note:'incompatible with Fanatic Egalitarian and Civil Education'},
+    'Pompous Purists':      {ethics_any:['Xenophobe','Fanatic Xenophobe'],
+                             origins_not:['Scion'],
+                             civics_not:['Fanatic Purifiers','Scorched Earth'],
+                             note:'requires Xenophobe; incompatible with Scion origin and certain civics'},
+    'Pyrolatry':            {ethics_any:['Spiritualist','Fanatic Spiritualist'],
+                             origins_not:['Cybernetic Creed','Ocean Paradise'],
+                             note:'requires Spiritualist; incompatible with Cybernetic Creed and Ocean Paradise'},
+    'Relentless Industrialists':{ethics_any:['Materialist','Fanatic Materialist'],
+                             origins_not:['Life Seeded'],
+                             note:'requires Materialist; incompatible with Life Seeded origin'},
+    'Scorched Earth':       {ethics_any:['Xenophobe','Fanatic Xenophobe'],
+                             ethics_not:['Pacifist','Fanatic Pacifist'],
+                             civics_not:['Barbaric Despoilers','Pompous Purists','Crusader Spirit','Selective Kinship','Fanatic Purifiers','Death Cult','Secret Societies','Diplomatic Corps','Memorialist','Void Reavers','Sovereign Guardianship'],
+                             note:'requires Xenophobe; incompatible with Pacifist and many civics'},
+    'Secret Societies':     {origins_not:['Broken Shackles','Cybernetic Creed','Unplugged'],
+                             civics_not:['Scorched Earth'],
+                             note:'incompatible with certain origins and Scorched Earth'},
+    'Selective Kinship':    {ethics_any:['Xenophile','Fanatic Xenophile','Fanatic Egalitarian'],
+                             origins_not:['Broken Shackles'],
+                             civics_not:['Fanatic Purifiers','Scorched Earth'],
+                             note:'requires Xenophile or Fanatic Egalitarian; incompatible with Broken Shackles and certain civics'},
+    'Shared Burden':        {ethics_any:['Fanatic Egalitarian'],
+                             ethics_not:['Xenophobe','Fanatic Xenophobe'],
+                             civics_not:['Technocracy','Pleasure Seekers'],
+                             note:'requires Fanatic Egalitarian; incompatible with Xenophobe, Technocracy and Pleasure Seekers'},
+    'Slaver Guilds':        {ethics_any:['Authoritarian','Fanatic Authoritarian'],
+                             note:'requires Authoritarian'},
+    'Sovereign Guardianship':{ethics_any:['Militarist','Fanatic Militarist'],
+                             origins_not:['Fear of the Dark','Payback','Broken Shackles'],
+                             note:'requires Militarist; incompatible with Fear of the Dark, Payback and Broken Shackles'},
+    'Superstitious Beliefs':{ethics_any:['Spiritualist','Fanatic Spiritualist'],
+                             origins_not:['Cybernetic Creed'],
+                             note:'requires Spiritualist; incompatible with Cybernetic Creed'},
+    'Technocracy':          {ethics_any:['Materialist','Fanatic Materialist'],
+                             civics_not:['Shared Burden'],
+                             note:'requires Materialist; incompatible with Shared Burden'},
+    'Twisted Experimenters':{ethics_any:['Authoritarian','Fanatic Authoritarian','Xenophobe','Fanatic Xenophobe'],
+                             note:'requires Authoritarian or Xenophobe'},
+    'Void Reavers':         {ethics_groups:[['Militarist','Fanatic Militarist'],['Xenophile','Fanatic Xenophile']],
+                             origins_not:['Forever Cruise'],
+                             civics_not:['Scorched Earth'],
+                             note:'requires Militarist and Xenophile; incompatible with Forever Cruise and Scorched Earth'},
+    'Warrior Culture':      {ethics_any:['Militarist','Fanatic Militarist'],
+                             civics_not:['Dystopian Society','Pleasure Seekers'],
+                             note:'requires Militarist; incompatible with Dystopian Society and Pleasure Seekers'},
+    'Anglers':              {origins_not:['Post-Apocalyptic','Shattered Ring','Void Dwellers'],
+                             note:'incompatible with Post-Apocalyptic, Shattered Ring and Void Dwellers origins'},
   };
+  const _civicSet=new Set(e.civics||[]);
   (e.civics||[]).forEach(cv=>{
     const pre=CIVIC_PREREQS[cv];
     if(!pre) return;
+    // Authority check — error
     if(pre.auth&&!pre.auth.includes(e.authority))
       errs.push(V("Empire",eName,"Civics",`Civic "${cv}" ${pre.note} (current: ${e.authority}).`));
-    if(pre.ethics&&pre.ethicsOp==='any'){
-      const hasRequired=pre.ethics.some(req=>e.ethics.includes(req));
-      if(!hasRequired) warns.push(V("Empire",eName,"Civics",`Civic "${cv}" ${pre.note}.`));
+    // ethics_any — must have at least one — warning
+    if(pre.ethics_any){
+      if(!pre.ethics_any.some(req=>(e.ethics||[]).includes(req)))
+        warns.push(V("Empire",eName,"Civics",`Civic "${cv}" ${pre.note}.`));
     }
+    // ethics_groups — AND-of-ORs — warning per unsatisfied group
+    if(pre.ethics_groups){
+      pre.ethics_groups.forEach(grp=>{
+        if(!grp.some(req=>(e.ethics||[]).includes(req)))
+          warns.push(V("Empire",eName,"Civics",`Civic "${cv}" ${pre.note}.`));
+      });
+    }
+    // ethics_not — error
     if(pre.ethics_not){
-      const hasBlocked=pre.ethics_not.some(bl=>e.ethics.includes(bl));
-      if(hasBlocked) errs.push(V("Empire",eName,"Civics",`Civic "${cv}" ${pre.note}.`));
+      const blocked=pre.ethics_not.filter(bl=>(e.ethics||[]).includes(bl));
+      if(blocked.length)
+        errs.push(V("Empire",eName,"Civics",`Civic "${cv}" ${pre.note} (has: ${blocked.join(', ')}).`));
+    }
+    // origins_not — error
+    if(pre.origins_not&&pre.origins_not.includes(e.origin))
+      errs.push(V("Empire",eName,"Civics",`Civic "${cv}" ${pre.note} (origin: ${e.origin}).`));
+    // civics_not — error (only report from the first civic to avoid duplicate messages)
+    if(pre.civics_not){
+      pre.civics_not.forEach(other=>{
+        if(_civicSet.has(other)&&cv<other)
+          errs.push(V("Empire",eName,"Civics",`Civics "${cv}" and "${other}" are incompatible.`));
+      });
     }
   });
   const hiveCivicSet=new Set(CIVICS_HIVE||[]);
@@ -6399,7 +6766,8 @@ function validate(){
 
   // ── DUPLICATE HOMEWORLD ────────────────────────────────────────────────────
   const hwCount=S.systems.reduce((n,sys)=>n+sys.planets.filter(p=>p.hw).length,0);
-  if(hwCount>1) errs.push(V("Systems","All","Homeworld",`${hwCount} homeworld planets detected across all systems. Exactly 1 is required.`));
+  const _hwEmpCount=(S.empires&&S.empires.length>0)?S.empires.length:1;
+  if(hwCount>_hwEmpCount) errs.push(V("Systems","All","Homeworld",`${hwCount} homeworld planets for ${_hwEmpCount} empire(s) — each empire needs exactly one homeworld (⌂).`));
   if(hwCount===0&&S.systems.length>0) errs.push(V("Systems","All","Homeworld",'No homeworld planet set. Mark one planet as Homeworld (⌂).'));
 
   // ── WORMHOLE MOD-SYSTEM LINKS ──────────────────────────────────────────────
@@ -6410,6 +6778,8 @@ function validate(){
         warns.push(V("Systems",sys.name||"Unnamed","Wormhole","Wormhole is set to 'Link to mod system' but no target system has been selected. Export will fall back to Auto pairing."));
         return;
       }
+      const tgt=S.systems.find(s=>s.id===b.link_to_sys_id);
+      if(!tgt) return; // target system not in this mod — skip
       // Verify target has a wormhole bypass to link into
       const tgtHasWormhole=(tgt.bypasses||[]).some(tb=>{
         const td=BYPASSES.find(x=>x.k===(tb.k||tb.type||tb))||{};
@@ -6501,6 +6871,18 @@ function validate(){
     if(!f.key||!f.key.trim()) errs.push(V(_gs_area,nm,'Key','Internal key is required.'));
   });
 
+  // ── ARKS ───────────────────────────────────────────────────────────────────
+  // _arkWarnings() lives in 27_txt-import.js. Only run if there are arks defined.
+  if(S.arks&&S.arks.length>0){
+    const _aw=typeof _arkWarnings==='function'?_arkWarnings(S.arks):[];
+    _aw.forEach(w=>{
+      // Strip any HTML tags from message for plain-text validation panel
+      const _msg=w.msg.replace(/<[^>]*>/g,'');
+      if(w.type==='error') errs.push(V('Arks','Ark Builder','Setup',_msg));
+      else warns.push(V('Arks','Ark Builder','Setup',_msg));
+    });
+  }
+
   return {errs, warns};
 }
 
@@ -6511,7 +6893,7 @@ function checklist(){
   return[
     {ok:s.length>0,l:"System defined"},{ok:s.some(x=>x.planets.length>0),l:"Planet added"},
     {ok:s.some(x=>x.planets.some(p=>p.hw)),l:"Homeworld assigned"},{ok:!!e.name,l:"Empire named"},
-    {ok:e.ethics.length>0,l:"Ethics selected"},{ok:e.civics.length>0,l:"Civics selected"},
+    {ok:(e.ethics||[]).length>0,l:"Ethics selected"},{ok:(e.civics||[]).length>0,l:"Civics selected"},
     {ok:!!e.homeSys||s.some(x=>x.home),l:"Home system linked"},
     {ok:planetErrors===0,l:planetErrors===0?"No planet rule errors":(planetErrors+" planet rule error"+(planetErrors!==1?"s":"")+" — check deposits/buildings")},
   ];
@@ -8143,19 +8525,23 @@ function updateNav(){
   const meta = MOD_HDR_META[S.tab]||{icon:"si-gear",label:S.tab};
   const modHdr = document.getElementById("mod-hdr");
   if(modHdr){
-    const _modKey={systems:'systems',empire:'empire',origins:'origins',events:'events',library:'library',arks:'arks'}[S.tab]||null;
+    const _modKey={systems:'systems',planets:'planets',empire:'empire',origins:'origins',events:'events',lib:'library',library:'library',arks:'arks',govspec:'govspec',import:'import',export:'export'}[S.tab]||null;
+    const _areaLabel={systems:'Systems',planets:'Planet Builder',empire:'Empire',origins:'Origins',events:'Events',lib:'Library',library:'Library',arks:'Ark Builder',govspec:'Species & Gov',import:'Import .txt',export:'Package & Export'}[S.tab]||'';
+    const _guideKey={systems:'guide_systems',planets:'guide_planets',empire:'guide_empire',origins:'guide_origins',events:'guide_events',lib:'guide_library',library:'guide_library',arks:'guide_arks',govspec:'guide_govspec',import:'guide_import',export:'guide_export'}[S.tab]||null;
     const _prj=_modKey?getActivePrj(_modKey):null;
-    const _projBadge=_modKey?`<button class="proj-badge" id="proj-switch-btn">${_prj?_prj.name:'No project'} ▾</button>`:'';
+    const _projBadge=_modKey?`<button class="proj-badge" id="proj-switch-btn" title="Projects are per-area — each module has its own independent project store"><span style="opacity:.55;font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;flex-shrink:0">${_areaLabel}</span><span style="opacity:.4;margin:0 3px">·</span>${_prj?_prj.name:'No project'} ▾</button>`:'';
+    const _guideBtn=_guideKey?`<button class="help-icon" id="area-guide-btn" title="Open ${_areaLabel} guide" style="margin-left:4px">?</button>`:''
     modHdr.innerHTML = `
-      <div id="mod-hdr-left"><i class="si ${meta.icon}"></i> ${meta.label} ${_projBadge}</div>
+      <div id="mod-hdr-left"><i class="si ${meta.icon}"></i> ${meta.label} ${_projBadge}${_guideBtn}</div>
       <div id="mod-hdr-right">
-        <button class="ver-chip" id="hdr-version-btn" title="View changelog — v${(typeof APP_VERSION!=='undefined')?APP_VERSION:''}">Alpha — ${(typeof APP_VERSION!=='undefined')?APP_VERSION:''}</button>
+        <button class="ver-chip" id="hdr-version-btn" title="View changelog — v${(typeof APP_VERSION!=='undefined')?APP_VERSION:''}">Alpha — ${(typeof APP_VERSION!=='undefined')?APP_VERSION:''}</button><a class="btn btn-ghost btn-sm" href="https://ko-fi.com/proeliumartifex" target="_blank" rel="noopener" title="Support the project on Ko-fi" style="font-size:11px;text-decoration:none">☕ Support the vision</a>
         <span id="hdr-ready" class="tag ${ready===cl.length?"tag-ok":"tag-warn"}">${ready}/${cl.length}</span>
         <button class="btn btn-ok btn-sm" id="btn-save-file" title="Download project as JSON — open next version and import to restore"><i class=si-save></i> ${S.tab==="export"&&getActivePkg()?("Save · "+getActivePkg().name):"Save"}</button>
       </div>`;
     document.getElementById("btn-save-file")?.addEventListener("click", ()=>exportProject());
     document.getElementById("hdr-version-btn")?.addEventListener("click",()=>{ S.settingsTab="changelog"; S.showSettings=true; updateNav(); renderOverlays(true); });
     if(_modKey) document.getElementById("proj-switch-btn")?.addEventListener("click",e=>{e.stopPropagation();openProjectSwitcher(_modKey,document.getElementById("proj-switch-btn"));});
+    if(_guideKey) document.getElementById("area-guide-btn")?.addEventListener("click",e=>{e.stopPropagation();openGuide(S.tab);});
   }
   // Nav save dot
   const dotEl = document.getElementById("nav-save-dot");
@@ -8862,28 +9248,28 @@ function renderTemplates(body){
           </div>
 
           <div class="card" style="margin-bottom:12px">
-            <div class="sec"><span style="font-weight:700">Ethics <span class="tag tag-ghost">${t.empire.ethics.length}/3</span></span></div>
+            <div class="sec"><span style="font-weight:700">Ethics <span class="tag tag-ghost">${(t.empire.ethics||[]).length}/3</span></span></div>
             <div style="padding:14px 18px">
-              ${isBuiltin?`<div class="pills">${t.empire.ethics.map(e=>`<span class="pill pill-on">${e}</span>`).join("")}</div>`
-                         :`<div class="pills">${mkPills([...ETHICS,...FANATIC_ETHICS],t.empire.ethics,3,"ethics")}</div>`}
+              ${isBuiltin?`<div class="pills">${(t.empire.ethics||[]).map(e=>`<span class="pill pill-on">${e}</span>`).join("")}</div>`
+                         :`<div class="pills">${mkPills([...ETHICS,...FANATIC_ETHICS],t.empire.ethics||[],3,"ethics")}</div>`}
             </div>
           </div>
 
           <div class="card" style="margin-bottom:12px">
-            <div class="sec"><span style="font-weight:700">Civics <span class="tag tag-ghost">${t.empire.civics.length}/2</span></span></div>
+            <div class="sec"><span style="font-weight:700">Civics <span class="tag tag-ghost">${(t.empire.civics||[]).length}/2</span></span></div>
             <div style="padding:14px 18px">
-              ${isBuiltin?`<div class="pills">${t.empire.civics.map(c=>`<span class="pill pill-on">${c}</span>`).join("")}</div>`
-                         :`<div class="pills">${mkPills(CIVICS_NORMAL,t.empire.civics,2,"civics")}</div>`}
+              ${isBuiltin?`<div class="pills">${(t.empire.civics||[]).map(c=>`<span class="pill pill-on">${c}</span>`).join("")}</div>`
+                         :`<div class="pills">${mkPills(CIVICS_NORMAL,t.empire.civics||[],2,"civics")}</div>`}
             </div>
           </div>
 
           <details><summary class="sec" style="cursor:pointer;list-style:none"><span>Traits & Origin</span></summary>
           <div style="padding:14px 18px">
             ${isBuiltin
-              ?`<div class="pills">${t.empire.traits.map(tr=>`<span class="pill pill-on">${tr}</span>`).join("")}</div>
+              ?`<div class="pills">${(t.empire.traits||[]).map(tr=>`<span class="pill pill-on">${tr}</span>`).join("")}</div>
                 <div style="margin-top:10px"><span class="pill pill-on">${t.empire.origin||"None"}</span></div>`
               :`<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--t3);margin-bottom:5px">Traits</div>
-                <div class="pills" style="margin-bottom:12px">${mkPills([...TRAITS_POS,...TRAITS_NEG],t.empire.traits,5,"traits")}</div>
+                <div class="pills" style="margin-bottom:12px">${mkPills([...TRAITS_POS,...TRAITS_NEG],t.empire.traits||[],5,"traits")}</div>
                 <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--t3);margin-bottom:5px">Origin</div>
                 <div class="pills">${originPills}</div>`}
           </div></details>
@@ -9845,6 +10231,17 @@ function renderHome(body){
       </div>
     </div>
 
+    <!-- Guides & Help panel -->
+    <div style="padding:20px 32px 0;flex-shrink:0">
+      <div style="padding:14px 18px;background:var(--s1);border:1px solid var(--b1);border-radius:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--t1)">Builder Guides &amp; Reference</div>
+          <div style="font-size:12px;color:var(--t3);margin-top:2px">Step-by-step walkthroughs for each module — Systems, Empire, Origins, Events, Library, Arks and Gov &amp; Species.</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="home-guides-btn"><i class=si-help></i> Open Guides</button>
+      </div>
+    </div>
+
     <!-- Footer -->
     <footer style="margin-top:auto;margin:auto 32px 0;padding:14px 0;border-top:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;flex-shrink:0">
       <div style="display:flex;align-items:center;gap:10px">
@@ -9870,6 +10267,7 @@ function renderHome(body){
     card.addEventListener("click",()=>{S.tab="events";S._eventsSubTab=card.dataset.evtSubtab;S.showLeftPane=true;S.showRightPane=false;renderAll();});
   });
   document.getElementById("home-wizard-btn")?.addEventListener("click",()=>openTour());
+  document.getElementById("home-guides-btn")?.addEventListener("click",()=>{ S.settingsTab="help"; S.showSettings=true; updateNav(); renderOverlays(true); });
 }
 
 // ── MOBILE RENDER ─────────────────────────────────────────────────────────────
@@ -10748,7 +11146,7 @@ function _renderMobEmpire(el){
         </div>
         </div>
       </details>
-      <details open><summary class="sec" style="list-style:none;cursor:pointer"><span>Species</span></summary>
+      <details id="e-sec-species" open><summary class="sec" style="list-style:none;cursor:pointer"><span>Species</span></summary>
         <div style="padding:14px 16px">
           <div class="field"><div class="lbl">Name</div><input id="e-spname" value="${e.spName}" placeholder="e.g. Vorathi"/></div>
           <div class="field"><div class="lbl">Plural</div><input id="e-spplural" value="${e.spPlural}"/></div>
@@ -10760,25 +11158,25 @@ function _renderMobEmpire(el){
                 <div class="field-desc">City visual style (usually same as portrait prefix)</div></div>
         </div>
       </details>
-      <details open><summary class="sec" style="list-style:none;cursor:pointer"><span>Ethics <span class="tag tag-ghost">${e.ethics.length}/3</span></span></summary>
+      <details id="e-sec-ethics" open><summary class="sec" style="list-style:none;cursor:pointer"><span>Ethics <span class="tag tag-ghost">${e.ethics.length}/3</span></span></summary>
         <div style="padding:14px 16px">
           <div class="notice n-ghost" style="margin-bottom:8px;font-size:11px">Max 3 points. Fanatic = 2 pts. No opposing pairs (Egalitarian↔Authoritarian, Pacifist↔Militarist, Xenophile↔Xenophobe, Materialist↔Spiritualist).</div>
-          <div class="pills">${mkPills([...ETHICS,...FANATIC_ETHICS],e.ethics,3,"ethics")}</div>
+          <div class="pills">${mkPills([...ETHICS,...FANATIC_ETHICS],e.ethics||[],3,"ethics")}</div>
         </div>
       </details>
-      <details open><summary class="sec" style="list-style:none;cursor:pointer"><span>Civics <span class="tag tag-ghost">${e.civics.length}/2</span>${e.authority==="auth_hive_mind"?` <span class="tag tag-warn" style="font-size:10px">Hive</span>`:""}${e.authority==="auth_machine_intelligence"?` <span class="tag tag-warn" style="font-size:10px">Machine</span>`:""}</span></summary>
+      <details id="e-sec-civics" open><summary class="sec" style="list-style:none;cursor:pointer"><span>Civics <span class="tag tag-ghost">${e.civics.length}/2</span>${e.authority==="auth_hive_mind"?` <span class="tag tag-warn" style="font-size:10px">Hive</span>`:""}${e.authority==="auth_machine_intelligence"?` <span class="tag tag-warn" style="font-size:10px">Machine</span>`:""}</span></summary>
         <div style="padding:14px 16px">
           ${e.authority==="auth_hive_mind"?`<div class="notice n-warn" style="margin-bottom:8px;font-size:11px">Hive Mind civics only.</div>`:e.authority==="auth_machine_intelligence"?`<div class="notice n-warn" style="margin-bottom:8px;font-size:11px">Machine Intelligence civics only.</div>`:""}
-          <div class="pills">${e.authority==="auth_hive_mind"?mkPills(CIVICS_HIVE,e.civics,2,"civics"):e.authority==="auth_machine_intelligence"?mkPills(CIVICS_MACHINE,e.civics,2,"civics"):e.authority==="auth_corporate"?mkPills(CIVICS_MEGACORP,e.civics,2,"civics"):mkPills(CIVICS_NORMAL,e.civics,2,"civics")}</div>
+          <div class="pills">${e.authority==="auth_hive_mind"?mkPills(CIVICS_HIVE,e.civics||[],2,"civics"):e.authority==="auth_machine_intelligence"?mkPills(CIVICS_MACHINE,e.civics||[],2,"civics"):e.authority==="auth_corporate"?mkPills(CIVICS_MEGACORP,e.civics||[],2,"civics"):mkPills(CIVICS_NORMAL,e.civics||[],2,"civics")}</div>
         </div>
       </details>
-      <details><summary class="sec" style="list-style:none;cursor:pointer"><span>Traits <span class="tag tag-ghost">${e.traits.length}/5</span></span></summary>
+      <details id="e-sec-traits"><summary class="sec" style="list-style:none;cursor:pointer"><span>Traits <span class="tag tag-ghost">${e.traits.length}/5</span></span></summary>
         <div style="padding:14px 16px">
           <div class="notice n-ghost" style="margin-bottom:8px;font-size:11px">2 trait points. Positive = cost, Negative = refund. Max 5 traits total.</div>
           <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Positive</div>
-          <div class="pills" style="margin-bottom:10px">${mkPills(TRAITS_POS,e.traits,5,"traits")}</div>
+          <div class="pills" style="margin-bottom:10px">${mkPills(TRAITS_POS,e.traits||[],5,"traits")}</div>
           <div style="font-size:10px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Negative</div>
-          <div class="pills">${mkPills(TRAITS_NEG,e.traits,5,"traits")}</div>
+          <div class="pills">${mkPills(TRAITS_NEG,e.traits||[],5,"traits")}</div>
         </div>
       </details>
       <details><summary class="sec" style="list-style:none;cursor:pointer"><span>Origin <span class="tag tag-ghost">${e.origin||"none"}</span></span></summary>
@@ -13211,23 +13609,23 @@ function renderEmpire(body){
       <details open><summary class="sec" style="list-style:none;cursor:pointer"><span class="sec-title">Ethics <span class="tag tag-ghost">${ethicPts(e.ethics)}/3 pts</span></span></summary>
         <div style="padding:14px 18px">
           <div class="notice n-ghost">Max 3 ethics. No opposing pairs. Fanatic version counts as 2 ethic points — use 1 Fanatic + 1 normal. Gestalt Consciousness replaces all ethics.</div>
-          <div class="pills">${mkPills([...ETHICS,...FANATIC_ETHICS],e.ethics,3,"ethics")}</div>
+          <div class="pills">${mkPills([...ETHICS,...FANATIC_ETHICS],e.ethics||[],3,"ethics")}</div>
         </div>
       </details>
       </div><div class="acc-col">
       <details open><summary class="sec" style="list-style:none;cursor:pointer"><span class="sec-title">Civics <span class="tag tag-ghost">${e.civics.length}/2</span>${e.authority==="auth_hive_mind"?` <span class="tag tag-warn" style="font-size:10px">Hive</span>`:""}${e.authority==="auth_machine_intelligence"?` <span class="tag tag-warn" style="font-size:10px">Machine</span>`:""}</span></summary>
         <div style="padding:14px 18px">
           ${e.authority==="auth_hive_mind"?`<div class="notice n-warn">Hive Mind civics shown. Regular civics will cause errors.</div>`:e.authority==="auth_machine_intelligence"?`<div class="notice n-warn">Machine Intelligence civics shown. Regular civics will cause errors.`:""}
-          <div class="pills">${e.authority==="auth_hive_mind"?mkPills(CIVICS_HIVE,e.civics,2,"civics"):e.authority==="auth_machine_intelligence"?mkPills(CIVICS_MACHINE,e.civics,2,"civics"):e.authority==="auth_corporate"?mkPills(CIVICS_MEGACORP,e.civics,2,"civics"):mkPills(CIVICS_NORMAL,e.civics,2,"civics")}</div>
+          <div class="pills">${e.authority==="auth_hive_mind"?mkPills(CIVICS_HIVE,e.civics||[],2,"civics"):e.authority==="auth_machine_intelligence"?mkPills(CIVICS_MACHINE,e.civics||[],2,"civics"):e.authority==="auth_corporate"?mkPills(CIVICS_MEGACORP,e.civics||[],2,"civics"):mkPills(CIVICS_NORMAL,e.civics||[],2,"civics")}</div>
         </div>
       </details>
       <details open><summary class="sec" style="list-style:none;cursor:pointer"><span class="sec-title">Traits <span class="tag tag-ghost">${e.traits.length}/5 · ${traitPts(e.traits)}/2 pts</span></span></summary>
         <div style="padding:14px 18px">
           <div class="notice n-ghost">2 trait points standard. Positive traits cost 1–3 points. Negative traits grant 1–2 points. Max 5 traits total.</div>
           <div style="font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--green);margin-bottom:5px;margin-top:4px">Positive (cost points)</div>
-          <div class="pills" style="margin-bottom:12px">${mkPills(TRAITS_POS,e.traits,5,"traits")}</div>
+          <div class="pills" style="margin-bottom:12px">${mkPills(TRAITS_POS,e.traits||[],5,"traits")}</div>
           <div style="font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--amber);margin-bottom:5px">Negative (grant points)</div>
-          <div class="pills">${mkPills(TRAITS_NEG,e.traits,5,"traits")}</div>
+          <div class="pills">${mkPills(TRAITS_NEG,e.traits||[],5,"traits")}</div>
         </div>
       </details>
       <details open><summary class="sec" style="list-style:none;cursor:pointer"><span class="sec-title">Origin <span class="tag tag-ghost">${e.origin||"none"}</span></span></summary>
@@ -13366,7 +13764,7 @@ function renderExport(body){
   const _pkgId=_activePkg.id;
   const _pkgs=getPackages();
   const _assembled=assembleExportState(_activePkg);
-  const _swapKeys=['systems','empire','empires','activeEmpire','modMeta','modDeps','modOverrides','customOrigins','customEvents','gameStartEvents','planetLibrary','systemLibrary','empireLibrary','exportMode','customAuthorities','customCivicsBuilt','customTraitsBuilt','customEthicsBuilt','customRulerTraits','customCouncilors','customFocuses','customEdicts','customPolicies','customSpeciesClasses','customPopFactions'];
+  const _swapKeys=['systems','empire','empires','activeEmpire','modMeta','modDeps','modOverrides','customOrigins','customEvents','gameStartEvents','customAnomalies','customSpecialProjects','customArchaeology','customRifts','arks','planetLibrary','systemLibrary','empireLibrary','exportMode','customAuthorities','customCivicsBuilt','customTraitsBuilt','customEthicsBuilt','customRulerTraits','customCouncilors','customFocuses','customEdicts','customPolicies','customSpeciesClasses','customPopFactions'];
   const _savedS={};_swapKeys.forEach(function(_sk){_savedS[_sk]=S[_sk];S[_sk]=(_assembled[_sk]!==undefined?_assembled[_sk]:S[_sk]);});
   S.exportMode=_activePkg.exportMode||'full';
   // ────────────────────────────────────────────────────────────────────────
@@ -13600,7 +13998,7 @@ function renderExport(body){
     <!-- ── CHECKLIST ──────────────────────────────────────────────────── -->
     ${cl.length?`
     <div class="card" style="margin-bottom:14px">
-      <div class="sec"><span class="sec-title">Pre-export Checklist</span><span class="tag ${ready===cl.length?"tag-ok":"tag-warn"}">${ready}/${cl.length}</span></div>
+      <div id="exp-checklist-sec" class="sec"><span class="sec-title">Pre-export Checklist</span><span class="tag ${ready===cl.length?"tag-ok":"tag-warn"}">${ready}/${cl.length}</span></div>
       <div class="chk-grid">${chkRows}</div>
     </div>`:""}
 
@@ -13625,12 +14023,12 @@ function renderExport(body){
 
     <!-- ── FOLDER STRUCTURE ────────────────────────────────────────────── -->
     <div class="card" style="margin-bottom:14px">
-      <details open><summary class="sec" style="list-style:none;cursor:pointer"><span class="sec-title">Folder Structure</span></summary>
+      <details id="exp-folder-sec" open><summary class="sec" style="list-style:none;cursor:pointer"><span class="sec-title">Folder Structure</span></summary>
         <div style="padding:14px 18px">
           <pre style="background:var(--bg);border:1px solid var(--b1);border-radius:8px;padding:14px;font-size:11px;color:var(--t3);line-height:2;font-family:monospace;overflow-x:auto">${treeFromPaths(Object.keys(currentFiles)).replace(/</g,"&lt;")}</pre>
         </div>
       </details>
-      <details><summary class="sec" style="list-style:none;cursor:pointer"><span class="sec-title">Known Gotchas</span></summary>
+      <details id="exp-gotchas-sec"><summary class="sec" style="list-style:none;cursor:pointer"><span class="sec-title">Known Gotchas</span></summary>
         <div style="padding:14px 18px">${gotchas}</div>
       </details>
     </div>`;
@@ -13923,13 +14321,14 @@ function renderOverlays(showSettings=false){
           <div id="help-topic-list" style="display:flex;flex-direction:column;gap:0;overflow-y:auto;flex:1">
             ${(function(){
               var groups={
+                'Builder Guides':['guide_systems','guide_empire','guide_origins','guide_events','guide_library','guide_arks','guide_govspec'],
                 'System Building':['system','star_classes','planet_classes_habitable','planet_classes_uninhabitable','bypasses','ambient_objects'],
                 'Planet Builder':['planet','deposits_orbital','deposits_planetary','moons','buildings'],
                 'Empire Builder':['empire','ethics','origins'],
                 'Export & Mod Files':['descriptor','export','modManager','dlc'],
                 'Advanced':['events','templates'],
               };
-              var icons={'System Building':'si-system','Planet Builder':'si-planet','Empire Builder':'si-empire','Export & Mod Files':'si-export','Advanced':'si-star'};
+              var icons={'Builder Guides':'si-help','System Building':'si-system','Planet Builder':'si-planet','Empire Builder':'si-empire','Export & Mod Files':'si-export','Advanced':'si-star'};
               var out='';
               Object.keys(groups).forEach(function(grp){
                 out+='<div class="sett-acc"><button class="sett-acc-hdr open"><i class="si '+icons[grp]+'"></i> '+grp+' <span class="acc-chevron">▼</span></button><div class="sett-acc-body open" style="padding:4px 0 8px;display:flex;flex-direction:column;gap:2px">';
@@ -13967,10 +14366,17 @@ function renderOverlays(showSettings=false){
                   existing.patches.push(entry);
                 } else {
                   // Patch without a milestone yet (appears before milestone in newest-first order)
-                  groups.push({ base, milestone: entry, patches: [] });
+                  // Use null so the entry goes into patches and isn't lost when the real milestone arrives
+                  groups.push({ base, milestone: null, patches: [entry] });
                 }
               });
 
+              // Escape HTML in note text so placeholder tokens like <key>, <namespace>, <details>
+              // are shown literally instead of being parsed as (unclosed) DOM elements. Intentional
+              // inline icons <i class=si-xxx></i> are restored after escaping.
+              const clEsc = v => String(v)
+                .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+                .replace(/&lt;i class=["\']?(si-[\w-]+)["\']?&gt;&lt;\/i&gt;/g,'<i class="$1"></i>');
               return groups.map((g, gi) => {
                 const m = g.milestone;
                 const patches = g.patches.slice().sort((a,b) => {
@@ -13984,16 +14390,17 @@ function renderOverlays(showSettings=false){
                 const mEntry = m || patches[0];
 
                 const milestoneNotes = (mEntry.notes||[]).map(n =>
-                  `<li style="margin-bottom:3px">${n}</li>`).join('');
+                  `<li style="margin-bottom:3px">${clEsc(n)}</li>`).join('');
 
                 const patchHTML = patches.map((p, pi) => {
                   const isLast = pi === patches.length - 1;
-                  const pNotes = p.notes.map(n => `<li style="margin-bottom:3px">${n}</li>`).join('');
+                  const _pn = p.notes||[];
+                  const pNotes = _pn.map(n => `<li style="margin-bottom:3px">${clEsc(n)}</li>`).join('');
                   return `<details style="background:var(--s1);border:1px solid var(--b1);border-top:none;${isLast?'border-radius:0 0 10px 10px;margin-bottom:14px':''}">
                     <summary style="display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;list-style:none">
                       <span style="font-size:12px;font-weight:700;font-family:monospace;color:var(--cyan)">${p.v}</span>
                       <span class="tag tag-ghost" style="font-size:10px">${p.date}</span>
-                      <span style="font-size:10px;color:var(--t4);margin-left:auto">${p.notes.length} change${p.notes.length!==1?'s':''} ▾</span>
+                      <span style="font-size:10px;color:var(--t4);margin-left:auto">${_pn.length} change${_pn.length!==1?'s':''} ▾</span>
                     </summary>
                     <div style="padding:6px 16px 12px;border-top:1px solid var(--b1)">
                       <ul style="margin:0;padding-left:18px;font-size:11px;color:var(--t3);line-height:1.9">${pNotes}</ul>
@@ -18920,6 +19327,17 @@ function wpick(rng, items){
   return items[Math.floor(rng()*items.length)];
 }
 
+function wpickItem(rng, items){
+  // Like wpick but returns the full item object (not item.v) for {v,w,...} arrays
+  if(!items||!items.length) return null;
+  if(typeof items[0]==='object'&&'w' in items[0]){
+    const total=items.reduce((s,x)=>s+x.w,0);
+    let r=rng()*total;
+    for(const item of items){r-=item.w;if(r<=0)return item;}
+    return items[items.length-1];
+  }
+  return items[Math.floor(rng()*items.length)];
+}
 function wpickN(rng, items, n, unique=true){
   const pool=[...items]; const out=[];
   for(let i=0;i<n&&pool.length;i++){
@@ -19355,12 +19773,10 @@ function randomPlanet(seedStr, opts={}){
   const maxDistricts=Math.max(1,Math.floor(size));  // Stellaris: total district cap = planet size
 
   // ── Orbital ring ─────────────────────────────────────────────────────────
-  // Very rare (~5%) for habitable worlds, DLC content
-  let orbitalRing=null;
-  if(isHab && rng()<0.05 && opts.orbitalRing!==false){
-    const tier=rng()<0.5?'t1':rng()<0.5?'t2':'t3';
-    orbitalRing={tier, modules:[], buildings:[]};
-  }
+  // Removed from randomiser: create_megastructure is not valid in solar_system_initializer
+  // init_effect blocks in Stellaris 4.x. Orbital rings must be added manually via a
+  // game_start event. Randomiser never generates them to avoid automatic validation warnings.
+  const orbitalRing=null;
 
   // ── Has ring ─────────────────────────────────────────────────────────────
   const has_ring = rng()<0.08;
@@ -19470,7 +19886,7 @@ function randomSystem(seedStr, opts={}){
   for(let i=0;i<pCount;i++){
     od+=orbitStep+Math.floor(rng()*20);
     const zone=od<100?'inner':od<280?'mid':'outer';
-    const pick=wpick(rng,ZONE_CLS[zone]);
+    const pick=wpickItem(rng,ZONE_CLS[zone]);
     const cls=pick.v;
     const cat=pick.cat||'body';
     const pName=name+' '+ROMAN[i]||name+' '+(i+1);
@@ -19637,32 +20053,69 @@ function randomEmpire(seedStr, opts={}){
 
   // Civics
   let civicPool=isGestalt?(isMachine?[...CIVICS_MACHINE]:[...CIVICS_HIVE]):isCorp?[...CIVICS_MEGACORP]:[...CIVICS_NORMAL];
-  // Filter out civics incompatible with chosen ethics
+  // Filter civic pool to only valid civics for the chosen authority + ethics.
+  // Uses the same CIVIC_PREREQS table that validate() uses — keeps randomiser and
+  // validator in sync so the randomiser never produces a civic that would error.
   if(!isGestalt){
-    const isPacifist=ethics.some(e=>e.includes('Pacifist'));
-    const isXenophile=ethics.some(e=>e.includes('Xenophile'));
-    const isEgalitarian=ethics.some(e=>e.includes('Egalitarian'));
-    const isAuthoritarian=ethics.some(e=>e.includes('Authoritarian'));
-    const isSpiritualEmpire=ethics.some(e=>e.includes('Spiritualist'));
-    const CIVIC_BLOCKS={
-      // Civic: [ethics that block it]
-      'Warrior Culture':['Pacifist','Fanatic Pacifist'],
-      'Barbaric Despoilers':['Pacifist','Fanatic Pacifist'],
-      'Fanatic Purifiers':['Xenophile','Fanatic Xenophile'],
-      'Inwards Perfection':['Xenophile','Fanatic Xenophile'],
-      'Corvee System':['Egalitarian','Fanatic Egalitarian'],
-      'Slaver Guilds':['Egalitarian','Fanatic Egalitarian'],
-      'Shared Burden':['Authoritarian','Fanatic Authoritarian'],
-      'Utopian Abundance':['Authoritarian','Fanatic Authoritarian'],
-      'Agrarian Idyll':['Fanatic Materialist'],
-      'Death Cult':['Materialist','Fanatic Materialist'],
-      'Exalted Priesthood':['Materialist','Fanatic Materialist'],
-      'Imperial Cult':['Materialist','Fanatic Materialist'],
+    // Inline prereq table matching CIVIC_PREREQS in 18_planet-event-chain-seeds.js.
+    // Keys: auth (must have one), ethics_any (must have one), ethics_not (must not have any).
+    const _CP={
+      'Imperial Cult':        {auth:['auth_imperial'],                     ethics_not:['Materialist','Fanatic Materialist']},
+      'Exalted Priesthood':   {auth:['auth_oligarchic','auth_dictatorial'],ethics_not:['Materialist','Fanatic Materialist'],ethics_any:['Spiritualist','Fanatic Spiritualist']},
+      'Aristocratic Elite':   {auth:['auth_oligarchic','auth_imperial'],   ethics_not:['Egalitarian','Fanatic Egalitarian']},
+      'Beacon of Liberty':    {auth:['auth_democratic'],                   ethics_any:['Egalitarian','Fanatic Egalitarian'],ethics_not:['Xenophobe','Fanatic Xenophobe']},
+      'Citizen Service':      {auth:['auth_democratic','auth_oligarchic'], ethics_any:['Militarist','Fanatic Militarist'],  ethics_not:['Fanatic Xenophile']},
+      'Corporate Dominion':   {auth:['auth_oligarchic'],                   ethics_not:['Xenophobe','Fanatic Xenophobe']},
+      'Feudal Realm':         {auth:['auth_imperial']},
+      'Meritocracy':          {auth:['auth_democratic','auth_oligarchic']},
+      'Parliamentary System': {auth:['auth_democratic']},
+      'Philosopher King':     {auth:['auth_dictatorial','auth_imperial']},
+      'Shadow Council':       {auth:['auth_democratic','auth_oligarchic','auth_dictatorial']},
+      'Criminal Heritage':    {auth:['auth_corporate']},
+      // Ethics-only restrictions
+      'Agrarian Idyll':       {ethics_any:['Pacifist','Fanatic Pacifist'],   ethics_not:['Fanatic Materialist']},
+      'Ascensionists':        {ethics_any:['Spiritualist','Fanatic Spiritualist']},
+      'Barbaric Despoilers':  {ethics_any:['Militarist','Fanatic Militarist'], ethics_not:['Pacifist','Fanatic Pacifist','Xenophile','Fanatic Xenophile']},
+      'Corvee System':        {ethics_not:['Egalitarian','Fanatic Egalitarian']},
+      'Crusader Spirit':      {ethics_any:['Militarist','Fanatic Militarist','Authoritarian','Fanatic Authoritarian','Spiritualist','Fanatic Spiritualist'],ethics_not:['Pacifist','Fanatic Pacifist']},
+      'Death Cult':           {ethics_any:['Spiritualist','Fanatic Spiritualist']},
+      'Death Cult Corporate': {ethics_any:['Spiritualist','Fanatic Spiritualist']},
+      'Dimensional Worship':  {ethics_any:['Spiritualist','Fanatic Spiritualist']},
+      'Distinguished Admiralty':{ethics_any:['Militarist','Fanatic Militarist']},
+      'Dystopian Society':    {ethics_any:['Fanatic Authoritarian']},
+      'Fanatic Purifiers':    {ethics_any:['Fanatic Xenophobe'],           ethics_not:['Xenophile','Fanatic Xenophile']},
+      'Free Haven':           {ethics_any:['Xenophile','Fanatic Xenophile']},
+      'Guided Sapience':      {ethics_any:['Xenophobe','Fanatic Xenophobe']},
+      'Idealistic Foundation':{ethics_any:['Egalitarian','Fanatic Egalitarian']},
+      'Inwards Perfection':   {ethics_not:['Xenophile','Fanatic Xenophile']},
+      'Nationalistic Zeal':   {ethics_any:['Militarist','Fanatic Militarist']},
+      'Police State':         {ethics_not:['Fanatic Egalitarian']},
+      'Pompous Purists':      {ethics_any:['Xenophobe','Fanatic Xenophobe']},
+      'Pyrolatry':            {ethics_any:['Spiritualist','Fanatic Spiritualist']},
+      'Relentless Industrialists':{ethics_any:['Materialist','Fanatic Materialist']},
+      'Scorched Earth':       {ethics_any:['Xenophobe','Fanatic Xenophobe'], ethics_not:['Pacifist','Fanatic Pacifist']},
+      'Selective Kinship':    {ethics_any:['Xenophile','Fanatic Xenophile','Fanatic Egalitarian']},
+      'Shared Burden':        {ethics_any:['Fanatic Egalitarian'],          ethics_not:['Xenophobe','Fanatic Xenophobe']},
+      'Slaver Guilds':        {ethics_any:['Authoritarian','Fanatic Authoritarian']},
+      'Sovereign Guardianship':{ethics_any:['Militarist','Fanatic Militarist']},
+      'Superstitious Beliefs':{ethics_any:['Spiritualist','Fanatic Spiritualist']},
+      'Technocracy':          {ethics_any:['Materialist','Fanatic Materialist']},
+      'Twisted Experimenters':{ethics_any:['Authoritarian','Fanatic Authoritarian','Xenophobe','Fanatic Xenophobe']},
+      'Warrior Culture':      {ethics_any:['Militarist','Fanatic Militarist'], ethics_not:['Pacifist','Fanatic Pacifist']},
+      'Void Reavers':         {ethics_not:['Pacifist','Fanatic Pacifist']},
+      'Chosen':               {ethics_any:['Spiritualist','Fanatic Spiritualist']},
+      'Crowdsourcing':        {ethics_any:['Fanatic Authoritarian','Fanatic Egalitarian','Fanatic Xenophobe','Fanatic Xenophile','Fanatic Militarist','Fanatic Pacifist','Fanatic Spiritualist','Fanatic Materialist']},
     };
     civicPool=civicPool.filter(cv=>{
-      const blocked=CIVIC_BLOCKS[cv];
-      if(!blocked) return true;
-      return !blocked.some(b=>ethics.includes(b));
+      const pre=_CP[cv];
+      if(!pre) return true;
+      // Authority check — must have one of the listed authorities
+      if(pre.auth&&!pre.auth.includes(authority)) return false;
+      // ethics_any — must have at least one
+      if(pre.ethics_any&&!pre.ethics_any.some(req=>ethics.includes(req))) return false;
+      // ethics_not — must not have any
+      if(pre.ethics_not&&pre.ethics_not.some(bl=>ethics.includes(bl))) return false;
+      return true;
     });
   }
   const nCivics=isGestalt?2:isCorp?Math.floor(rng()*2)+2:Math.floor(rng()*2)+1;
@@ -19680,10 +20133,32 @@ function randomEmpire(seedStr, opts={}){
   const namePool=spNames[spClass]||['Unknown'];
   const spName=wpick(rng,namePool)+(rng()<0.4?wpick(rng,['i','an','ar','en','ith','or']):'');
 
-  // Traits
-  const posPool=[...TRAITS_POS]; const negPool=[...TRAITS_NEG];
-  const nPos=1+Math.floor(rng()*3), nNeg=Math.floor(rng()*2);
-  const traits=[...wpickN(rng,posPool,nPos),...wpickN(rng,negPool,nNeg)];
+  // Traits — use machine-specific pool for machine intelligence empires
+  // Pick traits one at a time to respect:
+  //   (a) 2-point budget (TRAIT_COST), (b) 5-trait max, (c) opposing pairs (TRAIT_OPP_PAIRS)
+  const _posPool=isMachine?[...TRAITS_MACHINE_POS]:[...TRAITS_POS];
+  const _negPool=isMachine?[...TRAITS_MACHINE_NEG]:[...TRAITS_NEG];
+  // Shuffle pools so wpick doesn't always favour the same slots
+  const _shuf=arr=>{const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+  const _posShuf=_shuf(_posPool); const _negShuf=_shuf(_negPool);
+  const traits=[];
+  let _pts=0;
+  // Pick negative traits first (they refund points, expanding the positive budget)
+  const nNeg=Math.floor(rng()*2); // 0 or 1
+  for(let i=0;i<_negShuf.length&&traits.filter(t=>_negPool.includes(t)).length<nNeg;i++){
+    const t=_negShuf[i];
+    const cost=TRAIT_COST[t]||0;
+    const oppBlocked=(TRAIT_OPP_PAIRS||[]).some(p=>p.includes(t)&&p.some(o=>o!==t&&traits.includes(o)));
+    if(!oppBlocked&&traits.length<5){traits.push(t);_pts+=cost;}
+  }
+  // Pick positive traits within budget
+  const nPos=1+Math.floor(rng()*2); // 1 or 2
+  for(let i=0;i<_posShuf.length&&traits.filter(t=>_posPool.includes(t)).length<nPos;i++){
+    const t=_posShuf[i];
+    const cost=TRAIT_COST[t]||1;
+    const oppBlocked=(TRAIT_OPP_PAIRS||[]).some(p=>p.includes(t)&&p.some(o=>o!==t&&traits.includes(o)));
+    if(!oppBlocked&&_pts+cost<=2&&traits.length<5){traits.push(t);_pts+=cost;}
+  }
 
   // Origin
   const origin=wpick(rng,ORIGINS);
@@ -19853,7 +20328,7 @@ function _genSysPlanets(sys,seedStr,opts){
   for(let i=0;i<pCount;i++){
     od+=orbitStep+Math.floor(rng()*20);
     const zone=od<100?'inner':od<280?'mid':'outer';
-    const cls=wpick(rng,ZONE_CLS[zone]).v;
+    const cls=wpick(rng,ZONE_CLS[zone]);
     const pName=sys.name+' '+ROMAN[i]||sys.name+' '+(i+1);
     const oa=Math.floor(rng()*360);
     let finalOd=od;
@@ -22724,6 +23199,7 @@ function renderArks(body) {
 // State is transient (not persisted). Triggered from home page "Start Tour".
 
 var tourState = null; // { step: 0 }
+var _activeTourSteps = []; // points to TOUR_STEPS or a GUIDE_STEPS_* array
 
 // ── TOUR STEPS ───────────────────────────────────────────────────────────────
 // sel:    CSS selector for spotlight target (null = centred card, no spotlight)
@@ -22790,13 +23266,20 @@ var TOUR_STEPS = [
     tip:   "Adjective and plural fields below are optional but add nice flavour in-game."
   },
   {
-    sel:   '#body',
+    sel:   '#e-sec-ethics',
     nav:   'empire',
-    tipPos:'left',
-    title: "Ethics & Civics",
-    body:  "Scroll down in the Empire tab to find:<br><br><strong>Ethics</strong> — your empire's worldview (pick 1–3 points worth). Fanatic counts as 2 points.<br><br><strong>Civics</strong> — special government traits that give unique bonuses (pick 2).<br><br>Don't overthink it — any combination works.",
+    title: "Ethics",
+    body:  "Pick your empire's ethics — up to 3 points worth. Fanatic versions cost 2 points. Opposing pairs (Egalitarian vs Authoritarian, etc.) are mutually exclusive.<br><br>These appear as the <code>ethic</code> list in your prescripted country file.",
     btn:   "Done →",
-    tip:   "Ethics and Civics can be changed freely in the builder — nothing is locked in until you export."
+    tip:   "Ethics can be changed freely in the builder — nothing locks until you export."
+  },
+  {
+    sel:   '#e-sec-civics',
+    nav:   'empire',
+    title: "Civics",
+    body:  "Pick 2 civics that match your authority and ethics. The list filters in real time to only show valid choices.<br><br>Civics reference keys from <code>common/governments/civics/*.txt</code>.",
+    btn:   "Next →",
+    tip:   "Hive Minds and Machine Intelligences use entirely separate civic sets."
   },
   {
     sel:   '[data-tab="export"]',
@@ -22825,15 +23308,459 @@ var TOUR_STEPS = [
   {
     sel:   null,
     nav:   null,
+    title: "Per-Module Guides",
+    body:  "Every builder section has a <strong>?</strong> button in the top-right of its header. Click it anytime for a full spotlight guide covering that area's fields, Stellaris file paths, and tips.<br><br>Available for: Systems · Planet Builder · Empire · Origins · Events · Library · Ark Builder · Species & Gov · Import .txt",
+    btn:   "Got it →"
+  },
+  {
+    sel:   null,
+    nav:   null,
     title: "You're ready to play!",
     body:  "That's everything. Your custom empire should appear in the new-game empire picker in Stellaris.<br><br>Come back to the builder anytime to add more systems, events, origins, and more.",
     btn:   "Close tour"
   }
 ];
 
+
+// ── PER-MODULE GUIDE STEPS ───────────────────────────────────────────────────
+// Each array is a spotlight tour for a specific builder area.
+// Invoked via openGuide(module) from the ? button in each module header.
+
+// ── PER-MODULE GUIDE STEPS ───────────────────────────────────────────────────
+// Each array is a spotlight tour for a specific builder area.
+// All sel values verified against actual rendered DOM IDs/attributes.
+// Stellaris file paths referenced are canonical vanilla paths.
+
+var GUIDE_STEPS_SYSTEMS = [
+  {
+    sel: null, nav: 'systems', title: "System Builder — Quick Guide",
+    body: "Build custom star systems with planets, moons, asteroid belts, and bypasses. Systems export to <code>common/solar_system_initializers/*.txt</code> and are referenced in <code>common/galaxy_map_modes/</code> or via prescripted countries.",
+    btn: "Let's go →"
+  },
+  {
+    sel: '[data-tab="systems"]', nav: 'systems', title: "Systems Tab",
+    body: "The System Builder stores one or more systems per project. Each system becomes a separate initializer block. Systems are independent of your empire project.",
+    btn: "Next →", tipPos: 'right'
+  },
+  {
+    sel: '#pane-left', nav: 'systems', title: "System List",
+    body: "All systems in your project appear here. Click <strong>+ New System</strong> to add one. You can have multiple systems — e.g. a home system plus a nearby colony target.",
+    btn: "Next →", tipPos: 'right'
+  },
+  {
+    sel: '#sys-name', nav: 'systems', title: "System Name & Key",
+    body: "The name becomes the initializer key (auto-converted to <code>snake_case</code>). In Stellaris this is the block name: <code>my_system = { class = \"sc_g\" ... }</code>.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: '#sys-sc', nav: 'systems', title: "Star Class",
+    body: "Star class controls visuals and habitable-world odds. Common choices: <code>sc_g</code> (yellow, Earth-like odds), <code>sc_k</code> (orange), <code>sc_m</code> (red dwarf). Binary/trinary systems use <code>sc_binary_*</code>.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: '#sys-home', nav: 'systems', title: "Home System",
+    body: "Check this to mark the system as your empire's starting location. Stellaris requires exactly one home system per prescripted country — it sets <code>starting_system = yes</code> in the initializer.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: '#add-planet', nav: 'systems', title: "Add Planets & Bodies",
+    body: "Click <strong>+ Add Planet</strong> to add a celestial body. Each entry maps to a <code>planet = { class = ... size = ... }</code> block inside the initializer. Add moons, belts, and ambient objects from the right panel.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: '#pane-mid', nav: 'systems', title: "Planet Configuration",
+    body: "Configure the selected body: planet class, size (14–25 for habitable worlds), deposits, features, buildings, and whether it is the <strong>colony start</strong> (<code>init_effect = { create_colony = yes }</code>).",
+    btn: "Next →", tipPos: 'left'
+  },
+  {
+    sel: '#export-sys', nav: 'systems', title: "Preview & Export",
+    body: "Click <strong>Export</strong> to preview the full initializer script. The output goes into your mod ZIP as <code>common/solar_system_initializers/[mod_name]_systems.txt</code>.",
+    btn: "Done ✓", tipPos: 'above'
+  }
+];
+
+var GUIDE_STEPS_PLANETS = [
+  {
+    sel: null, nav: 'planets', title: "Planet Builder — Quick Guide",
+    body: "Design individual planets with full deposit, district, building, and species control. Planets built here can be saved to your Library and placed into any system, or used as colony start worlds.",
+    btn: "Let's go →"
+  },
+  {
+    sel: '[data-tab="planets"]', nav: 'planets', title: "Planet Builder Tab",
+    body: "The Planet Builder is a standalone editor — it works on one planet at a time. Use <strong>Save to Library</strong> to store templates you want to reuse across systems.",
+    btn: "Next →", tipPos: 'right'
+  },
+  {
+    sel: '#pb-sec-props', nav: 'planets', title: "Planet Properties",
+    body: "Set the planet class (<code>pc_continental</code>, <code>pc_ocean</code>, <code>pc_desert</code>, etc.), size (4–35, habitable worlds typically 12–25), and orbital position. Planet class maps directly to the <code>class</code> field in the initializer.",
+    btn: "Next →", tipPos: 'left'
+  },
+  {
+    sel: '#pb-hw', nav: 'planets', title: "Homeworld Flag",
+    body: "Check <strong>Mark as Homeworld</strong> to set <code>is_homeworld = yes</code> in the planet block. Homeworlds get a colonised start and special deposit rules — they must have a habitable planet class.",
+    btn: "Next →", tipPos: 'left', tip: "Only one planet per system should be marked as homeworld."
+  },
+  {
+    sel: '#pb-sec-deposits', nav: 'planets', title: "Deposits & Features",
+    body: "Deposits map to entries in <code>common/deposits/*.txt</code>. Strategic resources (<code>d_betharian_deposit</code>, <code>d_zro_deposit</code>, etc.) and blockers (<code>d_mountain_range_blocker</code>) go here. Each deposit becomes a line in the planet's <code>add_deposit</code> block.",
+    btn: "Next →", tipPos: 'left'
+  },
+  {
+    sel: '#pb-sec-buildings', nav: 'planets', title: "Starting Buildings",
+    body: "Pre-place buildings using <code>add_building</code> in the init effect. Common starting buildings: <code>building_capital</code>, <code>building_research_lab_1</code>, <code>building_foundry_1</code>. Note: buildings require valid job slots or they'll be demolished on load.",
+    btn: "Next →", tipPos: 'left'
+  },
+  {
+    sel: '#pb-save-lib', nav: 'planets', title: "Save to Library",
+    body: "Click <strong>Save to Library</strong> to store this planet as a reusable template. You can then add it to any system in the System Builder via the Library tab.",
+    btn: "Done ✓", tipPos: 'below'
+  }
+];
+
+var GUIDE_STEPS_EMPIRE = [
+  {
+    sel: null, nav: 'empire', title: "Empire Builder — Quick Guide",
+    body: "Build a prescripted empire that appears in the new-game empire selection screen. Output goes to <code>common/prescripted_countries/[name].txt</code> and requires a matching localisation entry in <code>localisation/english/[name]_l_english.yml</code>.",
+    btn: "Let's go →"
+  },
+  {
+    sel: '[data-tab="empire"]', nav: 'empire', title: "Empire Tab",
+    body: "Empire data is per-project — each project stores its own empire config independently of system and event projects.",
+    btn: "Next →", tipPos: 'right'
+  },
+  {
+    sel: '#e-name', nav: 'empire', title: "Empire Name",
+    body: "The empire name becomes the prescripted country key (e.g. <code>EMPIRE_terran_compact</code>). It also appears in the selection screen. Set an <strong>Adjective</strong> below for fleet and planet name generation.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: '#e-auth', nav: 'empire', title: "Authority",
+    body: "Authority sets the government type: <code>auth_democratic</code>, <code>auth_oligarchic</code>, <code>auth_dictatorial</code>, <code>auth_imperial</code>, <code>auth_corporate</code>, <code>auth_hive_mind</code>, or <code>auth_machine_intelligence</code>. This controls which civics are valid.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: '#e-sec-ethics', nav: 'empire', title: "Ethics",
+    body: "Pick up to 3 ethics points. Normal ethics cost 1 pt, Fanatics cost 2. No opposing pairs (e.g. <code>ethic_egalitarian</code> and <code>ethic_authoritarian</code> are mutually exclusive). These map to the <code>ethic</code> list in the prescripted country.",
+    btn: "Next →", tipPos: 'left'
+  },
+  {
+    sel: '#e-sec-civics', nav: 'empire', title: "Civics",
+    body: "Pick 2–3 civics valid for your authority. Civics reference keys from <code>common/governments/civics/*.txt</code>. The builder enforces authority and ethics requirements in real time.",
+    btn: "Next →", tipPos: 'left'
+  },
+  {
+    sel: '#e-sec-traits', nav: 'empire', title: "Species Traits",
+    body: "Assign up to 2 trait points. Positive traits cost points, negative traits (flaws) refund them. Traits reference <code>common/traits/04_species_traits.txt</code> and appear in the <code>create_species</code> block.",
+    btn: "Next →", tipPos: 'left'
+  },
+  {
+    sel: '#e-sec-species', nav: 'empire', title: "Species",
+    body: "Set species name, plural, class, portrait, and graphical culture. The <code>graphical_culture</code> must match a valid entry in <code>common/graphical_culture/00_graphical_culture.txt</code> — it controls city visuals.",
+    btn: "Next →", tipPos: 'left'
+  },
+  {
+    sel: '#export-empire', nav: 'empire', title: "Export",
+    body: "Click <strong>Export</strong> to preview the prescripted country script. The mod ZIP places this in <code>common/prescripted_countries/</code> and generates a matching localisation file.",
+    btn: "Done ✓", tipPos: 'above'
+  }
+];
+
+var GUIDE_STEPS_ORIGINS = [
+  {
+    sel: null, nav: 'origins', title: "Origins Builder — Quick Guide",
+    body: "Custom origins export as <code>civic_type = origin</code> entries in <code>common/governments/civics/*.txt</code>. They appear in the Empire Creation screen under Origins and use <code>is_origin = yes</code>.",
+    btn: "Let's go →"
+  },
+  {
+    sel: '[data-tab="origins"]', nav: 'origins', title: "Origins Tab",
+    body: "Each project has its own origins list. Origins are exported independently of empire and system data — they can be added to any empire via the Origin section in the Empire Builder.",
+    btn: "Next →", tipPos: 'right'
+  },
+  {
+    sel: '#pane-single', nav: 'origins', title: "Origins Panel",
+    body: "All custom origins in this project appear as collapsible cards — Identity, Requirements, Starting Effects, and Modifiers sections. Each card maps to one origin civic block in the output file.",
+    btn: "Next →", tipPos: 'left'
+  },
+  {
+    sel: '#add-origin-btn', nav: 'origins', title: "Create an Origin",
+    body: "Click <strong>+ New Origin</strong> to add one. Set a display name and internal key (e.g. <code>origin_ancient_cradle</code>). Set ethics/authority requirements and starting effects — buildings, deposits, or techs granted at game start.",
+    btn: "Next →", tipPos: 'below', tip: "The key must start with origin_ by convention and be globally unique in your mod."
+  },
+  {
+    sel: '#preview-origin-btn', nav: 'origins', title: "Preview & Export",
+    body: "Click <strong>Preview Files</strong> to inspect the generated civic file, <code>on_action</code> triggers, and localisation YML. The ZIP places these in <code>common/governments/civics/</code> and <code>localisation/english/</code>.",
+    btn: "Done ✓", tipPos: 'below'
+  }
+];
+
+var GUIDE_STEPS_EVENTS = [
+  {
+    sel: null, nav: 'events', title: "Event Builder — Quick Guide",
+    body: "Custom events fire via <code>on_actions</code>, scripted triggers, or other events. Output goes to <code>events/*.txt</code>. Each event needs a unique namespaced ID (e.g. <code>my_mod.1</code>) and a defined <code>namespace</code> at the top of the file.",
+    btn: "Let's go →"
+  },
+  {
+    sel: '[data-tab="events"]', nav: 'events', title: "Events Tab",
+    body: "The Event Builder stores all events for this project. Events are grouped by type (country, planet, leader, fleet, ship, etc.) and exported to a single namespaced event file.",
+    btn: "Next →", tipPos: 'right'
+  },
+  {
+    sel: '#evt-left', nav: 'events', title: "Event List",
+    body: "The left column lists all events in this project. Click <strong>+ New Event</strong> to add one. Use the type selector to set the event scope — <code>country_event</code>, <code>planet_event</code>, <code>leader_event</code>, etc.",
+    btn: "Next →", tipPos: 'right'
+  },
+  {
+    sel: '#evt-layout', nav: 'events', title: "Event Editor",
+    body: "Select an event to edit its title, description (<code>desc</code>), picture (<code>picture</code>), trigger block, <code>mean_time_to_happen</code>, and option blocks. The <code>trigger</code> block controls when Stellaris fires the event.",
+    btn: "Next →", tipPos: 'left'
+  },
+  {
+    sel: null, nav: 'events', title: "Options & Effects",
+    body: "Each option is a player-clickable button (<code>option = { name = ... effect = { ... } }</code>). Add effects: <code>add_resource</code>, <code>add_modifier</code>, <code>fire_on_action</code>, or chain to another event with <code>country_event = { id = my_mod.2 }</code>.",
+    btn: "Next →"
+  },
+  {
+    sel: '#evt-right', nav: 'events', title: "Live Preview",
+    body: "The right column shows the generated script in real time. Copy it directly or include it in your ZIP. Check that the <code>namespace</code> matches your event IDs — mismatches cause Stellaris to silently skip the file.",
+    btn: "Done ✓", tipPos: 'left'
+  }
+];
+
+var GUIDE_STEPS_LIBRARY = [
+  {
+    sel: null, nav: 'lib', title: "Library — Quick Guide",
+    body: "The Library is a cross-project template store. Save planets, systems, empires, origins, events, and arks here to reuse across any project without re-building from scratch.",
+    btn: "Let's go →"
+  },
+  {
+    sel: '[data-tab="lib"]', nav: 'lib', title: "Library Tab",
+    body: "Library snapshots persist independently of your active project — they are stored in your browser's localStorage under dedicated library keys, not in the project data.",
+    btn: "Next →", tipPos: 'right'
+  },
+  {
+    sel: '[data-libnav="empires"]', nav: 'lib', title: "Empires Section",
+    body: "The <strong>Empires</strong> section stores saved empire presets. Use <strong>⤓ Save Current Empire</strong> to snapshot your active empire, then <strong>◈ Load</strong> to restore it in any project.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: '[data-libnav="planets"]', nav: 'lib', title: "Planets Section",
+    body: "The <strong>Planets</strong> section stores planet templates from the Planet Builder. Use <strong>+ To System</strong> to drop a saved planet directly into the active system.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: '[data-libnav="templates"]', nav: 'lib', title: "Templates",
+    body: "The <strong>Templates</strong> section gives you a full empire template editor — define reusable empire archetypes with pre-set ethics, civics, and species that you can apply to any project.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: '#lib-save-empire', nav: 'lib', title: "Saving to Library",
+    body: "Use the <strong>Save</strong> buttons in each section to snapshot your current builder state. Each saved item can have a custom name and notes — useful for keeping track of variant builds.",
+    btn: "Done ✓", tipPos: 'below'
+  }
+];
+
+var GUIDE_STEPS_ARKS = [
+  {
+    sel: null, nav: 'arks', title: "Ark Builder — Quick Guide",
+    body: "Arks are the massive colony ships used by Nomadic empires (requires the <em>The Machine Age</em> or <em>Overlord</em> DLC). They export into the <code>prescripted_countries</code> effect block as <code>create_fleet</code> entries.",
+    btn: "Let's go →"
+  },
+  {
+    sel: '[data-tab="arks"]', nav: 'arks', title: "Ark Builder Tab",
+    body: "Arks are only relevant when your empire uses a Nomadic-type origin. The setup checklist on the left confirms whether your empire and Nomad system are configured correctly before you build.",
+    btn: "Next →", tipPos: 'right'
+  },
+  {
+    sel: '#ark-add-btn', nav: 'arks', title: "Add an Arkship",
+    body: "Click <strong>+ Add Arkship</strong> to create one. Most Nomadic empires start with 2–3 arks — a flagship, a colony ship, and optionally a warship. Each becomes a separate <code>create_fleet</code> block.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: null, nav: 'arks', title: "Configure the Ark",
+    body: "Click an ark card to open its editor. Set: <strong>Type</strong> (flagship, colony, warship, science, etc.), <strong>Tier</strong> (1–3 — controls hull size and starting component slots), and the <strong>Nomad System</strong> it spawns in (must be tagged <code>usage = nomad_init</code> in the System Builder).",
+    btn: "Next →"
+  },
+  {
+    sel: null, nav: 'arks', title: "Districts & Buildings",
+    body: "Assign starting districts (<code>add_district</code>) and buildings (<code>add_building</code>) to the ark. These populate the ark's colony immediately at game start — balance them against available job slots for the starting population.",
+    btn: "Next →"
+  },
+  {
+    sel: null, nav: 'arks', title: "Export & Package",
+    body: "Ark data is bundled into your empire's prescripted country file under <code>common/prescripted_countries/</code>. Use the Package tab to download the complete mod ZIP with all components included.",
+    btn: "Done ✓"
+  }
+];
+
+var GUIDE_STEPS_GOVSPEC = [
+  {
+    sel: null, nav: 'govspec', title: "Species & Gov — Quick Guide",
+    body: "This builder creates custom government and species content: civics, authorities, traits, ethics, ruler traits, council positions, edicts, policies, species classes, and pop factions. Each sub-tab exports to a different folder under <code>common/</code>.",
+    btn: "Let's go →"
+  },
+  {
+    sel: '[data-tab="govspec"]', nav: 'govspec', title: "Species & Gov Tab",
+    body: "All government and species customisation lives here, grouped by content type in the sub-tab bar. Use the tab bar at the top of the panel to switch sections.",
+    btn: "Next →", tipPos: 'right'
+  },
+  {
+    sel: '[data-gstab="civics"]', nav: 'govspec', title: "Civics",
+    body: "Custom civics export to <code>common/governments/civics/*.txt</code>. Set name, key (<code>civic_my_civic</code>), ethics requirements, allowed authorities, point cost, and modifiers. The <code>random_weight</code> affects AI likelihood of picking it.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: '[data-gstab="authority"]', nav: 'govspec', title: "Authorities",
+    body: "Custom authorities export to <code>common/governments/authorities/*.txt</code>. Define election type, term length, heir mechanics, council agenda support, and which ethics block the authority.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: '[data-gstab="traits"]', nav: 'govspec', title: "Species Traits",
+    body: "Species traits export to <code>common/traits/*.txt</code>. Set archetype (BIOLOGICAL, MACHINE, BOT, etc.), point cost (positive = cost, negative = flaw), and the species modifiers the trait grants.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: '[data-gstab="ethics"]', nav: 'govspec', title: "Ethics",
+    body: "Custom ethics export to <code>common/ethics/*.txt</code>. Set cost (1 = normal, 2 = fanatic), country modifiers, and the fanatic variant key if applicable. Ethics must not conflict with existing pairs.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: '[data-gstab="ruler_traits"]', nav: 'govspec', title: "Ruler & Councilor Traits",
+    body: "Ruler traits export to <code>common/traits/*.txt</code> with <code>leader_class = { ruler }</code>. Councilor traits add <code>councilor_modifier</code> blocks instead of standard modifiers.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: '[data-gstab="councilors"]', nav: 'govspec', title: "Gov Positions & Edicts",
+    body: "The remaining sub-tabs cover <strong>Gov Positions</strong> (<code>common/council_positions/</code>), <strong>Edicts</strong> (<code>common/edicts/</code>), <strong>Policies</strong> (<code>common/policies/</code>), <strong>Species Classes</strong> (<code>common/species_classes/</code>), and <strong>Pop Factions</strong> (<code>common/pop_factions/</code>).",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: null, nav: 'govspec', title: "Preview & Export",
+    body: "Each sub-tab has a <strong>Preview</strong> button to inspect the generated script. All Gov & Species content is exported to their respective <code>common/</code> subfolders in the mod ZIP from the Package tab.",
+    btn: "Done ✓"
+  }
+];
+
+var GUIDE_STEPS_IMPORT = [
+  {
+    sel: null, nav: 'import', title: "Import .txt — Quick Guide",
+    body: "The Import tool reverse-parses vanilla or modded Stellaris <code>.txt</code> files and loads their content directly into the relevant builder. Great for editing existing mods or learning from vanilla files.",
+    btn: "Let's go →"
+  },
+  {
+    sel: '[data-tab="import"]', nav: 'import', title: "Import Tab",
+    body: "Pick the file type matching what you want to import. Each type knows exactly which fields to extract and where to put them in the builder.",
+    btn: "Next →", tipPos: 'right'
+  },
+  {
+    sel: '[data-imp-type="system"]', nav: 'import', title: "System Initializer",
+    body: "Paste the contents of any <code>common/solar_system_initializers/*.txt</code> file. Each <code>*_init = { }</code> block becomes a separate system in your Systems project — planets, moons, deposits, and bypasses included.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: '[data-imp-type="empire"]', nav: 'import', title: "Prescripted Country",
+    body: "Paste a file from <code>common/prescripted_countries/*.txt</code>. Each country block imports as an empire — species, ethics, civics, authority, traits, and portrait all extracted where parseable.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: '[data-imp-type="event"]', nav: 'import', title: "Event File",
+    body: "Paste from <code>events/*.txt</code>. Country, planet, leader, and fleet events are extracted — trigger conditions, options, and chained event IDs are preserved where the parser can resolve them.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: '[data-imp-type="origin"]', nav: 'import', title: "Origin Definition",
+    body: "Paste from <code>common/governments/civics/*.txt</code>. Blocks with <code>is_origin = yes</code> are extracted as custom origins — ethics requirements, authority blocks, and flags are auto-populated.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: null, nav: 'import', title: "Paste, Parse & Import",
+    body: "After selecting a type, paste your file content into the text area (or drag-and-drop the file). The parser previews what it found. Select the entries you want, then click <strong>Import</strong> to add them to your active project.",
+    btn: "Done ✓", tip: "Localisation files can be pasted alongside to resolve display names and descriptions."
+  }
+];
+
+
+
 // ── OPEN / CLOSE ─────────────────────────────────────────────────────────────
 
 function openTour(){
+  _activeTourSteps = TOUR_STEPS;
+  tourState = { step: 0 };
+  _renderTour();
+}
+
+var GUIDE_STEPS_EXPORT = [
+  {
+    sel: null, nav: 'export', title: "Package & Export — Quick Guide",
+    body: "This tab bundles everything you've built into Stellaris-ready files. You can download individual files, a complete mod ZIP, or merge files into an existing mod. Three export modes control what gets included.",
+    btn: "Let's go →"
+  },
+  {
+    sel: '[data-tab="export"]', nav: 'export', title: "Package & Export Tab",
+    body: "The export tab reads your current project state — systems, empire, origins, events, arks — and generates the correct folder structure automatically. Nothing locks in until you download.",
+    btn: "Next →", tipPos: 'right'
+  },
+  {
+    sel: '[data-expmode="full"]', nav: 'export', title: "Export Mode — Standalone Mod",
+    body: "<strong>Standalone Mod</strong> generates a complete, self-contained mod with descriptor files (<code>.mod</code>) that the Paradox Launcher can register. Use this for a new mod you're releasing standalone.<br><br>The ZIP extracts to a folder you place directly in <code>Documents/Paradox Interactive/Stellaris/mod/</code>.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: '[data-expmode="system"]', nav: 'export', title: "Export Mode — System Files Only",
+    body: "<strong>System Files</strong> outputs only the system initializer and its localisation — no descriptor files. Use this to merge your custom systems into an existing mod.<br><br>Drop the files into your existing mod's <code>common/solar_system_initializers/</code> and <code>localisation/english/</code> folders.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: '[data-expmode="empire"]', nav: 'export', title: "Export Mode — Empire Files Only",
+    body: "<strong>Empire Files</strong> outputs only the prescripted country file. Use this when adding your empire to an existing mod.<br><br>The file goes in <code>prescripted_countries/</code> at the mod root level — <strong>not</strong> under <code>common/</code>. This is a common mistake that causes empires to not appear in the new-game screen.",
+    btn: "Next →", tipPos: 'below'
+  },
+  {
+    sel: '#mod-name', nav: 'export', title: "Mod Name & Version",
+    body: "The <strong>Mod Name</strong> is what the Paradox Launcher displays. It auto-fills from your empire name — update it if you want a distinct mod title.<br><br><strong>Version</strong> defaults to <code>1.0.0</code>. The launcher shows this in the mod list. Bump it when you release updates.",
+    btn: "Next →", tipPos: 'left'
+  },
+  {
+    sel: '#exp-checklist-sec', nav: 'export', title: "Pre-export Checklist",
+    body: "The checklist flags common issues before download: missing empire name, no home system set, ethics/civics count errors, and invalid mod name characters. All items should be green (✓) before downloading.<br><br>Red items will produce a mod that loads with errors or doesn't appear in Stellaris at all.",
+    btn: "Next →", tipPos: 'left'
+  },
+  {
+    sel: '#dl-zip', nav: 'export', title: "Download ZIP",
+    body: "Click <strong>Download ZIP</strong> to get the complete mod folder as a <code>.zip</code> file. Extract it so the mod folder (e.g. <code>my_mod/</code>) and the launcher <code>.mod</code> file sit directly inside <code>Documents/Paradox Interactive/Stellaris/mod/</code>.<br><br>Use <strong>⤓ Files</strong> to download individual files instead — useful when merging into an existing mod.",
+    btn: "Next →", tipPos: 'above'
+  },
+  {
+    sel: '#exp-folder-sec', nav: 'export', title: "Folder Structure",
+    body: "The <strong>Folder Structure</strong> section shows the exact paths of every generated file. Expand it to see where each file goes inside the mod. This matches what's inside the ZIP.<br><br>Key path rule: <code>prescripted_countries/</code> sits at the mod root, not under <code>common/</code>. Stellaris requires this exact layout to register the empire.",
+    btn: "Next →", tipPos: 'left'
+  },
+  {
+    sel: '#exp-gotchas-sec', nav: 'export', title: "Known Gotchas",
+    body: "Expand <strong>Known Gotchas</strong> to read the most common Stellaris modding mistakes: homeworld deposit stripping, DLC-gated planet classes, civic/ethics conflicts, and localisation key mismatches.<br><br>Read these before your first in-game test — they explain the majority of 'mod installed but nothing changed' situations.",
+    btn: "Next →", tipPos: 'left'
+  },
+  {
+    sel: null, nav: 'export', title: "Testing Your Mod",
+    body: "After installing the ZIP:<br>1. Open the Paradox Launcher → Mods tab<br>2. Enable your mod and click <strong>Play</strong><br>3. Start a new game → select your empire in the picker<br><br>If the empire doesn't appear, check: the <code>prescripted_countries/</code> folder is at the mod root (not under <code>common/</code>), and <code>spawn_enabled = yes</code> is in the country block.",
+    btn: "Done ✓"
+  }
+];
+
+function openGuide(module){
+  var map = {
+    systems:  GUIDE_STEPS_SYSTEMS,
+    planets:  GUIDE_STEPS_PLANETS,
+    empire:   GUIDE_STEPS_EMPIRE,
+    origins:  GUIDE_STEPS_ORIGINS,
+    events:   GUIDE_STEPS_EVENTS,
+    lib:      GUIDE_STEPS_LIBRARY,
+    library:  GUIDE_STEPS_LIBRARY,
+    arks:     GUIDE_STEPS_ARKS,
+    govspec:  GUIDE_STEPS_GOVSPEC,
+    import:   GUIDE_STEPS_IMPORT,
+    export:   GUIDE_STEPS_EXPORT
+  };
+  _activeTourSteps = map[module] || TOUR_STEPS;
   tourState = { step: 0 };
   _renderTour();
 }
@@ -22849,9 +23776,9 @@ function closeTour(){
 
 function _tourGoto(n){
   if(!tourState) return;
-  if(n >= TOUR_STEPS.length){ closeTour(); return; }
+  if(n >= _activeTourSteps.length){ closeTour(); return; }
   tourState.step = n;
-  var step = TOUR_STEPS[n];
+  var step = _activeTourSteps[n];
   // Auto-navigate tab if needed
   if(step.nav && S.tab !== step.nav){
     S.tab = step.nav;
@@ -22869,8 +23796,8 @@ function _tourGoto(n){
 
 function _renderTour(){
   if(!tourState) return;
-  var step   = TOUR_STEPS[tourState.step];
-  var total  = TOUR_STEPS.length;
+  var step   = _activeTourSteps[tourState.step];
+  var total  = _activeTourSteps.length;
   var cur    = tourState.step;
   var isLast = cur === total - 1;
 
