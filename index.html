@@ -456,6 +456,37 @@
   @keyframes pa-bob{0%,100%{transform:translateY(0);opacity:.5;}50%{transform:translateY(7px);opacity:1;}}
   @media (prefers-reduced-motion: reduce){*{animation:none!important;}}
 </style>
+<style id="pa-mobile-nav">
+  /* hidden checkbox that drives the pure-CSS menu */
+  .pa-menu-toggle{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;}
+  .pa-burger{display:none;}
+  @media (max-width:760px){
+    #pa-nav{padding:14px 18px !important;}
+    .pa-wordmark{display:none !important;}
+    .pa-burger{display:flex !important;flex-direction:column;justify-content:center;gap:6px;width:34px;height:34px;cursor:pointer;z-index:60;background:none;border:0;padding:0;}
+    .pa-burger span{display:block;width:26px;height:2px;background:#F2F0EB;border-radius:2px;transition:transform .3s ease,opacity .25s ease;}
+    #pa-links{
+      position:fixed !important;top:0;left:0;right:0;
+      flex-direction:column !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:26px !important;
+      padding:92px 24px 40px !important;
+      background:rgba(14,16,18,0.98);
+      border-bottom:1px solid rgba(110,113,118,0.28);
+      transform:translateY(-105%);
+      transition:transform .38s cubic-bezier(.4,0,.2,1);
+      z-index:55;
+    }
+    #pa-links a{font-size:13px !important;}
+    .pa-menu-toggle:checked ~ #pa-links{transform:translateY(0);}
+    .pa-menu-toggle:checked ~ .pa-burger span:nth-child(1){transform:translateY(8px) rotate(45deg);}
+    .pa-menu-toggle:checked ~ .pa-burger span:nth-child(2){opacity:0;}
+    .pa-menu-toggle:checked ~ .pa-burger span:nth-child(3){transform:translateY(-8px) rotate(-45deg);}
+    #pa-hero h1{white-space:normal !important;}
+    #pa-hero [data-accent]{letter-spacing:0.22em !important;line-height:1.7;}
+  }
+</style>
 </helmet>
 
 <div style="position:relative;width:100%;min-height:100vh;background:#0E1012;overflow-x:hidden;">
@@ -467,9 +498,11 @@
   <nav id="pa-nav" style="position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:18px clamp(20px,5vw,64px);border-bottom:1px solid transparent;background:transparent;transition:background .4s ease,border-color .4s ease;">
     <a href="#pa-hero" style="display:flex;align-items:center;gap:14px;text-decoration:none;">
       <img src="assets/pa-mark_25718e37b71d.png" alt="Proelium Artifex" style="height:34px;width:auto;display:block;">
-      <span style="font-family:'Cinzel',serif;font-weight:500;font-size:15px;letter-spacing:0.26em;color:#F2F0EB;">PROELIUM&nbsp;ARTIFEX</span>
+      <span class="pa-wordmark" style="font-family:'Cinzel',serif;font-weight:500;font-size:15px;letter-spacing:0.26em;color:#F2F0EB;">PROELIUM&nbsp;ARTIFEX</span>
     </a>
-    <div style="display:flex;align-items:center;gap:clamp(18px,2.6vw,40px);">
+    <input type="checkbox" id="pa-menu-toggle" class="pa-menu-toggle" aria-hidden="true">
+    <label for="pa-menu-toggle" class="pa-burger" aria-label="Toggle menu"><span></span><span></span><span></span></label>
+    <div id="pa-links" style="display:flex;align-items:center;gap:clamp(18px,2.6vw,40px);">
       <a href="consultancy.html" style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.2em;text-transform:uppercase;color:#9A9DA3;text-decoration:none;transition:color .25s;" style-hover="color:#F2F0EB;">Consultancy</a>
       <a href="gaming/" style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.2em;text-transform:uppercase;color:#9A9DA3;text-decoration:none;transition:color .25s;" style-hover="color:#F2F0EB;">Gaming</a>
       <a href="#pa-connect" style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.2em;text-transform:uppercase;color:#9A9DA3;text-decoration:none;transition:color .25s;" style-hover="color:#F2F0EB;">Connect</a>
@@ -485,7 +518,7 @@
 
     <div style="position:relative;z-index:3;text-align:center;padding:0 24px;max-width:920px;">
       <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.42em;text-transform:uppercase;color:#C9A76A;margin-bottom:22px;" data-accent="color">Software Studio &nbsp;·&nbsp; Delivery · Consultancy · Gaming</div>
-      <h1 style="font-family:'Cinzel',serif;font-weight:600;font-size:clamp(2.6rem,8vw,6.2rem);line-height:0.98;letter-spacing:0.06em;color:#F2F0EB;margin:0;">PROELIUM&nbsp;ARTIFEX</h1>
+      <h1 style="font-family:'Cinzel',serif;font-weight:600;font-size:clamp(2.6rem,8vw,6.2rem);line-height:0.98;letter-spacing:0.06em;color:#F2F0EB;margin:0;">PROELIUM ARTIFEX</h1>
       <div style="width:min(420px,72%);height:1px;background:linear-gradient(90deg,transparent,rgba(110,113,118,0.6),transparent);margin:26px auto 22px;"></div>
       <p style="font-family:'Cinzel',serif;font-weight:400;font-size:clamp(0.85rem,1.9vw,1.25rem);letter-spacing:0.34em;text-transform:uppercase;color:#C7C5BE;margin:0;">Crafting Systems. Building Worlds.</p>
       <p style="font-family:'Inter',sans-serif;font-weight:300;font-size:clamp(0.95rem,1.4vw,1.08rem);line-height:1.7;color:#9A9DA3;max-width:540px;margin:24px auto 0;">A studio that designs and delivers software — project management, solutions and consultancy — and a gaming workshop that mods, builds systems and crafts worlds. All with the precision of a drafting compass.</p>
