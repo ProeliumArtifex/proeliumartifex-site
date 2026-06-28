@@ -73,6 +73,10 @@
 
 
 
+
+
+
+
 *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
 /* ── Splash screen ── */
 #pa-splash{position:fixed;inset:0;z-index:99999;background:#06090f;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;transition:opacity .6s ease}
@@ -677,8 +681,16 @@ details.details-row[open]>.details-summary{color:var(--t1);border-left-color:var
 
 
 
+
+
+
+
 </style>
 <style>
+
+
+
+
 
 
 
@@ -724,7 +736,15 @@ details.details-row[open]>.details-summary{color:var(--t1);border-left-color:var
 
 
 
+
+
+
+
 </style>
+
+
+
+
 
 
 
@@ -1393,7 +1413,9 @@ const ETHIC_OPP={Authoritarian:"Egalitarian",Egalitarian:"Authoritarian",Xenophi
 function ethicPts(sel){return (sel||[]).reduce((n,x)=>n+(String(x).startsWith("Fanatic")?2:1),0);}
 function traitPts(sel){return (sel||[]).reduce((n,x)=>n+(TRAIT_COST[x]||0),0);}
 // Returns true if adding value v (of pill group a) is allowed under vanilla rules.
-function canAddPill(a,v,sel){
+// ctx (optional) — pass {authority, ethics} when calling for civics so the check
+// can gate against CIVIC_PREREQS as well as the 2-civic count limit.
+function canAddPill(a,v,sel,ctx={}){
   if(a==="ethics"){
     if(v==="Gestalt Consciousness") return sel.length===0;
     if(sel.includes("Gestalt Consciousness")) return false;
@@ -1408,9 +1430,92 @@ function canAddPill(a,v,sel){
     if(opp.some(o=>sel.includes(o))) return false;
     return traitPts(sel)+(TRAIT_COST[v]||0)<=2;
   }
-  if(a==="civics") return sel.length<2;
+  if(a==="civics"){
+    if(sel.length>=2) return false;
+    // Gate on CIVIC_PREREQS when empire context is available (authority + ethics).
+    // This keeps pill gating in sync with validate() and randomEmpire().
+    const pre=CIVIC_PREREQS&&CIVIC_PREREQS[v];
+    if(pre){
+      const {authority,ethics=[]} = ctx;
+      // Authority — hard block
+      if(pre.auth&&authority&&!pre.auth.includes(authority)) return false;
+      // ethics_any — must have at least one
+      if(pre.ethics_any&&ethics.length&&!pre.ethics_any.some(r=>ethics.includes(r))) return false;
+      // ethics_groups — AND-of-ORs: every group must be satisfied
+      if(pre.ethics_groups&&ethics.length&&!pre.ethics_groups.every(g=>g.some(r=>ethics.includes(r)))) return false;
+      // ethics_not — hard block
+      if(pre.ethics_not&&pre.ethics_not.some(b=>ethics.includes(b))) return false;
+      // civics_not — block if a conflicting civic is already selected
+      if(pre.civics_not&&pre.civics_not.some(bad=>sel.includes(bad))) return false;
+    }
+    return true;
+  }
   return sel.length<3;
 }
+
+// ── ORIGIN COMPATIBILITY RULES ────────────────────────────────────────────────
+// Single source of truth for origin requirements, auto-extracted from the actual
+// Stellaris game files (common/governments/civics/00_origins.txt -> each origin's
+// possible{} block). Consulted by: the empire builder (selection gating), the
+// randomiser (randomEmpire), and validate() (Package & Export error panel).
+// Only origins with hard authority/ethics/gestalt requirements are listed; any
+// origin not present here is compatible with every empire. To refresh after a game
+// update, re-run the origin-rules extractor against 00_origins.txt.
+const ORIGIN_RULES={
+  "Clone Army":{gestalt:"forbid"},
+  "Common Ground":{ethicsNot:["Fanatic Xenophobe","Xenophobe"]},
+  "Hegemon":{ethicsNot:["Egalitarian","Fanatic Egalitarian","Fanatic Xenophobe","Xenophobe"]},
+  "Legendary Leader":{authAny:["auth_dictatorial"]},
+  "Mechanists":{ethicsAny:["Fanatic Materialist","Materialist"], gestalt:"forbid"},
+  "Necrophage":{authNot:["auth_machine_intelligence"], ethicsNot:["Fanatic Egalitarian","Fanatic Xenophile","Xenophile"]},
+  "On the Shoulders of Giants":{gestalt:"forbid"},
+  "Overtuned":{authNot:["auth_machine_intelligence"]},
+  "Progenitor Hive":{authAny:["auth_hive_mind"], gestalt:"require"},
+  "Scion":{ethicsNot:["Fanatic Xenophobe"], gestalt:"forbid"},
+  "Syncretic Evolution":{gestalt:"forbid"},
+  "Tree of Life":{authAny:["auth_hive_mind"], gestalt:"require"},
+  "Broken Shackles":{ethicsNot:["Authoritarian","Fanatic Authoritarian","Fanatic Xenophobe","Xenophobe"], gestalt:"forbid"},
+  "Cosmic Dawn":{authNot:["auth_hive_mind"]},
+  "Cybernetic Creed":{ethicsAny:["Fanatic Spiritualist","Spiritualist"]},
+  "Endbringers":{ethicsNot:["Fanatic Pacifist","Pacifist"], gestalt:"forbid"},
+  "Fear of the Dark":{gestalt:"forbid"},
+  "Fringe Explorers":{ethicsNot:["Fanatic Pacifist","Pacifist"], gestalt:"forbid"},
+  "Fruitful Partnership":{authNot:["auth_machine_intelligence"], ethicsAny:["Fanatic Pacifist","Fanatic Xenophile","Gestalt Consciousness","Pacifist","Xenophile"]},
+  "In the Wilderness":{authAny:["auth_hive_mind"], gestalt:"require"},
+  "Knights of the Toxic God":{gestalt:"forbid"},
+  "Machine World":{authAny:["auth_machine_intelligence"], gestalt:"require"},
+  "Payback":{gestalt:"forbid"},
+  "Shroud-Forged":{authAny:["auth_machine_intelligence"], gestalt:"require"},
+  "Shroudwalker Enclave":{ethicsAny:["Fanatic Spiritualist","Spiritualist"]},
+  "Synthetic Fertility":{ethicsNot:["Fanatic Spiritualist","Spiritualist"], gestalt:"forbid"},
+  "Unplugged":{ethicsAny:["Fanatic Militarist","Militarist"], ethicsNot:["Fanatic Spiritualist","Fanatic Xenophile"]},
+  "Heirs of the Khan":{authAny:["auth_dictatorial","auth_imperial","auth_oligarchic"], ethicsAny:["Fanatic Militarist","Militarist"]},
+  "Forever Cruise":{ethicsNot:["Fanatic Xenophobe","Xenophobe"]},
+  "The Sacred Path":{ethicsAny:["Fanatic Spiritualist","Spiritualist"]}
+};
+const _ORIGIN_AUTHL={auth_democratic:"Democratic",auth_oligarchic:"Oligarchic",auth_dictatorial:"Dictatorial",auth_imperial:"Imperial",auth_corporate:"Corporate",auth_hive_mind:"Hive Mind",auth_machine_intelligence:"Machine Intelligence"};
+// Returns an array of plain-English reasons empire e's ORIGIN is incompatible with
+// its authority/ethics. Empty array = compatible. Used everywhere origin validity matters.
+function originRuleIssues(e){
+  if(!e||!e.origin) return [];
+  const r=ORIGIN_RULES[e.origin]; if(!r) return [];
+  const auth=e.authority||"auth_democratic";
+  const eth=Array.isArray(e.ethics)?e.ethics:[];
+  const isGestalt=auth==="auth_hive_mind"||auth==="auth_machine_intelligence"||eth.includes("Gestalt Consciousness");
+  const out=[];
+  if(r.gestalt==="forbid"&&isGestalt) out.push(e.origin+" can't be used by a Gestalt Consciousness empire.");
+  if(r.gestalt==="require"&&!isGestalt) out.push(e.origin+" requires a Gestalt Consciousness empire (Hive Mind or Machine Intelligence).");
+  if(r.authAny&&r.authAny.length&&!r.authAny.includes(auth)) out.push(e.origin+" requires "+r.authAny.map(a=>_ORIGIN_AUTHL[a]||a).join(" or ")+" authority.");
+  if(r.authNot&&r.authNot.includes(auth)) out.push(e.origin+" can't be used with "+(_ORIGIN_AUTHL[auth]||auth)+" authority.");
+  if(r.ethicsAny&&r.ethicsAny.length&&!r.ethicsAny.some(x=>eth.includes(x))) out.push(e.origin+" requires one of these ethics: "+r.ethicsAny.join(", ")+".");
+  if(r.ethicsNot&&r.ethicsNot.length){ const bad=r.ethicsNot.filter(x=>eth.includes(x)); if(bad.length) out.push(e.origin+" is incompatible with: "+bad.join(", ")+"."); }
+  return out;
+}
+// True if originName would be valid for empire e (same authority/ethics, swapped origin).
+function originAllowed(originName,e){
+  return originRuleIssues({authority:e&&e.authority,ethics:e&&e.ethics,origin:originName}).length===0;
+}
+
 function secSpeciesCompatible(e){
   return e.origin==="Syncretic Evolution"||e.origin==="Necrophage"||
     (e.authority==="auth_machine_intelligence"&&(e.civics||[]).some(c=>c==="Driven Assimilator"||c==="Rogue Servitor"));
@@ -1485,6 +1590,170 @@ const ORIGINS=[
   "Void Dwellers (Machines)", // Aquatics + Synthetic Dawn
   // ── Nomads DLC (4.4) ─────────────────────────────────────────────────────
   "Voidfarers","Heirs of the Khan","Forever Cruise","The Sacred Path"];
+// ── CIVIC PREREQUISITE RULES ─────────────────────────────────────────────────
+// Single source of truth for civic/authority/ethics requirements, verified against
+// Stellaris 4.x common/governments/civics/. Consulted by: the empire builder
+// (selection gating + inline warnings), validate() (Package & Export panel), and
+// randomEmpire() (civic pool filtering). To update after a game patch, edit here
+// and both callers automatically pick up the change.
+// Fields:
+//   auth        — must have one of these authorities (error if not)
+//   ethics_any  — must have at least one of these ethics (warning if not)
+//   ethics_groups — array of groups; must have ≥1 from EACH group (AND-of-ORs, warning)
+//   ethics_not  — must NOT have any of these (error if violated)
+//   origins_not — must NOT have this origin (error if violated)
+//   civics_not  — must NOT combine with these other civics (error if violated)
+//   note        — message fragment used in error/warning text
+const CIVIC_PREREQS={
+  // ── Auth + Ethics ──────────────────────────────────────────────────────
+  'Imperial Cult':        {auth:['auth_imperial'],
+                           ethics_groups:[['Authoritarian','Fanatic Authoritarian'],['Spiritualist','Fanatic Spiritualist']],
+                           note:'requires Imperial authority, Authoritarian and Spiritualist ethics'},
+  'Exalted Priesthood':   {auth:['auth_oligarchic','auth_dictatorial'],
+                           ethics_any:['Spiritualist','Fanatic Spiritualist'],
+                           note:'requires Oligarchic or Dictatorial authority and Spiritualist ethics'},
+  'Aristocratic Elite':   {auth:['auth_oligarchic','auth_imperial'],
+                           ethics_not:['Egalitarian','Fanatic Egalitarian'],
+                           note:'requires Oligarchic or Imperial authority; incompatible with Egalitarian'},
+  'Beacon of Liberty':    {auth:['auth_democratic'],
+                           ethics_any:['Egalitarian','Fanatic Egalitarian'],
+                           ethics_not:['Xenophobe','Fanatic Xenophobe'],
+                           civics_not:['Crusader Spirit'],
+                           note:'requires Democratic authority and Egalitarian; incompatible with Xenophobe and Crusader Spirit'},
+  'Citizen Service':      {auth:['auth_democratic','auth_oligarchic'],
+                           ethics_any:['Militarist','Fanatic Militarist'],
+                           ethics_not:['Fanatic Xenophile'],
+                           note:'requires Democratic or Oligarchic authority and Militarist; incompatible with Fanatic Xenophile'},
+  'Corporate Dominion':   {auth:['auth_oligarchic'],
+                           ethics_not:['Xenophobe','Fanatic Xenophobe'],
+                           note:'requires Oligarchic authority; incompatible with Xenophobe'},
+  'Feudal Realm':         {auth:['auth_imperial'],
+                           note:'requires Imperial authority'},
+  'Meritocracy':          {auth:['auth_democratic','auth_oligarchic'],
+                           note:'requires Democratic or Oligarchic authority'},
+  'Parliamentary System': {auth:['auth_democratic'],
+                           note:'requires Democratic authority'},
+  'Philosopher King':     {auth:['auth_dictatorial','auth_imperial'],
+                           note:'requires Dictatorial or Imperial authority'},
+  'Shadow Council':       {auth:['auth_democratic','auth_oligarchic','auth_dictatorial'],
+                           note:'incompatible with Imperial and Corporate authority'},
+  // ── Ethics only ────────────────────────────────────────────────────────
+  'Agrarian Idyll':       {ethics_any:['Pacifist','Fanatic Pacifist'],
+                           origins_not:['Post-Apocalyptic','Post-Apocalyptic (Machines)','Shattered Ring','Void Dwellers','Void Dwellers (Machines)','Remnants'],
+                           civics_not:['Dystopian Society','Tankbound','Relentless Industrialists'],
+                           note:'requires Pacifist; incompatible with certain origins and civics'},
+  'Ascensionists':        {ethics_any:['Spiritualist','Fanatic Spiritualist'],
+                           note:'requires Spiritualist'},
+  'Barbaric Despoilers':  {ethics_groups:[['Militarist','Fanatic Militarist'],['Authoritarian','Fanatic Authoritarian','Xenophobe','Fanatic Xenophobe']],
+                           ethics_not:['Xenophile','Fanatic Xenophile'],
+                           civics_not:['Fanatic Purifiers','Scorched Earth'],
+                           origins_not:['Common Ground'],
+                           note:'requires Militarist and Authoritarian or Xenophobe; incompatible with Xenophile, Common Ground and certain civics'},
+  'Chosen':               {ethics_any:['Spiritualist','Fanatic Spiritualist'],
+                           origins_not:['Cybernetic Creed','Synthetic Fertility','Evolutionary Predators','Unplugged','Endbringers'],
+                           note:'requires Spiritualist; incompatible with certain origins'},
+  'Corvée System':        {ethics_not:['Egalitarian','Fanatic Egalitarian'],
+                           civics_not:['Free Haven'],
+                           note:'incompatible with Egalitarian and Free Haven'},
+  'Criminal Heritage':    {auth:['auth_corporate'],
+                           note:'requires Corporate authority'},
+  'Crowdsourcing':        {ethics_any:['Fanatic Authoritarian','Fanatic Egalitarian','Fanatic Xenophobe','Fanatic Xenophile','Fanatic Militarist','Fanatic Pacifist','Fanatic Spiritualist','Fanatic Materialist'],
+                           note:'requires any Fanatic ethic'},
+  'Crusader Spirit':      {ethics_any:['Militarist','Fanatic Militarist','Authoritarian','Fanatic Authoritarian','Spiritualist','Fanatic Spiritualist'],
+                           ethics_not:['Pacifist','Fanatic Pacifist'],
+                           civics_not:['Fanatic Purifiers','Scorched Earth','Beacon of Liberty'],
+                           note:'requires Militarist, Authoritarian or Spiritualist; incompatible with Pacifist and certain civics'},
+  'Death Cult':           {ethics_any:['Spiritualist','Fanatic Spiritualist'],
+                           origins_not:['Necrophage'],
+                           note:'requires Spiritualist; incompatible with Necrophage origin'},
+  'Death Cult Corporate': {ethics_any:['Spiritualist','Fanatic Spiritualist'],
+                           origins_not:['Necrophage'],
+                           note:'requires Spiritualist; incompatible with Necrophage origin'},
+  'Dimensional Worship':  {ethics_any:['Spiritualist','Fanatic Spiritualist'],
+                           note:'requires Spiritualist'},
+  'Distinguished Admiralty':{ethics_any:['Militarist','Fanatic Militarist'],
+                           note:'requires Militarist'},
+  'Dystopian Society':    {ethics_any:['Fanatic Authoritarian'],
+                           civics_not:['Agrarian Idyll','Warrior Culture'],
+                           note:'requires Fanatic Authoritarian'},
+  'Environmental Architects':{origins_not:['Remnants','Post-Apocalyptic','Post-Apocalyptic (Machines)','Void Dwellers','Void Dwellers (Machines)','Shattered Ring','Unplugged'],
+                           note:'incompatible with certain origins'},
+  'Fanatic Purifiers':    {ethics_any:['Fanatic Xenophobe'],
+                           ethics_groups:[['Militarist','Fanatic Militarist','Spiritualist','Fanatic Spiritualist']],
+                           civics_not:['Barbaric Despoilers','Pompous Purists','Crusader Spirit','Selective Kinship'],
+                           origins_not:['Syncretic Evolution','Common Ground','Hegemon','Knights of the Toxic God','Broken Shackles'],
+                           note:'requires Fanatic Xenophobe and Militarist or Spiritualist; incompatible with certain civics and origins'},
+  'Free Haven':           {ethics_any:['Xenophile','Fanatic Xenophile'],
+                           civics_not:['Corvée System'],
+                           note:'requires Xenophile; incompatible with Corvée System'},
+  'Guided Sapience':      {ethics_any:['Xenophobe','Fanatic Xenophobe'],
+                           origins_not:['Life Seeded','Syncretic Evolution','Unplugged'],
+                           note:'requires Xenophobe; incompatible with certain origins'},
+  'Idealistic Foundation':{ethics_any:['Egalitarian','Fanatic Egalitarian'],
+                           note:'requires Egalitarian'},
+  'Idyllic Bloom':        {origins_not:['Void Dwellers','Void Dwellers (Machines)','Evolutionary Predators','Unplugged'],
+                           note:'incompatible with certain origins'},
+  'Inwards Perfection':   {ethics_groups:[['Pacifist','Fanatic Pacifist'],['Xenophobe','Fanatic Xenophobe']],
+                           origins_not:['Common Ground','Hegemon','Fear of the Dark'],
+                           note:'requires Pacifist and Xenophobe; incompatible with Common Ground, Hegemon and Fear of the Dark'},
+  'Machine Anglers':      {origins_not:['Post-Apocalyptic (Machines)','Shattered Ring','Void Dwellers (Machines)'],
+                           note:'incompatible with certain origins'},
+  'Nationalistic Zeal':   {ethics_any:['Militarist','Fanatic Militarist'],
+                           note:'requires Militarist'},
+  'Natural Design':       {origins_not:['Clone Army','Overtuned','Shroudwalker Enclave','Cybernetic Creed','Synthetic Fertility','Evolutionary Predators','Unplugged','Endbringers'],
+                           note:'incompatible with certain origins'},
+  'Police State':         {ethics_not:['Fanatic Egalitarian'],
+                           civics_not:['Civil Education'],
+                           note:'incompatible with Fanatic Egalitarian and Civil Education'},
+  'Pompous Purists':      {ethics_any:['Xenophobe','Fanatic Xenophobe'],
+                           origins_not:['Scion'],
+                           civics_not:['Fanatic Purifiers','Scorched Earth'],
+                           note:'requires Xenophobe; incompatible with Scion origin and certain civics'},
+  'Pyrolatry':            {ethics_any:['Spiritualist','Fanatic Spiritualist'],
+                           origins_not:['Cybernetic Creed','Ocean Paradise'],
+                           note:'requires Spiritualist; incompatible with Cybernetic Creed and Ocean Paradise'},
+  'Relentless Industrialists':{ethics_any:['Materialist','Fanatic Materialist'],
+                           origins_not:['Life Seeded'],
+                           note:'requires Materialist; incompatible with Life Seeded origin'},
+  'Scorched Earth':       {ethics_any:['Xenophobe','Fanatic Xenophobe'],
+                           ethics_not:['Pacifist','Fanatic Pacifist'],
+                           civics_not:['Barbaric Despoilers','Pompous Purists','Crusader Spirit','Selective Kinship','Fanatic Purifiers','Death Cult','Secret Societies','Diplomatic Corps','Memorialist','Void Reavers','Sovereign Guardianship'],
+                           note:'requires Xenophobe; incompatible with Pacifist and many civics'},
+  'Secret Societies':     {origins_not:['Broken Shackles','Cybernetic Creed','Unplugged'],
+                           civics_not:['Scorched Earth'],
+                           note:'incompatible with certain origins and Scorched Earth'},
+  'Selective Kinship':    {ethics_any:['Xenophile','Fanatic Xenophile','Fanatic Egalitarian'],
+                           origins_not:['Broken Shackles'],
+                           civics_not:['Fanatic Purifiers','Scorched Earth'],
+                           note:'requires Xenophile or Fanatic Egalitarian; incompatible with Broken Shackles and certain civics'},
+  'Shared Burden':        {ethics_any:['Fanatic Egalitarian'],
+                           ethics_not:['Xenophobe','Fanatic Xenophobe'],
+                           civics_not:['Technocracy','Pleasure Seekers'],
+                           note:'requires Fanatic Egalitarian; incompatible with Xenophobe, Technocracy and Pleasure Seekers'},
+  'Slaver Guilds':        {ethics_any:['Authoritarian','Fanatic Authoritarian'],
+                           note:'requires Authoritarian'},
+  'Sovereign Guardianship':{ethics_any:['Militarist','Fanatic Militarist'],
+                           origins_not:['Fear of the Dark','Payback','Broken Shackles'],
+                           note:'requires Militarist; incompatible with Fear of the Dark, Payback and Broken Shackles'},
+  'Superstitious Beliefs':{ethics_any:['Spiritualist','Fanatic Spiritualist'],
+                           origins_not:['Cybernetic Creed'],
+                           note:'requires Spiritualist; incompatible with Cybernetic Creed'},
+  'Technocracy':          {ethics_any:['Materialist','Fanatic Materialist'],
+                           civics_not:['Shared Burden'],
+                           note:'requires Materialist; incompatible with Shared Burden'},
+  'Twisted Experimenters':{ethics_any:['Authoritarian','Fanatic Authoritarian','Xenophobe','Fanatic Xenophobe'],
+                           note:'requires Authoritarian or Xenophobe'},
+  'Void Reavers':         {ethics_groups:[['Militarist','Fanatic Militarist'],['Xenophile','Fanatic Xenophile']],
+                           origins_not:['Forever Cruise'],
+                           civics_not:['Scorched Earth'],
+                           note:'requires Militarist and Xenophile; incompatible with Forever Cruise and Scorched Earth'},
+  'Warrior Culture':      {ethics_any:['Militarist','Fanatic Militarist'],
+                           civics_not:['Dystopian Society','Pleasure Seekers'],
+                           note:'requires Militarist; incompatible with Dystopian Society and Pleasure Seekers'},
+  'Anglers':              {origins_not:['Post-Apocalyptic','Shattered Ring','Void Dwellers'],
+                           note:'incompatible with Post-Apocalyptic, Shattered Ring and Void Dwellers origins'},
+};
+
 /*
 === APP COMPENDIUM (AUTO-GENERATED) ===
 File    : 02_help-data.js
@@ -1700,6 +1969,21 @@ const CHANGELOG = [
     "Packages now pull live data from each module's active project when no explicit pin is set. The Package panel shows all seven module dropdowns including Gov & Species. Five missing export keys (anomalies, special projects, archaeology, astral rifts, arks) were added to the swap layer so assembled data reaches the zip generator cleanly.",
     "Every module's project badge now displays the area name alongside the project name, making it immediately clear that Systems, Empire, Origins, Events, Library, Arks and Gov & Species each maintain independent project stores.",
     "Detailed walkthroughs added under Help → Builder Guides for all seven builder areas. The home page links to the guides.",
+  ]},
+  {v:"0.37s", date:"2026-06-28", milestone:false, notes:[
+    "[Empire][Fix] AUTHORITY CHANGE NOW UPDATES CIVIC PILLS: changing authority on the desktop empire builder was saving the new value but not re-rendering — so civic pills stayed showing the old pool and old grey-out state until something else triggered a re-render. Added _reEmp() to the desktop e-auth change handler. Mobile already called _renderMobEmpire() on authority change and was unaffected.",
+  ]},
+  {v:"0.37r", date:"2026-06-28", milestone:false, notes:[
+    "[Empire][Fix] CIVIC PILL GATING: the empire builder now greys out civic pills that are incompatible with the current authority and ethics — not just when 2 civics are already selected. canAddPill() for civics now reads from the shared CIVIC_PREREQS database (02_data.js) and checks auth, ethics_any, ethics_groups, ethics_not, and civics_not against the current empire state. The empire context (authority + ethics) is passed through mkPills() at both desktop and mobile render sites. This means, for example, Fanatic Purifiers is greyed unless you have Fanatic Xenophobe; Inwards Perfection is greyed unless you have both Pacifist and Xenophobe; authority-locked civics (Feudal Realm, Parliamentary System, etc.) are only selectable under their required authority. Modded Game override still applies.",
+  ]},
+  {v:"0.37q", date:"2026-06-28", milestone:false, notes:[
+    "[Randomiser][Fix] CIVIC PREREQS NOW SHARED: the randomEmpire() civic filter was using a stale inline _CP table (~35 entries, no ethics_groups/civics_not support) that had drifted from the richer CIVIC_PREREQS used by validate(). CIVIC_PREREQS is now a module-level const in 02_data.js — a single source of truth consulted by validate(), randomEmpire(), and the empire builder UI. The randomiser now correctly applies ethics_groups (AND-of-ORs, e.g. Inwards Perfection requires both Pacifist and Xenophobe, not just any non-Xenophile) and runs a deconfliction pass after selection to remove mutually incompatible civic pairs (civics_not). Any future civic additions or rule changes only need to be made in one place.",
+  ]},
+  {v:"0.37p", date:"2026-06-28", milestone:false, notes:[
+    "[Rules][New] ORIGIN COMPATIBILITY DATABASE: added ORIGIN_RULES, a single source-of-truth table of origin requirements (authority, ethics, gestalt) auto-extracted from the actual game files (common/governments/civics/00_origins.txt -> each origin's possible{} block). 30 constrained origins encoded; unconstrained origins are compatible with everything.",
+    "[Randomiser][Fix] Random Empire no longer generates empires the game rejects: origin selection is now filtered through ORIGIN_RULES against the generated authority/ethics, so combinations like Heirs of the Khan without Militarist or the right authority can never be produced.",
+    "[Empire][New] ORIGIN SELECTION GATING: incompatible origins are greyed out in the Empire builder (desktop and mobile) with a tooltip explaining the requirement; clicking one is blocked unless Settings -> Modded Game is on (same pattern as ethics/civics/traits limits).",
+    "[Validation][New] The Package & Export validation panel now reports an incompatible origin as an error (warning under Modded Game), e.g. 'Heirs of the Khan requires Militarist; requires Oligarchic/Dictatorial/Imperial authority.'",
   ]},
   {v:"0.37o", date:"2026-06-28", milestone:false, notes:[
     "[Guide][Fix] GUIDE SPOTLIGHT OFF-SCREEN: the tour positioned its spotlight at each target's coordinates but never scrolled the target into view. On long builder pages (e.g. Empire) sections like Ethics and Traits sit below the fold — and Species ends up above it once you have scrolled down — so the spotlight box was drawn outside the visible area and appeared not to highlight. The tour now scrolls each target to the centre of its scrolling pane before drawing the spotlight. Applies to every guided tour.",
@@ -6331,6 +6615,18 @@ function validate(){
     if(ha&&hb) errs.push(V("Empire",eName,"Ethics",`Opposing ethics: ${a} and ${b} cannot coexist.`));
   });
 
+  // ── ORIGIN COMPATIBILITY ───────────────────────────────────────────────────
+  // Uses the shared ORIGIN_RULES database (extracted from the game files). Flags an
+  // origin that the game would reject for this empire's authority/ethics (e.g. Heirs
+  // of the Khan without Militarist or the right authority). Modded Game downgrades to a warning.
+  if(typeof originRuleIssues==="function"){
+    const _oIssues=originRuleIssues(e);
+    if(_oIssues.length){
+      const _om=S.settings?.moddedGame||false;
+      _oIssues.forEach(msg=>{ (_om?warns:errs).push(V("Empire",eName,"Origin",msg)); });
+    }
+  }
+
   // Ethics point budget
   let ethicPoints=0;
   e.ethics.forEach(eth=>{
@@ -6540,164 +6836,9 @@ function validate(){
   });
 
   // ── CIVIC / AUTHORITY CONSISTENCY ─────────────────────────────────────────
-  // Civic prerequisites — verified against Stellaris 4.x common/governments/civics/
-  // Fields:
-  //   auth        — must have one of these authorities (error if not)
-  //   ethics_any  — must have at least one of these ethics (warning if not)
-  //   ethics_groups — array of groups; must have ≥1 from EACH group (AND-of-ORs, warning)
-  //   ethics_not  — must NOT have any of these (error if violated)
-  //   origins_not — must NOT have this origin (error if violated)
-  //   civics_not  — must NOT combine with these other civics (error if violated)
-  //   note        — message fragment used in error/warning text
-  const CIVIC_PREREQS={
-    // ── Auth + Ethics ──────────────────────────────────────────────────────
-    'Imperial Cult':        {auth:['auth_imperial'],
-                             ethics_groups:[['Authoritarian','Fanatic Authoritarian'],['Spiritualist','Fanatic Spiritualist']],
-                             note:'requires Imperial authority, Authoritarian and Spiritualist ethics'},
-    'Exalted Priesthood':   {auth:['auth_oligarchic','auth_dictatorial'],
-                             ethics_any:['Spiritualist','Fanatic Spiritualist'],
-                             note:'requires Oligarchic or Dictatorial authority and Spiritualist ethics'},
-    'Aristocratic Elite':   {auth:['auth_oligarchic','auth_imperial'],
-                             ethics_not:['Egalitarian','Fanatic Egalitarian'],
-                             note:'requires Oligarchic or Imperial authority; incompatible with Egalitarian'},
-    'Beacon of Liberty':    {auth:['auth_democratic'],
-                             ethics_any:['Egalitarian','Fanatic Egalitarian'],
-                             ethics_not:['Xenophobe','Fanatic Xenophobe'],
-                             civics_not:['Crusader Spirit'],
-                             note:'requires Democratic authority and Egalitarian; incompatible with Xenophobe and Crusader Spirit'},
-    'Citizen Service':      {auth:['auth_democratic','auth_oligarchic'],
-                             ethics_any:['Militarist','Fanatic Militarist'],
-                             ethics_not:['Fanatic Xenophile'],
-                             note:'requires Democratic or Oligarchic authority and Militarist; incompatible with Fanatic Xenophile'},
-    'Corporate Dominion':   {auth:['auth_oligarchic'],
-                             ethics_not:['Xenophobe','Fanatic Xenophobe'],
-                             note:'requires Oligarchic authority; incompatible with Xenophobe'},
-    'Feudal Realm':         {auth:['auth_imperial'],
-                             note:'requires Imperial authority'},
-    'Meritocracy':          {auth:['auth_democratic','auth_oligarchic'],
-                             note:'requires Democratic or Oligarchic authority'},
-    'Parliamentary System': {auth:['auth_democratic'],
-                             note:'requires Democratic authority'},
-    'Philosopher King':     {auth:['auth_dictatorial','auth_imperial'],
-                             note:'requires Dictatorial or Imperial authority'},
-    'Shadow Council':       {auth:['auth_democratic','auth_oligarchic','auth_dictatorial'],
-                             note:'incompatible with Imperial and Corporate authority'},
-    // ── Ethics only ────────────────────────────────────────────────────────
-    'Agrarian Idyll':       {ethics_any:['Pacifist','Fanatic Pacifist'],
-                             origins_not:['Post-Apocalyptic','Post-Apocalyptic (Machines)','Shattered Ring','Void Dwellers','Void Dwellers (Machines)','Remnants'],
-                             civics_not:['Dystopian Society','Tankbound','Relentless Industrialists'],
-                             note:'requires Pacifist; incompatible with certain origins and civics'},
-    'Ascensionists':        {ethics_any:['Spiritualist','Fanatic Spiritualist'],
-                             note:'requires Spiritualist'},
-    'Barbaric Despoilers':  {ethics_groups:[['Militarist','Fanatic Militarist'],['Authoritarian','Fanatic Authoritarian','Xenophobe','Fanatic Xenophobe']],
-                             ethics_not:['Xenophile','Fanatic Xenophile'],
-                             civics_not:['Fanatic Purifiers','Scorched Earth'],
-                             origins_not:['Common Ground'],
-                             note:'requires Militarist and Authoritarian or Xenophobe; incompatible with Xenophile, Common Ground and certain civics'},
-    'Chosen':               {ethics_any:['Spiritualist','Fanatic Spiritualist'],
-                             origins_not:['Cybernetic Creed','Synthetic Fertility','Evolutionary Predators','Unplugged','Endbringers'],
-                             note:'requires Spiritualist; incompatible with certain origins'},
-    'Corvée System':        {ethics_not:['Egalitarian','Fanatic Egalitarian'],
-                             civics_not:['Free Haven'],
-                             note:'incompatible with Egalitarian and Free Haven'},
-    'Criminal Heritage':    {auth:['auth_corporate'],
-                             note:'requires Corporate authority'},
-    'Crowdsourcing':        {ethics_any:['Fanatic Authoritarian','Fanatic Egalitarian','Fanatic Xenophobe','Fanatic Xenophile','Fanatic Militarist','Fanatic Pacifist','Fanatic Spiritualist','Fanatic Materialist'],
-                             note:'requires any Fanatic ethic'},
-    'Crusader Spirit':      {ethics_any:['Militarist','Fanatic Militarist','Authoritarian','Fanatic Authoritarian','Spiritualist','Fanatic Spiritualist'],
-                             ethics_not:['Pacifist','Fanatic Pacifist'],
-                             civics_not:['Fanatic Purifiers','Scorched Earth','Beacon of Liberty'],
-                             note:'requires Militarist, Authoritarian or Spiritualist; incompatible with Pacifist and certain civics'},
-    'Death Cult':           {ethics_any:['Spiritualist','Fanatic Spiritualist'],
-                             origins_not:['Necrophage'],
-                             note:'requires Spiritualist; incompatible with Necrophage origin'},
-    'Death Cult Corporate': {ethics_any:['Spiritualist','Fanatic Spiritualist'],
-                             origins_not:['Necrophage'],
-                             note:'requires Spiritualist; incompatible with Necrophage origin'},
-    'Dimensional Worship':  {ethics_any:['Spiritualist','Fanatic Spiritualist'],
-                             note:'requires Spiritualist'},
-    'Distinguished Admiralty':{ethics_any:['Militarist','Fanatic Militarist'],
-                             note:'requires Militarist'},
-    'Dystopian Society':    {ethics_any:['Fanatic Authoritarian'],
-                             civics_not:['Agrarian Idyll','Warrior Culture'],
-                             note:'requires Fanatic Authoritarian'},
-    'Environmental Architects':{origins_not:['Remnants','Post-Apocalyptic','Post-Apocalyptic (Machines)','Void Dwellers','Void Dwellers (Machines)','Shattered Ring','Unplugged'],
-                             note:'incompatible with certain origins'},
-    'Fanatic Purifiers':    {ethics_any:['Fanatic Xenophobe'],
-                             ethics_groups:[['Militarist','Fanatic Militarist','Spiritualist','Fanatic Spiritualist']],
-                             civics_not:['Barbaric Despoilers','Pompous Purists','Crusader Spirit','Selective Kinship'],
-                             origins_not:['Syncretic Evolution','Common Ground','Hegemon','Knights of the Toxic God','Broken Shackles'],
-                             note:'requires Fanatic Xenophobe and Militarist or Spiritualist; incompatible with certain civics and origins'},
-    'Free Haven':           {ethics_any:['Xenophile','Fanatic Xenophile'],
-                             civics_not:['Corvée System'],
-                             note:'requires Xenophile; incompatible with Corvée System'},
-    'Guided Sapience':      {ethics_any:['Xenophobe','Fanatic Xenophobe'],
-                             origins_not:['Life Seeded','Syncretic Evolution','Unplugged'],
-                             note:'requires Xenophobe; incompatible with certain origins'},
-    'Idealistic Foundation':{ethics_any:['Egalitarian','Fanatic Egalitarian'],
-                             note:'requires Egalitarian'},
-    'Idyllic Bloom':        {origins_not:['Void Dwellers','Void Dwellers (Machines)','Evolutionary Predators','Unplugged'],
-                             note:'incompatible with certain origins'},
-    'Inwards Perfection':   {ethics_groups:[['Pacifist','Fanatic Pacifist'],['Xenophobe','Fanatic Xenophobe']],
-                             origins_not:['Common Ground','Hegemon','Fear of the Dark'],
-                             note:'requires Pacifist and Xenophobe; incompatible with Common Ground, Hegemon and Fear of the Dark'},
-    'Machine Anglers':      {origins_not:['Post-Apocalyptic (Machines)','Shattered Ring','Void Dwellers (Machines)'],
-                             note:'incompatible with certain origins'},
-    'Nationalistic Zeal':   {ethics_any:['Militarist','Fanatic Militarist'],
-                             note:'requires Militarist'},
-    'Natural Design':       {origins_not:['Clone Army','Overtuned','Shroudwalker Enclave','Cybernetic Creed','Synthetic Fertility','Evolutionary Predators','Unplugged','Endbringers'],
-                             note:'incompatible with certain origins'},
-    'Police State':         {ethics_not:['Fanatic Egalitarian'],
-                             civics_not:['Civil Education'],
-                             note:'incompatible with Fanatic Egalitarian and Civil Education'},
-    'Pompous Purists':      {ethics_any:['Xenophobe','Fanatic Xenophobe'],
-                             origins_not:['Scion'],
-                             civics_not:['Fanatic Purifiers','Scorched Earth'],
-                             note:'requires Xenophobe; incompatible with Scion origin and certain civics'},
-    'Pyrolatry':            {ethics_any:['Spiritualist','Fanatic Spiritualist'],
-                             origins_not:['Cybernetic Creed','Ocean Paradise'],
-                             note:'requires Spiritualist; incompatible with Cybernetic Creed and Ocean Paradise'},
-    'Relentless Industrialists':{ethics_any:['Materialist','Fanatic Materialist'],
-                             origins_not:['Life Seeded'],
-                             note:'requires Materialist; incompatible with Life Seeded origin'},
-    'Scorched Earth':       {ethics_any:['Xenophobe','Fanatic Xenophobe'],
-                             ethics_not:['Pacifist','Fanatic Pacifist'],
-                             civics_not:['Barbaric Despoilers','Pompous Purists','Crusader Spirit','Selective Kinship','Fanatic Purifiers','Death Cult','Secret Societies','Diplomatic Corps','Memorialist','Void Reavers','Sovereign Guardianship'],
-                             note:'requires Xenophobe; incompatible with Pacifist and many civics'},
-    'Secret Societies':     {origins_not:['Broken Shackles','Cybernetic Creed','Unplugged'],
-                             civics_not:['Scorched Earth'],
-                             note:'incompatible with certain origins and Scorched Earth'},
-    'Selective Kinship':    {ethics_any:['Xenophile','Fanatic Xenophile','Fanatic Egalitarian'],
-                             origins_not:['Broken Shackles'],
-                             civics_not:['Fanatic Purifiers','Scorched Earth'],
-                             note:'requires Xenophile or Fanatic Egalitarian; incompatible with Broken Shackles and certain civics'},
-    'Shared Burden':        {ethics_any:['Fanatic Egalitarian'],
-                             ethics_not:['Xenophobe','Fanatic Xenophobe'],
-                             civics_not:['Technocracy','Pleasure Seekers'],
-                             note:'requires Fanatic Egalitarian; incompatible with Xenophobe, Technocracy and Pleasure Seekers'},
-    'Slaver Guilds':        {ethics_any:['Authoritarian','Fanatic Authoritarian'],
-                             note:'requires Authoritarian'},
-    'Sovereign Guardianship':{ethics_any:['Militarist','Fanatic Militarist'],
-                             origins_not:['Fear of the Dark','Payback','Broken Shackles'],
-                             note:'requires Militarist; incompatible with Fear of the Dark, Payback and Broken Shackles'},
-    'Superstitious Beliefs':{ethics_any:['Spiritualist','Fanatic Spiritualist'],
-                             origins_not:['Cybernetic Creed'],
-                             note:'requires Spiritualist; incompatible with Cybernetic Creed'},
-    'Technocracy':          {ethics_any:['Materialist','Fanatic Materialist'],
-                             civics_not:['Shared Burden'],
-                             note:'requires Materialist; incompatible with Shared Burden'},
-    'Twisted Experimenters':{ethics_any:['Authoritarian','Fanatic Authoritarian','Xenophobe','Fanatic Xenophobe'],
-                             note:'requires Authoritarian or Xenophobe'},
-    'Void Reavers':         {ethics_groups:[['Militarist','Fanatic Militarist'],['Xenophile','Fanatic Xenophile']],
-                             origins_not:['Forever Cruise'],
-                             civics_not:['Scorched Earth'],
-                             note:'requires Militarist and Xenophile; incompatible with Forever Cruise and Scorched Earth'},
-    'Warrior Culture':      {ethics_any:['Militarist','Fanatic Militarist'],
-                             civics_not:['Dystopian Society','Pleasure Seekers'],
-                             note:'requires Militarist; incompatible with Dystopian Society and Pleasure Seekers'},
-    'Anglers':              {origins_not:['Post-Apocalyptic','Shattered Ring','Void Dwellers'],
-                             note:'incompatible with Post-Apocalyptic, Shattered Ring and Void Dwellers origins'},
-  };
+  // CIVIC_PREREQS is defined as a module-level const in 02_data.js — single source
+  // of truth shared by validate(), randomEmpire(), and the empire builder UI.
+  // Do NOT redeclare it here; just reference it directly.
   const _civicSet=new Set(e.civics||[]);
   (e.civics||[]).forEach(cv=>{
     const pre=CIVIC_PREREQS[cv];
@@ -11132,8 +11273,8 @@ function _renderMobEmpire(el){
     +S.systems.map(s=>`<option value="${s.id}"${(!e.homeInitializer&&e.homeSys===s.id)?" selected":""}>${s.name} (custom)</option>`).join("")
     +`<option value="none"${e.homeInitializer==="__none__"?" selected":""}>Auto-generate standard home (no initializer)</option>`
     +`<optgroup label="Vanilla systems">`+VANILLA_INITS.map(v=>`<option value="vanilla:${v[0]}"${e.homeInitializer===v[0]?" selected":""}>${v[1]}</option>`).join("")+`</optgroup>`;
-  const mkPills=(arr,sel,max,action)=>arr.map(o=>{const on=sel.includes(o);const cap=!on&&!(S.settings?.moddedGame)&&!canAddPill(action,o,sel);return `<button class="pill${on?" pill-on":cap?" pill-cap":""}" data-pa="${action}" data-pv="${o}" title="${cap?'Exceeds vanilla limits — enable Modded Game in settings to override':''}">${o}</button>`;}).join("");
-  const originPills=ORIGINS.map(o=>`<button class="pill${e.origin===o?" pill-on":""}" data-origin="${o}">${o}</button>`).join("");
+  const mkPills=(arr,sel,max,action)=>arr.map(o=>{const on=sel.includes(o);const cap=!on&&!(S.settings?.moddedGame)&&!canAddPill(action,o,sel,{authority:e.authority,ethics:e.ethics});return `<button class="pill${on?" pill-on":cap?" pill-cap":""}" data-pa="${action}" data-pv="${o}" title="${cap?'Exceeds vanilla limits — enable Modded Game in settings to override':''}">${o}</button>`;}).join("");
+  const originPills=ORIGINS.map(o=>{const _on=e.origin===o;const _cap=!_on&&!(S.settings?.moddedGame)&&typeof originAllowed==="function"&&!originAllowed(o,e);const _why=_cap?originRuleIssues({authority:e.authority,ethics:e.ethics,origin:o}).join(" ").replace(/"/g,"&quot;"):"";return `<button class="pill${_on?" pill-on":_cap?" pill-cap":""}" data-origin="${o}" title="${_cap?_why+" — enable Modded Game in settings to override":""}">${o}</button>`;}).join("");
 
   el.innerHTML=`
     <div style="padding:14px 16px 0;display:flex;justify-content:space-between;align-items:center">
@@ -11239,10 +11380,10 @@ function _renderMobEmpire(el){
   document.querySelectorAll("[data-pa]").forEach(btn=>btn.addEventListener("click",()=>{
     const a=btn.dataset.pa,v=btn.dataset.pv;
     if(e[a].includes(v))e[a]=e[a].filter(x=>x!==v);
-    else { if(!(S.settings?.moddedGame)&&!canAddPill(a,v,e[a]))return; e[a]=[...e[a],v]; }
+    else { if(!(S.settings?.moddedGame)&&!canAddPill(a,v,e[a],{authority:e.authority,ethics:e.ethics}))return; e[a]=[...e[a],v]; }
     save();_renderMobEmpire(el);
   }));
-  document.querySelectorAll("[data-origin]").forEach(btn=>btn.addEventListener("click",()=>{e.origin=e.origin===btn.dataset.origin?"":btn.dataset.origin;save();_renderMobEmpire(el);}));
+  document.querySelectorAll("[data-origin]").forEach(btn=>btn.addEventListener("click",()=>{const _o=btn.dataset.origin;if(e.origin!==_o&&!(S.settings?.moddedGame)&&typeof originAllowed==="function"&&!originAllowed(_o,e))return;e.origin=e.origin===_o?"":_o;save();_renderMobEmpire(el);}));
 }
 
 function _renderMobExport(el){
@@ -13536,8 +13677,8 @@ function renderEmpire(body){
     +S.systems.map(s=>`<option value="${s.id}"${(!e.homeInitializer&&e.homeSys===s.id)?" selected":""}>${s.name} (custom)</option>`).join("")
     +`<option value="none"${e.homeInitializer==="__none__"?" selected":""}>Auto-generate standard home (no initializer)</option>`
     +`<optgroup label="Vanilla systems">`+VANILLA_INITS.map(v=>`<option value="vanilla:${v[0]}"${e.homeInitializer===v[0]?" selected":""}>${v[1]}</option>`).join("")+`</optgroup>`;
-  const mkPills=(arr,sel,max,action)=>arr.map(o=>{const on=sel.includes(o);const cap=!on&&!(S.settings?.moddedGame)&&!canAddPill(action,o,sel);return `<button class="pill${on?" pill-on":cap?" pill-cap":""}" data-pa="${action}" data-pv="${o}" title="${cap?'Exceeds vanilla limits — enable Modded Game in settings to override':''}">${o}</button>`;}).join("");
-  const originPills=ORIGINS.map(o=>`<button class="pill${e.origin===o?" pill-on":""}" data-origin="${o}">${o}</button>`).join("");
+  const mkPills=(arr,sel,max,action)=>arr.map(o=>{const on=sel.includes(o);const cap=!on&&!(S.settings?.moddedGame)&&!canAddPill(action,o,sel,{authority:e.authority,ethics:e.ethics});return `<button class="pill${on?" pill-on":cap?" pill-cap":""}" data-pa="${action}" data-pv="${o}" title="${cap?'Exceeds vanilla limits — enable Modded Game in settings to override':''}">${o}</button>`;}).join("");
+  const originPills=ORIGINS.map(o=>{const _on=e.origin===o;const _cap=!_on&&!(S.settings?.moddedGame)&&typeof originAllowed==="function"&&!originAllowed(o,e);const _why=_cap?originRuleIssues({authority:e.authority,ethics:e.ethics,origin:o}).join(" ").replace(/"/g,"&quot;"):"";return `<button class="pill${_on?" pill-on":_cap?" pill-cap":""}" data-origin="${o}" title="${_cap?_why+" — enable Modded Game in settings to override":""}">${o}</button>`;}).join("");
   const _flagIco=e.flagIcon||'flag_human_1';
   const _flagCatM=_flagIco.match(/^flag_([a-z]+)_\d+$/);
   const flagPreviewCat=_flagCatM?_flagCatM[1]:'special';
@@ -13748,7 +13889,7 @@ function renderEmpire(body){
     });
   });
   document.getElementById("e-ship")?.addEventListener("change",ex=>{e.ship=ex.target.value;save();});
-  document.getElementById("e-auth")?.addEventListener("change",ex=>{e.authority=ex.target.value;save();});
+  document.getElementById("e-auth")?.addEventListener("change",ex=>{e.authority=ex.target.value;save();_reEmp();});
   document.getElementById("e-homesys")?.addEventListener("change",ex=>{const val=ex.target.value;if(val==="none"){e.homeInitializer="__none__";e.homeSys=null;S.systems.forEach(s=>s.home=false);}else if(val.indexOf("vanilla:")===0){e.homeInitializer=val.slice(8);e.homeSys=null;S.systems.forEach(s=>s.home=false);}else{e.homeInitializer="";e.homeSys=val||null;S.systems.forEach(s=>s.home=s.id===val);}save();renderHdr();});
   [["e-planetname","planetName"],["e-systemname","systemName"],["e-rulername","rulerName"]].forEach(([id,k])=>{document.getElementById(id)?.addEventListener("input",ex=>{e[k]=ex.target.value;clearTimeout(_empireTimer);_empireTimer=setTimeout(save,400);});});
   [["e-planetclass","planetClass"],["e-namelist","nameList"],["e-room","room"],["e-advisor","advisor"],["e-rulergender","rulerGender"],["e-rulertrait","rulerTrait"],["e-gc","graphicalCulture"]].forEach(([id,k])=>{document.getElementById(id)?.addEventListener("change",ex=>{e[k]=ex.target.value;save();});});
@@ -13760,10 +13901,10 @@ function renderEmpire(body){
   document.querySelectorAll("[data-pa]").forEach(btn=>btn.addEventListener("click",()=>{
     const a=btn.dataset.pa,v=btn.dataset.pv;
     if(e[a].includes(v))e[a]=e[a].filter(x=>x!==v);
-    else { if(!(S.settings?.moddedGame)&&!canAddPill(a,v,e[a]))return; e[a]=[...e[a],v]; }
+    else { if(!(S.settings?.moddedGame)&&!canAddPill(a,v,e[a],{authority:e.authority,ethics:e.ethics}))return; e[a]=[...e[a],v]; }
     save();_reEmp();
   }));
-  document.querySelectorAll("[data-origin]").forEach(btn=>btn.addEventListener("click",()=>{e.origin=e.origin===btn.dataset.origin?"":btn.dataset.origin;save();_reEmp();}));
+  document.querySelectorAll("[data-origin]").forEach(btn=>btn.addEventListener("click",()=>{const _o=btn.dataset.origin;if(e.origin!==_o&&!(S.settings?.moddedGame)&&typeof originAllowed==="function"&&!originAllowed(_o,e))return;e.origin=e.origin===_o?"":_o;save();_reEmp();}));
   document.getElementById("e-sec-enabled")?.addEventListener("change",ex=>{if(!e.secondary)e.secondary={spClass:"MAM",traits:[]};e.secondary.enabled=ex.target.checked;save();_reEmp();});
   document.getElementById("e-sec-class")?.addEventListener("change",ex=>{if(!e.secondary)e.secondary={traits:[]};e.secondary.spClass=ex.target.value;const _p=PORTRAITS[ex.target.value]||PORTRAITS.MAM;e.secondary.portrait=_p[0];save();_reEmp();});
   [["e-sec-portrait","portrait"],["e-sec-namelist","nameList"],["e-sec-gender","gender"]].forEach(([id,k])=>{document.getElementById(id)?.addEventListener("change",ex=>{if(!e.secondary)e.secondary={traits:[]};e.secondary[k]=ex.target.value;save();});});
@@ -20072,73 +20213,42 @@ function randomEmpire(seedStr, opts={}){
 
   // Civics
   let civicPool=isGestalt?(isMachine?[...CIVICS_MACHINE]:[...CIVICS_HIVE]):isCorp?[...CIVICS_MEGACORP]:[...CIVICS_NORMAL];
-  // Filter civic pool to only valid civics for the chosen authority + ethics.
-  // Uses the same CIVIC_PREREQS table that validate() uses — keeps randomiser and
-  // validator in sync so the randomiser never produces a civic that would error.
+  // Filter civic pool using the shared CIVIC_PREREQS database (defined in 02_data.js).
+  // This is the same table validate() and the empire builder UI use, so the randomiser
+  // can never produce a civic combination that would fail validation.
+  // Note: origins_not cannot be pre-filtered here (origin is picked after civics).
+  //       civics_not conflicts are resolved in the deconfliction pass below.
   if(!isGestalt){
-    // Inline prereq table matching CIVIC_PREREQS in 18_planet-event-chain-seeds.js.
-    // Keys: auth (must have one), ethics_any (must have one), ethics_not (must not have any).
-    const _CP={
-      'Imperial Cult':        {auth:['auth_imperial'],                     ethics_not:['Materialist','Fanatic Materialist']},
-      'Exalted Priesthood':   {auth:['auth_oligarchic','auth_dictatorial'],ethics_not:['Materialist','Fanatic Materialist'],ethics_any:['Spiritualist','Fanatic Spiritualist']},
-      'Aristocratic Elite':   {auth:['auth_oligarchic','auth_imperial'],   ethics_not:['Egalitarian','Fanatic Egalitarian']},
-      'Beacon of Liberty':    {auth:['auth_democratic'],                   ethics_any:['Egalitarian','Fanatic Egalitarian'],ethics_not:['Xenophobe','Fanatic Xenophobe']},
-      'Citizen Service':      {auth:['auth_democratic','auth_oligarchic'], ethics_any:['Militarist','Fanatic Militarist'],  ethics_not:['Fanatic Xenophile']},
-      'Corporate Dominion':   {auth:['auth_oligarchic'],                   ethics_not:['Xenophobe','Fanatic Xenophobe']},
-      'Feudal Realm':         {auth:['auth_imperial']},
-      'Meritocracy':          {auth:['auth_democratic','auth_oligarchic']},
-      'Parliamentary System': {auth:['auth_democratic']},
-      'Philosopher King':     {auth:['auth_dictatorial','auth_imperial']},
-      'Shadow Council':       {auth:['auth_democratic','auth_oligarchic','auth_dictatorial']},
-      'Criminal Heritage':    {auth:['auth_corporate']},
-      // Ethics-only restrictions
-      'Agrarian Idyll':       {ethics_any:['Pacifist','Fanatic Pacifist'],   ethics_not:['Fanatic Materialist']},
-      'Ascensionists':        {ethics_any:['Spiritualist','Fanatic Spiritualist']},
-      'Barbaric Despoilers':  {ethics_any:['Militarist','Fanatic Militarist'], ethics_not:['Pacifist','Fanatic Pacifist','Xenophile','Fanatic Xenophile']},
-      'Corvee System':        {ethics_not:['Egalitarian','Fanatic Egalitarian']},
-      'Crusader Spirit':      {ethics_any:['Militarist','Fanatic Militarist','Authoritarian','Fanatic Authoritarian','Spiritualist','Fanatic Spiritualist'],ethics_not:['Pacifist','Fanatic Pacifist']},
-      'Death Cult':           {ethics_any:['Spiritualist','Fanatic Spiritualist']},
-      'Death Cult Corporate': {ethics_any:['Spiritualist','Fanatic Spiritualist']},
-      'Dimensional Worship':  {ethics_any:['Spiritualist','Fanatic Spiritualist']},
-      'Distinguished Admiralty':{ethics_any:['Militarist','Fanatic Militarist']},
-      'Dystopian Society':    {ethics_any:['Fanatic Authoritarian']},
-      'Fanatic Purifiers':    {ethics_any:['Fanatic Xenophobe'],           ethics_not:['Xenophile','Fanatic Xenophile']},
-      'Free Haven':           {ethics_any:['Xenophile','Fanatic Xenophile']},
-      'Guided Sapience':      {ethics_any:['Xenophobe','Fanatic Xenophobe']},
-      'Idealistic Foundation':{ethics_any:['Egalitarian','Fanatic Egalitarian']},
-      'Inwards Perfection':   {ethics_not:['Xenophile','Fanatic Xenophile']},
-      'Nationalistic Zeal':   {ethics_any:['Militarist','Fanatic Militarist']},
-      'Police State':         {ethics_not:['Fanatic Egalitarian']},
-      'Pompous Purists':      {ethics_any:['Xenophobe','Fanatic Xenophobe']},
-      'Pyrolatry':            {ethics_any:['Spiritualist','Fanatic Spiritualist']},
-      'Relentless Industrialists':{ethics_any:['Materialist','Fanatic Materialist']},
-      'Scorched Earth':       {ethics_any:['Xenophobe','Fanatic Xenophobe'], ethics_not:['Pacifist','Fanatic Pacifist']},
-      'Selective Kinship':    {ethics_any:['Xenophile','Fanatic Xenophile','Fanatic Egalitarian']},
-      'Shared Burden':        {ethics_any:['Fanatic Egalitarian'],          ethics_not:['Xenophobe','Fanatic Xenophobe']},
-      'Slaver Guilds':        {ethics_any:['Authoritarian','Fanatic Authoritarian']},
-      'Sovereign Guardianship':{ethics_any:['Militarist','Fanatic Militarist']},
-      'Superstitious Beliefs':{ethics_any:['Spiritualist','Fanatic Spiritualist']},
-      'Technocracy':          {ethics_any:['Materialist','Fanatic Materialist']},
-      'Twisted Experimenters':{ethics_any:['Authoritarian','Fanatic Authoritarian','Xenophobe','Fanatic Xenophobe']},
-      'Warrior Culture':      {ethics_any:['Militarist','Fanatic Militarist'], ethics_not:['Pacifist','Fanatic Pacifist']},
-      'Void Reavers':         {ethics_not:['Pacifist','Fanatic Pacifist']},
-      'Chosen':               {ethics_any:['Spiritualist','Fanatic Spiritualist']},
-      'Crowdsourcing':        {ethics_any:['Fanatic Authoritarian','Fanatic Egalitarian','Fanatic Xenophobe','Fanatic Xenophile','Fanatic Militarist','Fanatic Pacifist','Fanatic Spiritualist','Fanatic Materialist']},
-    };
     civicPool=civicPool.filter(cv=>{
-      const pre=_CP[cv];
+      const pre=(typeof CIVIC_PREREQS!=='undefined')&&CIVIC_PREREQS[cv];
       if(!pre) return true;
-      // Authority check — must have one of the listed authorities
+      // Authority check
       if(pre.auth&&!pre.auth.includes(authority)) return false;
       // ethics_any — must have at least one
       if(pre.ethics_any&&!pre.ethics_any.some(req=>ethics.includes(req))) return false;
+      // ethics_groups — AND-of-ORs: each group must have at least one match
+      if(pre.ethics_groups&&!pre.ethics_groups.every(grp=>grp.some(req=>ethics.includes(req)))) return false;
       // ethics_not — must not have any
       if(pre.ethics_not&&pre.ethics_not.some(bl=>ethics.includes(bl))) return false;
       return true;
     });
   }
   const nCivics=isGestalt?2:isCorp?Math.floor(rng()*2)+2:Math.floor(rng()*2)+1;
-  const civics=wpickN(rng,civicPool,Math.min(nCivics,civicPool.length));
+  let civics=wpickN(rng,civicPool,Math.min(nCivics,civicPool.length));
+  // Deconfliction pass: remove any civic whose civics_not list includes a previously
+  // selected civic. Iterate until stable (mutual conflicts resolve in pick order).
+  if(typeof CIVIC_PREREQS!=='undefined'){
+    let changed=true;
+    while(changed){
+      changed=false;
+      civics=civics.filter(cv=>{
+        const pre=CIVIC_PREREQS[cv];
+        if(!pre||!pre.civics_not) return true;
+        if(pre.civics_not.some(bad=>civics.includes(bad)&&bad!==cv)){changed=true;return false;}
+        return true;
+      });
+    }
+  }
 
   // Species
   // opts.spClass: 'any'(default) or SPC code
@@ -20179,8 +20289,13 @@ function randomEmpire(seedStr, opts={}){
     if(!oppBlocked&&_pts+cost<=2&&traits.length<5){traits.push(t);_pts+=cost;}
   }
 
-  // Origin
-  const origin=wpick(rng,ORIGINS);
+  // Origin — filter to origins compatible with the generated authority + ethics,
+  // using the shared ORIGIN_RULES database (extracted from the game files). This stops
+  // the randomiser producing empires the game would reject (e.g. Heirs of the Khan on a
+  // non-militarist / wrong-authority empire). Falls back to the always-valid default.
+  const _emp4origin={authority,ethics};
+  const _okOrigins=(typeof originAllowed==='function')?ORIGINS.filter(o=>originAllowed(o,_emp4origin)):ORIGINS;
+  const origin=wpick(rng,_okOrigins.length?_okOrigins:["Prosperous Unification"]);
 
   // Ship style
   const shipMap={MAM:'Humanoid',REP:'Reptilian',AVI:'Avian',ART:'Arthropoid',MOL:'Molluscoid',
