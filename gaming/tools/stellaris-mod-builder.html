@@ -71,6 +71,8 @@
 
 
 
+
+
 *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
 /* ── Splash screen ── */
 #pa-splash{position:fixed;inset:0;z-index:99999;background:#06090f;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;transition:opacity .6s ease}
@@ -673,8 +675,12 @@ details.details-row[open]>.details-summary{color:var(--t1);border-left-color:var
 
 
 
+
+
 </style>
 <style>
+
+
 
 
 
@@ -716,7 +722,11 @@ details.details-row[open]>.details-summary{color:var(--t1);border-left-color:var
 
 
 
+
+
 </style>
+
+
 
 
 
@@ -1690,6 +1700,15 @@ const CHANGELOG = [
     "Packages now pull live data from each module's active project when no explicit pin is set. The Package panel shows all seven module dropdowns including Gov & Species. Five missing export keys (anomalies, special projects, archaeology, astral rifts, arks) were added to the swap layer so assembled data reaches the zip generator cleanly.",
     "Every module's project badge now displays the area name alongside the project name, making it immediately clear that Systems, Empire, Origins, Events, Library, Arks and Gov & Species each maintain independent project stores.",
     "Detailed walkthroughs added under Help → Builder Guides for all seven builder areas. The home page links to the guides.",
+  ]},
+  {v:"0.37o", date:"2026-06-28", milestone:false, notes:[
+    "[Guide][Fix] GUIDE SPOTLIGHT OFF-SCREEN: the tour positioned its spotlight at each target's coordinates but never scrolled the target into view. On long builder pages (e.g. Empire) sections like Ethics and Traits sit below the fold — and Species ends up above it once you have scrolled down — so the spotlight box was drawn outside the visible area and appeared not to highlight. The tour now scrolls each target to the centre of its scrolling pane before drawing the spotlight. Applies to every guided tour.",
+  ]},
+  {v:"0.37n", date:"2026-06-28", milestone:false, notes:[
+    "[Guide][Fix] EMPIRE GUIDE NOT HIGHLIGHTING: the empire spotlight tour targets #e-sec-species, #e-sec-ethics, #e-sec-civics and #e-sec-traits, but those ids existed only in the mobile empire renderer. On desktop the matching sections rendered as id-less <details>, so querySelector found nothing and the spotlight fell back to a plain dim backdrop with no highlight. Added the e-sec-* ids to the desktop renderEmpire() Species/Ethics/Civics/Traits sections so the guide highlights them on desktop as well.",
+  ]},
+  {v:"0.37m", date:"2026-06-28", milestone:false, notes:[
+    "[Randomiser][Fix] EMPIRE/SYSTEM/PLANET GENERATOR BUTTONS SWAPPED: in the randomiser modal the 'Regenerate' button was wired to the apply-to-mod logic (it committed the result and closed the modal), while 'Add to Mod' had no click handler at all and did nothing. Regenerate now rolls a new seed and refreshes the preview only; Add to Mod commits the previewed result and closes. Affected all three modes (empire, system, planet). Planet mode now also honours the 'Add to System' destination dropdown.",
   ]},
   {v:"0.37l", date:"2026-06-28", milestone:false, notes:[
     "[Changelog][Fix] LOG PAGE OVERLAPPING TEXT: changelog note strings containing literal angle-bracket placeholders (e.g. <key>, <namespace>, <id>, <root>, <details>, <text>) were injected into the DOM unescaped, so the browser parsed them as unknown, unclosed HTML elements. This corrupted the changelog's nesting and made entries fracture into overlapping narrow columns. Note text is now HTML-escaped via a clEsc() helper before insertion; the intentional inline icons (<i class=si-xxx></i>) are restored after escaping so they still render.",
@@ -13559,7 +13578,7 @@ function renderEmpire(body){
           </div>
         </div>
       </details>
-      <details open><summary class="sec" style="list-style:none;cursor:pointer"><span class="sec-title">Species</span></summary>
+      <details id="e-sec-species" open><summary class="sec" style="list-style:none;cursor:pointer"><span class="sec-title">Species</span></summary>
         <div style="padding:14px 18px">
           <div class="grid2">
             <div class="field"><div class="lbl">Name</div><input id="e-spname" value="${e.spName}" placeholder="e.g. Vorathi"/></div>
@@ -13606,20 +13625,20 @@ function renderEmpire(body){
           <div class="notice n-ghost">Ruler fields are ignored for Gestalt empires.</div>
         </div>
       </details>
-      <details open><summary class="sec" style="list-style:none;cursor:pointer"><span class="sec-title">Ethics <span class="tag tag-ghost">${ethicPts(e.ethics)}/3 pts</span></span></summary>
+      <details id="e-sec-ethics" open><summary class="sec" style="list-style:none;cursor:pointer"><span class="sec-title">Ethics <span class="tag tag-ghost">${ethicPts(e.ethics)}/3 pts</span></span></summary>
         <div style="padding:14px 18px">
           <div class="notice n-ghost">Max 3 ethics. No opposing pairs. Fanatic version counts as 2 ethic points — use 1 Fanatic + 1 normal. Gestalt Consciousness replaces all ethics.</div>
           <div class="pills">${mkPills([...ETHICS,...FANATIC_ETHICS],e.ethics||[],3,"ethics")}</div>
         </div>
       </details>
       </div><div class="acc-col">
-      <details open><summary class="sec" style="list-style:none;cursor:pointer"><span class="sec-title">Civics <span class="tag tag-ghost">${e.civics.length}/2</span>${e.authority==="auth_hive_mind"?` <span class="tag tag-warn" style="font-size:10px">Hive</span>`:""}${e.authority==="auth_machine_intelligence"?` <span class="tag tag-warn" style="font-size:10px">Machine</span>`:""}</span></summary>
+      <details id="e-sec-civics" open><summary class="sec" style="list-style:none;cursor:pointer"><span class="sec-title">Civics <span class="tag tag-ghost">${e.civics.length}/2</span>${e.authority==="auth_hive_mind"?` <span class="tag tag-warn" style="font-size:10px">Hive</span>`:""}${e.authority==="auth_machine_intelligence"?` <span class="tag tag-warn" style="font-size:10px">Machine</span>`:""}</span></summary>
         <div style="padding:14px 18px">
           ${e.authority==="auth_hive_mind"?`<div class="notice n-warn">Hive Mind civics shown. Regular civics will cause errors.</div>`:e.authority==="auth_machine_intelligence"?`<div class="notice n-warn">Machine Intelligence civics shown. Regular civics will cause errors.`:""}
           <div class="pills">${e.authority==="auth_hive_mind"?mkPills(CIVICS_HIVE,e.civics||[],2,"civics"):e.authority==="auth_machine_intelligence"?mkPills(CIVICS_MACHINE,e.civics||[],2,"civics"):e.authority==="auth_corporate"?mkPills(CIVICS_MEGACORP,e.civics||[],2,"civics"):mkPills(CIVICS_NORMAL,e.civics||[],2,"civics")}</div>
         </div>
       </details>
-      <details open><summary class="sec" style="list-style:none;cursor:pointer"><span class="sec-title">Traits <span class="tag tag-ghost">${e.traits.length}/5 · ${traitPts(e.traits)}/2 pts</span></span></summary>
+      <details id="e-sec-traits" open><summary class="sec" style="list-style:none;cursor:pointer"><span class="sec-title">Traits <span class="tag tag-ghost">${e.traits.length}/5 · ${traitPts(e.traits)}/2 pts</span></span></summary>
         <div style="padding:14px 18px">
           <div class="notice n-ghost">2 trait points standard. Positive traits cost 1–3 points. Negative traits grant 1–2 points. Max 5 traits total.</div>
           <div style="font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--green);margin-bottom:5px;margin-top:4px">Positive (cost points)</div>
@@ -20976,8 +20995,16 @@ function attachRandomiserEvents(overlay, mode, initialSeed, targetSysId, targetP
     currentSeed=seedFromStr(e.target.value);
     rerender();
   });
+  // Regenerate: roll a new seed and refresh the preview only (does NOT commit to the mod).
   overlay.querySelector('#rand-preview-btn')?.addEventListener('click',()=>{
     const ns=randomSeed();
+    const inp=overlay.querySelector('#rand-seed');
+    if(inp){inp.value=ns;}
+    currentSeed=ns;
+    rerender();
+  });
+  // Add to Mod: commit the currently-previewed result to the mod and close.
+  overlay.querySelector('#rand-apply')?.addEventListener('click',()=>{
     const s=getSeed();
     try{
       if(mode==='system'){
@@ -20987,8 +21014,9 @@ function attachRandomiserEvents(overlay, mode, initialSeed, targetSysId, targetP
       } else if(mode==='planet'){
         const p=randomPlanet(s,currentOpts);
         p.id=uid();
-        if(targetSysId){
-          const sys=S.systems.find(x=>x.id===targetSysId);
+        const destId=overlay.querySelector('#rand-dest-sys')?.value||targetSysId;
+        if(destId){
+          const sys=S.systems.find(x=>x.id===destId);
           if(sys){ if(targetPlanetId){ const idx=sys.planets.findIndex(x=>x.id===targetPlanetId); if(idx>=0) sys.planets[idx]={...sys.planets[idx],...p}; } else { sys.planets.push(p); } }
         } else { S.planetBuilder={...p}; S.tab="planets"; }
         save(); overlay.remove(); renderAll();
@@ -23812,6 +23840,11 @@ function _renderTour(){
   var target = step.sel ? document.querySelector(step.sel) : null;
   var pad = 8;
   if(target){
+    // Bring the target into view (it may be far down a scrolling builder pane) so the
+    // fixed-position spotlight is actually visible. No smooth scroll-behavior is set, so
+    // getBoundingClientRect below reflects the post-scroll position synchronously.
+    try{ target.scrollIntoView({block:'center',inline:'nearest',behavior:'auto'}); }
+    catch(_e){ try{ target.scrollIntoView(); }catch(_e2){} }
     var r = target.getBoundingClientRect();
     spotlight.style.cssText = (
       'position:fixed;z-index:8001;pointer-events:none;border-radius:8px;' +
