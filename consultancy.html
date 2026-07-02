@@ -571,6 +571,12 @@
       </a>
       <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.2em;text-transform:uppercase;color:#6E7176;">© {{ year }} &nbsp;·&nbsp; Crafting Systems. Building Worlds.</span>
     </div>
+    <div style="max-width:1180px;margin:0 auto;padding:0 clamp(20px,5vw,64px) clamp(30px,5vh,48px);display:flex;flex-wrap:wrap;justify-content:center;gap:8px 20px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;text-transform:uppercase;">
+      <a href="privacy.html" style="color:#6E7176;text-decoration:none;">Privacy</a>
+      <a href="cookies.html" style="color:#6E7176;text-decoration:none;">Cookie Policy</a>
+      <a href="terms.html" style="color:#6E7176;text-decoration:none;">Terms</a>
+      <a href="javascript:void(0)" onclick="window.paCookieSettings&&window.paCookieSettings()" style="color:#6E7176;text-decoration:none;">Cookie Settings</a>
+    </div>
   </footer>
 
 </div>
@@ -642,5 +648,153 @@ class Component extends DCLogic {
 }
 </script>
 
+
+<!-- PA COOKIE CONSENT -->
+<style id="pa-cc-style">
+#pa-cc-banner{position:fixed;left:0;right:0;bottom:0;z-index:999999;background:rgba(14,16,18,0.97);border-top:1px solid rgba(201,167,106,0.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:20px clamp(16px,4vw,40px);font-family:'Inter',system-ui,sans-serif;color:#F2F0EB;display:none;}
+#pa-cc-banner.pa-cc-show{display:block;}
+#pa-cc-inner{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:18px 28px;}
+#pa-cc-text{flex:1 1 380px;font-size:13.5px;line-height:1.6;color:#B9BBC0;font-weight:300;}
+#pa-cc-text a{color:#C9A76A;text-decoration:underline;}
+#pa-cc-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+#pa-cc-actions button{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer;padding:11px 18px;border-radius:2px;white-space:nowrap;}
+.pa-cc-accept{background:#C9A76A;color:#0E1012;border:1px solid #C9A76A;}
+.pa-cc-accept:hover{opacity:0.88;}
+.pa-cc-reject{background:transparent;color:#F2F0EB;border:1px solid rgba(110,113,118,0.5);}
+.pa-cc-reject:hover{border-color:rgba(201,167,106,0.6);}
+.pa-cc-manage{background:transparent;color:#9A9DA3;border:1px solid transparent;text-decoration:underline;padding:11px 6px;}
+#pa-cc-prefs{display:none;max-width:1180px;margin:16px auto 0;padding-top:16px;border-top:1px solid rgba(110,113,118,0.2);}
+#pa-cc-prefs.pa-cc-show{display:block;}
+.pa-cc-row{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:12px 0;}
+.pa-cc-row + .pa-cc-row{border-top:1px solid rgba(110,113,118,0.12);}
+.pa-cc-row-label{font-size:13px;color:#F2F0EB;font-weight:500;}
+.pa-cc-row-desc{font-size:12px;color:#9A9DA3;font-weight:300;margin-top:4px;max-width:60ch;}
+.pa-cc-switch{position:relative;flex:0 0 auto;width:38px;height:22px;}
+.pa-cc-switch input{opacity:0;width:0;height:0;}
+.pa-cc-slider{position:absolute;inset:0;background:rgba(110,113,118,0.4);border-radius:22px;cursor:pointer;transition:background .2s;}
+.pa-cc-slider:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#F2F0EB;border-radius:50%;transition:transform .2s;}
+.pa-cc-switch input:checked + .pa-cc-slider{background:#C9A76A;}
+.pa-cc-switch input:checked + .pa-cc-slider:before{transform:translateX(16px);}
+.pa-cc-switch input:disabled + .pa-cc-slider{opacity:0.5;cursor:not-allowed;}
+@media (max-width:640px){#pa-cc-inner{flex-direction:column;align-items:stretch;}#pa-cc-actions{justify-content:stretch;}#pa-cc-actions button{flex:1;}}
+</style>
+<div id="pa-cc-banner" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <div id="pa-cc-inner">
+    <div id="pa-cc-text">
+      We use a small consent cookie to remember your choice, and — only if you allow it — analytics cookies to see how the site is used. No advertising cookies, ever. See our <a href="cookies.html">Cookie Policy</a> and <a href="privacy.html">Privacy Policy</a>.
+    </div>
+    <div id="pa-cc-actions">
+      <button type="button" class="pa-cc-manage" id="pa-cc-manage-btn">Manage preferences</button>
+      <button type="button" class="pa-cc-reject" id="pa-cc-reject-btn">Reject non-essential</button>
+      <button type="button" class="pa-cc-accept" id="pa-cc-accept-btn">Accept all</button>
+    </div>
+  </div>
+  <div id="pa-cc-prefs">
+    <div class="pa-cc-row">
+      <div><div class="pa-cc-row-label">Strictly necessary</div><div class="pa-cc-row-desc">Remembers your cookie choice. Always on — the site can't function without it.</div></div>
+      <label class="pa-cc-switch"><input type="checkbox" checked disabled><span class="pa-cc-slider"></span></label>
+    </div>
+    <div class="pa-cc-row">
+      <div><div class="pa-cc-row-label">Analytics</div><div class="pa-cc-row-desc">Google Analytics — helps us see which pages get used. Off by default.</div></div>
+      <label class="pa-cc-switch"><input type="checkbox" id="pa-cc-analytics-toggle"><span class="pa-cc-slider"></span></label>
+    </div>
+    <div style="max-width:1180px;margin:0 auto;">
+      <button type="button" class="pa-cc-accept" id="pa-cc-save-btn" style="margin-top:4px;">Save preferences</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var PA_GA_ID = 'G-XXXXXXXXXX'; // TODO: replace with real GA4 Measurement ID when ready
+  var COOKIE_NAME = 'pa_consent';
+  var DAYS = 180;
+
+  function setCookie(name, value, days){
+    var d = new Date(); d.setTime(d.getTime() + days*24*60*60*1000);
+    document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+  }
+  function getCookie(name){
+    var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+    return m ? decodeURIComponent(m[1]) : null;
+  }
+  function readConsent(){
+    var raw = getCookie(COOKIE_NAME);
+    if (!raw) { try { raw = localStorage.getItem(COOKIE_NAME); } catch(e){} }
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch(e){ return null; }
+  }
+  function writeConsent(obj){
+    var raw = JSON.stringify(obj);
+    setCookie(COOKIE_NAME, raw, DAYS);
+    try { localStorage.setItem(COOKIE_NAME, raw); } catch(e){}
+  }
+  function loadGA(){
+    if (window._paGaLoaded || PA_GA_ID.indexOf('XXXX') !== -1) return;
+    window._paGaLoaded = true;
+    var s = document.createElement('script');
+    s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=' + PA_GA_ID;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    window.gtag = gtag;
+    gtag('js', new Date());
+    gtag('config', PA_GA_ID, { anonymize_ip: true });
+  }
+  function purgeGA(){
+    var names = ['_ga','_gid','_gat','_ga_' + PA_GA_ID.replace('G-','')];
+    for (var i=0;i<names.length;i++){
+      document.cookie = names[i] + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=' + location.hostname;
+      document.cookie = names[i] + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+    }
+  }
+  function applyConsent(c){ if (c && c.analytics) loadGA(); else purgeGA(); }
+  function showBanner(prefsOpen){
+    var b = document.getElementById('pa-cc-banner');
+    if (!b) return;
+    b.classList.add('pa-cc-show');
+    if (prefsOpen) document.getElementById('pa-cc-prefs').classList.add('pa-cc-show');
+  }
+  function hideBanner(){
+    var b = document.getElementById('pa-cc-banner');
+    if (!b) return;
+    b.classList.remove('pa-cc-show');
+    document.getElementById('pa-cc-prefs').classList.remove('pa-cc-show');
+  }
+  function init(){
+    var existing = readConsent();
+    if (existing) { applyConsent(existing); return; }
+    showBanner(false);
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    var acceptBtn = document.getElementById('pa-cc-accept-btn');
+    var rejectBtn = document.getElementById('pa-cc-reject-btn');
+    var manageBtn = document.getElementById('pa-cc-manage-btn');
+    var saveBtn = document.getElementById('pa-cc-save-btn');
+    var toggle = document.getElementById('pa-cc-analytics-toggle');
+    if (acceptBtn) acceptBtn.addEventListener('click', function(){
+      var c = { necessary:true, analytics:true, ts:new Date().toISOString() };
+      writeConsent(c); applyConsent(c); hideBanner();
+    });
+    if (rejectBtn) rejectBtn.addEventListener('click', function(){
+      var c = { necessary:true, analytics:false, ts:new Date().toISOString() };
+      writeConsent(c); applyConsent(c); hideBanner();
+    });
+    if (manageBtn) manageBtn.addEventListener('click', function(){
+      document.getElementById('pa-cc-prefs').classList.toggle('pa-cc-show');
+    });
+    if (saveBtn) saveBtn.addEventListener('click', function(){
+      var c = { necessary:true, analytics: !!(toggle && toggle.checked), ts:new Date().toISOString() };
+      writeConsent(c); applyConsent(c); hideBanner();
+    });
+    window.paCookieSettings = function(){
+      var existing = readConsent();
+      if (toggle) toggle.checked = !!(existing && existing.analytics);
+      showBanner(true);
+    };
+    init();
+  });
+})();
+</script>
+<!-- /PA COOKIE CONSENT -->
 
 </body></html>
