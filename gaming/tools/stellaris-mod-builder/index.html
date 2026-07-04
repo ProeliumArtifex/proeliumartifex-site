@@ -2,8 +2,9 @@
 <html><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cookie Policy — Proelium Artifex</title>
-<link rel="icon" href="assets/favicon_6df2d73334dc.png">
+<title>Stellaris Mod Builder — Proelium Artifex</title>
+<meta name="description" content="A free, browser-based tool for building Stellaris mods — star systems, empires, origins, events, anomalies and more — with built-in validation and direct export to mod-ready files.">
+<link rel="icon" href="../../../assets/favicon_6df2d73334dc.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -13,16 +14,17 @@
   body{margin:0;background:#0E1012;color:#F2F0EB;font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
   ::selection{background:#C9A76A;color:#0E1012;}
   a{color:#C9A76A;}
-  .pa-legal h2{font-family:'Cinzel',serif;font-weight:600;font-size:1.5rem;letter-spacing:0.03em;color:#F2F0EB;margin:48px 0 16px;}
-  .pa-legal h2:first-child{margin-top:0;}
-  .pa-legal h3{font-family:'Cinzel',serif;font-weight:500;font-size:1.1rem;letter-spacing:0.02em;color:#E7E4DD;margin:28px 0 10px;}
-  .pa-legal p{font-family:'Inter',sans-serif;font-weight:300;font-size:0.98rem;line-height:1.8;color:#B9BBC0;margin:0 0 16px;}
-  .pa-legal ul{font-family:'Inter',sans-serif;font-weight:300;font-size:0.96rem;line-height:1.8;color:#B9BBC0;margin:0 0 16px;padding-left:22px;}
-  .pa-legal li{margin-bottom:6px;}
-  .pa-legal table{width:100%;border-collapse:collapse;margin:0 0 24px;font-family:'Inter',sans-serif;font-size:0.88rem;}
-  .pa-legal th{text-align:left;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#C9A76A;padding:10px 14px;border-bottom:1px solid rgba(110,113,118,0.3);}
-  .pa-legal td{padding:12px 14px;border-bottom:1px solid rgba(110,113,118,0.14);color:#B9BBC0;font-weight:300;vertical-align:top;}
-  .pa-legal strong{color:#E7E4DD;font-weight:500;}
+  .pa-tool h2{font-family:'Cinzel',serif;font-weight:600;font-size:clamp(1.6rem,3.4vw,2.2rem);letter-spacing:0.03em;color:#F2F0EB;margin:0 0 18px;}
+  .pa-tool p{font-family:'Inter',sans-serif;font-weight:300;font-size:clamp(1rem,1.4vw,1.08rem);line-height:1.8;color:#B9BBC0;margin:0 0 16px;}
+  .pa-feature-card{background:#0E1012;padding:28px 26px;transition:background .3s ease;}
+  .pa-feature-card:hover{background:#16181B;}
+  .pa-feature-card h4{font-family:'Cinzel',serif;font-weight:500;font-size:1.08rem;letter-spacing:0.04em;color:#E7E4DD;margin:0 0 9px;}
+  .pa-feature-card p{font-family:'Inter',sans-serif;font-weight:300;font-size:0.9rem;line-height:1.6;color:#9A9DA3;margin:0;}
+  @media (max-width:760px){
+    body::-webkit-scrollbar{width:3px;}
+    #pa-nav{padding:14px 18px !important;}
+    .pa-wordmark{display:none !important;}
+  }
 </style>
 </head>
 <body>
@@ -30,77 +32,85 @@
 
   <div style="position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(110,113,118,0.055) 1px,transparent 1px),linear-gradient(90deg,rgba(110,113,118,0.055) 1px,transparent 1px);background-size:72px 72px;-webkit-mask-image:radial-gradient(ellipse 120% 80% at 50% 0%,#000 30%,transparent 72%);mask-image:radial-gradient(ellipse 120% 80% at 50% 0%,#000 30%,transparent 72%);"></div>
 
-  <nav style="position:relative;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:18px clamp(20px,5vw,64px);border-bottom:1px solid rgba(110,113,118,0.16);background:rgba(14,16,18,0.82);">
-    <a href="index.html" style="display:flex;align-items:center;gap:14px;text-decoration:none;">
-      <img src="assets/pa-mark_25718e37b71d.png" alt="Proelium Artifex" style="height:30px;width:auto;display:block;">
-      <span style="font-family:'Cinzel',serif;font-weight:500;font-size:14px;letter-spacing:0.26em;color:#F2F0EB;">PROELIUM&nbsp;ARTIFEX</span>
+  <nav id="pa-nav" style="position:relative;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:18px clamp(20px,5vw,64px);border-bottom:1px solid rgba(110,113,118,0.16);background:rgba(14,16,18,0.82);">
+    <a href="../../../index.html" style="display:flex;align-items:center;gap:14px;text-decoration:none;">
+      <img src="../../../assets/pa-mark_25718e37b71d.png" alt="Proelium Artifex" style="height:30px;width:auto;display:block;">
+      <span class="pa-wordmark" style="font-family:'Cinzel',serif;font-weight:500;font-size:14px;letter-spacing:0.26em;color:#F2F0EB;">PROELIUM&nbsp;ARTIFEX</span>
     </a>
-    <div style="display:flex;align-items:center;gap:clamp(14px,2vw,30px);">
-      <a href="consultancy.html" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#9A9DA3;text-decoration:none;">Consultancy</a>
-      <a href="gaming/" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#9A9DA3;text-decoration:none;">Gaming</a>
-      <a href="index.html" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#9A9DA3;text-decoration:none;">Home</a>
+    <div style="display:flex;align-items:center;gap:clamp(12px,2vw,26px);">
+      <a href="../../" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#F2F0EB;text-decoration:none;">Gaming</a>
+      <a href="../../../index.html" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#9A9DA3;text-decoration:none;">Home</a>
     </div>
   </nav>
 
-  <section style="position:relative;z-index:3;max-width:760px;margin:0 auto;padding:clamp(60px,10vh,100px) clamp(20px,5vw,64px) 20px;">
-    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#C9A76A;margin-bottom:18px;">Legal</div>
-    <h1 style="font-family:'Cinzel',serif;font-weight:600;font-size:clamp(2rem,5vw,2.8rem);letter-spacing:0.02em;color:#F2F0EB;margin:0 0 10px;">Cookie Policy</h1>
-    <p style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;color:#6E7176;margin:0;">Last updated: 2 July 2026</p>
+  <section style="position:relative;z-index:3;max-width:900px;margin:0 auto;padding:clamp(60px,10vh,100px) clamp(20px,5vw,64px) 10px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#C9A76A;margin-bottom:18px;">Gaming &nbsp;·&nbsp; Browser Tool</div>
+    <h1 style="font-family:'Cinzel',serif;font-weight:600;font-size:clamp(2.1rem,5.5vw,3.4rem);letter-spacing:0.02em;color:#F2F0EB;margin:0 0 18px;line-height:1.08;">Stellaris Mod Builder</h1>
+    <p style="font-family:'Inter',sans-serif;font-weight:300;font-size:clamp(1.05rem,1.7vw,1.25rem);line-height:1.7;color:#9A9DA3;max-width:640px;margin:0 0 28px;">Design star systems, prescripted empires, origins, events and anomalies — then export directly to mod-ready files. No install required.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:36px;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.15em;color:#6E7176;border:1px solid rgba(110,113,118,0.3);padding:4px 10px;">STELLARIS</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.15em;color:#6E7176;border:1px solid rgba(110,113,118,0.3);padding:4px 10px;">FREE</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.15em;color:#6E7176;border:1px solid rgba(110,113,118,0.3);padding:4px 10px;">OPEN SOURCE</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.15em;color:#6E7176;border:1px solid rgba(110,113,118,0.3);padding:4px 10px;">BROWSER-BASED</span>
+    </div>
+    <a href="../stellaris-mod-builder.html" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:12.5px;letter-spacing:0.18em;text-transform:uppercase;color:#0E1012;background:#C9A76A;text-decoration:none;padding:16px 32px;transition:opacity .25s;">Launch the Tool ↗</a>
   </section>
 
-  <section class="pa-legal" style="position:relative;z-index:3;max-width:760px;margin:0 auto;padding:20px clamp(20px,5vw,64px) clamp(80px,10vh,120px);">
+  <section class="pa-tool" style="position:relative;z-index:3;max-width:900px;margin:0 auto;padding:clamp(50px,8vh,80px) clamp(20px,5vw,64px) 10px;">
+    <h2>The problem</h2>
+    <p>Stellaris mods are written in Paradox's own script format — plain text files with strict, cross-referenced rules that live across dozens of game files: which traits a species archetype can take, how many trait points a Gestalt empire gets versus an organic one, which ethics combinations are actually legal, what a valid event chain needs to compile. None of that is validated as you write it. You find out something's wrong when the mod fails to load, or worse, when it loads but behaves incorrectly in-game.</p>
+    <p>Building a full custom empire, a chain of anomalies, or a set of prescripted species by hand means holding all of those rules in your head at once, or discovering the ones you missed through trial and error.</p>
 
-    <h2>1. What cookies are</h2>
-    <p>Cookies are small text files a website stores on your device to remember information between visits. Some are essential to how a site works; others are optional and help site owners understand usage. We also use your browser's local storage (a similar but separate technology) for one specific purpose, described below.</p>
+    <h2>What it does instead</h2>
+    <p>Stellaris Mod Builder is a visual, form-based editor for the content types that make up a Stellaris mod. You build systems, empires, origins, events, anomalies, archaeology sites and astral rifts through structured forms instead of raw script, and the tool checks your work against the game's actual rules — trait budgets by species archetype, forbidden trait combinations, ethic and authority compatibility, and more — before you ever export. When something would be invalid in-game, you find out on the page, not after a failed load.</p>
+    <p>Everything runs entirely in your browser. Nothing you build is uploaded anywhere — your projects are saved locally on your device, and exporting produces mod-ready files you place directly into your Stellaris mod folder.</p>
 
-    <h2>2. The choice you get</h2>
-    <p>When you first visit, a banner lets you <strong>Accept All</strong>, <strong>Reject Non-Essential</strong>, or open <strong>Manage Preferences</strong> to choose analytics on or off individually. You can change your mind at any time using the <strong>Cookie Settings</strong> link in the footer of every page.</p>
+    <h2>Built for</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1px;background:rgba(110,113,118,0.18);border:1px solid rgba(110,113,118,0.18);margin-bottom:8px;">
+      <div class="pa-feature-card">
+        <h4>Systems &amp; Empires</h4>
+        <p>Star systems, prescripted empires, origins and species — built and validated against the same rules the game engine enforces.</p>
+      </div>
+      <div class="pa-feature-card">
+        <h4>Events &amp; Anomalies</h4>
+        <p>Event chains, anomalies, archaeology sites and astral rifts, structured without hand-writing the underlying script.</p>
+      </div>
+      <div class="pa-feature-card">
+        <h4>Ship Components</h4>
+        <p>A full catalog of weapons, armor, shields, reactors and thrusters to draw from when building custom designs.</p>
+      </div>
+      <div class="pa-feature-card">
+        <h4>Validation Built In</h4>
+        <p>Trait-point budgets, forbidden combinations, and cross-file rule checks run before export — not after a failed load.</p>
+      </div>
+      <div class="pa-feature-card">
+        <h4>Direct Export</h4>
+        <p>Produces mod-ready files, packaged and ready to drop into your Stellaris mod folder.</p>
+      </div>
+      <div class="pa-feature-card">
+        <h4>Private by Design</h4>
+        <p>Runs entirely client-side. Your projects are saved locally in your browser and never leave your device.</p>
+      </div>
+    </div>
+  </section>
 
-    <h2>3. Cookies we use</h2>
-    <table>
-      <tr><th>Name</th><th>Type</th><th>Purpose</th><th>Duration</th></tr>
-      <tr><td><strong>pa_consent</strong></td><td>Strictly necessary</td><td>Remembers your cookie choice so we don't ask every visit.</td><td>180 days</td></tr>
-      <tr><td><strong>_ga</strong></td><td>Analytics (Google) — only if accepted</td><td>Distinguishes unique visitors.</td><td>~13 months</td></tr>
-      <tr><td><strong>_ga_&lt;container-id&gt;</strong></td><td>Analytics (Google) — only if accepted</td><td>Persists session state for Google Analytics 4.</td><td>~13 months</td></tr>
-      <tr><td><strong>_gid</strong></td><td>Analytics (Google) — only if accepted</td><td>Distinguishes visitors for a short window.</td><td>~24 hours</td></tr>
-    </table>
-    <p>We do not use advertising, retargeting, or cross-site tracking cookies of any kind.</p>
-
-    <h2>4. Product usage events (only if you've accepted analytics)</h2>
-    <p>When analytics cookies are accepted, our tools send a small number of anonymous usage events alongside the cookies above — currently:</p>
-    <table>
-      <tr><th>Event</th><th>What it contains</th><th>Why</th></tr>
-      <tr><td><strong>validation_run</strong></td><td>Pass/fail result, and a count of errors and warnings. No project content.</td><td>Tells us whether the validation feature is catching real issues.</td></tr>
-      <tr><td><strong>mod_exported</strong></td><td>Counts of systems, empires, origins and events in the exported mod. No names, no custom text, no project content.</td><td>Tells us the tool is actually being used to ship mods, and roughly how big they are.</td></tr>
-    </table>
-    <p>These events never include anything you've typed or named — no system, empire, or event content is ever sent. If you reject analytics cookies, none of this fires.</p>
-
-    <h2>5. Local storage used by our tools</h2>
-    <p>The Stellaris Mod Builder and our other in-browser tools are not cookies in the technical sense, but they do use your browser's local storage to save your project data (systems, empires, settings, UI preferences) directly on your device. We disclose it here for transparency: this storage is essential to the tool working at all, is never transmitted anywhere, and is entirely under your control — clearing your browser's site data removes it permanently, including from us, since we never had a copy.</p>
-
-    <h2>6. Managing cookies in your browser</h2>
-    <p>Beyond our own banner, you can block or delete cookies through your browser's settings at any time, and you can opt out of Google Analytics specifically using Google's <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener">browser add-on</a>. Blocking necessary cookies may affect how the site remembers your preferences.</p>
-
-    <h2>7. Changes to this policy</h2>
-    <p>We'll update this page if the cookies we use change. See our <a href="privacy.html">Privacy Policy</a> for how we handle personal data more broadly.</p>
-
-    <h2>8. Contact</h2>
-    <p>Questions about cookies on this site: <a href="mailto:hello@proeliumartifex.com">hello@proeliumartifex.com</a>.</p>
-
+  <section style="position:relative;z-index:3;max-width:900px;margin:0 auto;padding:clamp(40px,6vh,60px) clamp(20px,5vw,64px) clamp(90px,12vh,140px);text-align:center;">
+    <a href="../stellaris-mod-builder.html" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:12.5px;letter-spacing:0.18em;text-transform:uppercase;color:#0E1012;background:#C9A76A;text-decoration:none;padding:16px 32px;transition:opacity .25s;">Launch the Tool ↗</a>
+    <p style="margin-top:18px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.1em;color:#6E7176;">Opens in a new tab. No install, no account, no upload.</p>
   </section>
 
   <footer style="position:relative;z-index:3;border-top:1px solid rgba(110,113,118,0.16);">
     <div style="max-width:1180px;margin:0 auto;padding:clamp(46px,7vh,72px) clamp(20px,5vw,64px);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;">
-      <a href="index.html" style="display:flex;align-items:center;gap:13px;text-decoration:none;">
-        <img src="assets/pa-mark_25718e37b71d.png" alt="" style="height:30px;width:auto;display:block;">
+      <a href="../../../index.html" style="display:flex;align-items:center;gap:13px;text-decoration:none;">
+        <img src="../../../assets/pa-mark_25718e37b71d.png" alt="" style="height:30px;width:auto;display:block;">
         <span style="font-family:'Cinzel',serif;font-weight:500;font-size:13px;letter-spacing:0.26em;color:#C7C5BE;">PROELIUM&nbsp;ARTIFEX</span>
       </a>
       <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.2em;text-transform:uppercase;color:#6E7176;">© 2026 &nbsp;·&nbsp; Crafting Systems. Building Worlds.</span>
     </div>
     <div style="max-width:1180px;margin:0 auto;padding:0 clamp(20px,5vw,64px) clamp(30px,5vh,48px);display:flex;flex-wrap:wrap;justify-content:center;gap:8px 20px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;text-transform:uppercase;">
-      <a href="privacy.html" style="color:#6E7176;text-decoration:none;">Privacy</a>
-      <a href="cookies.html" style="color:#6E7176;text-decoration:none;">Cookie Policy</a>
-      <a href="terms.html" style="color:#6E7176;text-decoration:none;">Terms</a>
+      <a href="../../../privacy.html" style="color:#6E7176;text-decoration:none;">Privacy</a>
+      <a href="../../../cookies.html" style="color:#6E7176;text-decoration:none;">Cookie Policy</a>
+      <a href="../../../terms.html" style="color:#6E7176;text-decoration:none;">Terms</a>
       <a href="javascript:void(0)" onclick="window.paCookieSettings&&window.paCookieSettings()" style="color:#6E7176;text-decoration:none;">Cookie Settings</a>
     </div>
   </footer>
@@ -138,7 +148,7 @@
 <div id="pa-cc-banner" role="dialog" aria-live="polite" aria-label="Cookie consent">
   <div id="pa-cc-inner">
     <div id="pa-cc-text">
-      We use a small consent cookie to remember your choice, and — only if you allow it — analytics cookies to see how the site is used. No advertising cookies, ever. See our <a href="cookies.html">Cookie Policy</a> and <a href="privacy.html">Privacy Policy</a>.
+      We use a small consent cookie to remember your choice, and — only if you allow it — analytics cookies to see how the site is used. No advertising cookies, ever. See our <a href="../../../cookies.html">Cookie Policy</a> and <a href="../../../privacy.html">Privacy Policy</a>.
     </div>
     <div id="pa-cc-actions">
       <button type="button" class="pa-cc-manage" id="pa-cc-manage-btn">Manage preferences</button>
@@ -165,7 +175,6 @@
   var PA_GA_ID = 'G-XXXXXXXXXX'; // TODO: replace with real GA4 Measurement ID when ready
   var COOKIE_NAME = 'pa_consent';
   var DAYS = 180;
-
   function setCookie(name, value, days){
     var d = new Date(); d.setTime(d.getTime() + days*24*60*60*1000);
     document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';

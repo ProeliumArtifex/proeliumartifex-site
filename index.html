@@ -1017,6 +1017,12 @@ class Component extends DCLogic {
       if (toggle) toggle.checked = !!(existing && existing.analytics);
       showBanner(true);
     };
+    window.paTrackEvent = function(name, params){
+      var c = readConsent();
+      if (!c || !c.analytics) return;
+      loadGA();
+      if (window.gtag) window.gtag('event', name, params || {});
+    };
     init();
   });
 })();

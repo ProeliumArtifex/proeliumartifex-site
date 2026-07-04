@@ -544,7 +544,7 @@
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;">
 
         <!-- Stellaris Mod Builder card -->
-        <a href="tools/stellaris-mod-builder.html" data-reveal="" style="display:flex;flex-direction:column;gap:20px;padding:32px;background:rgba(14,16,18,0.6);border:1px solid rgba(110,113,118,0.2);text-decoration:none;transition:border-color .3s ease,transform .3s ease;" style-hover="border-color:rgba(201,167,106,0.55);transform:translateY(-3px);">
+        <a href="tools/stellaris-mod-builder/" data-reveal="" style="display:flex;flex-direction:column;gap:20px;padding:32px;background:rgba(14,16,18,0.6);border:1px solid rgba(110,113,118,0.2);text-decoration:none;transition:border-color .3s ease,transform .3s ease;" style-hover="border-color:rgba(201,167,106,0.55);transform:translateY(-3px);">
           <div style="display:flex;align-items:center;justify-content:space-between;">
             <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.25em;color:#C9A76A;text-transform:uppercase;">Browser Tool</span>
             <span style="font-family:'Cinzel',serif;font-size:1rem;color:#C9A76A;">→</span>
@@ -834,6 +834,12 @@ class Component extends DCLogic {
       var existing = readConsent();
       if (toggle) toggle.checked = !!(existing && existing.analytics);
       showBanner(true);
+    };
+    window.paTrackEvent = function(name, params){
+      var c = readConsent();
+      if (!c || !c.analytics) return;
+      loadGA();
+      if (window.gtag) window.gtag('event', name, params || {});
     };
     init();
   });

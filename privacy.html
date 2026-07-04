@@ -61,8 +61,11 @@
     <h3>Information collected automatically (only with your consent)</h3>
     <p>We do not run analytics or tracking of any kind unless you accept analytics cookies via the consent banner. If you accept, we use Google Analytics to understand aggregate usage of the site — pages visited, approximate location (city/country level), device and browser type, and referring site. We do not use advertising cookies, and we do not sell or share data for advertising purposes. See our <a href="cookies.html">Cookie Policy</a> for the full list of cookies and what each one does.</p>
 
+    <h3>Product usage statistics from our tools (only with your consent)</h3>
+    <p>If you've accepted analytics cookies, the Stellaris Mod Builder (and future tools we publish) also reports a small number of anonymous usage counts through the same Google Analytics connection — for example, that a validation check was run and whether it passed or failed, or that a mod export was completed and how many systems, empires, origins, or events it contained. These are counts only: no system names, empire names, custom text, or any other content you've created is ever included or transmitted. We use this purely to understand whether the tool is being used and where it's falling over, and — in aggregate — to share honest numbers about tool usage publicly (e.g. "X mods exported"). If you reject analytics cookies, none of this is sent.</p>
+
     <h3>Information stored only in your browser</h3>
-    <p>The Stellaris Mod Builder and our other in-browser tools save your work — systems, empires, projects, and settings — using your browser's local storage (localStorage). This data never leaves your device: it is not transmitted to us, not uploaded to any server, and we have no access to it, no copy of it, and no way to recover it if you clear your browser data. Exporting or importing a project file is something only you initiate, and those files pass through your own device.</p>
+    <p>Beyond the anonymous counts above, the actual content you build — systems, empires, projects, and settings — is saved using your browser's local storage (localStorage) and never included in any usage statistic. That content is not transmitted to us, not uploaded to any server, and we have no access to it, no copy of it, and no way to recover it if you clear your browser data. Exporting or importing a project file is something only you initiate, and those files pass through your own device.</p>
 
     <h2>3. How we use information</h2>
     <ul>
@@ -255,6 +258,12 @@
       var existing = readConsent();
       if (toggle) toggle.checked = !!(existing && existing.analytics);
       showBanner(true);
+    };
+    window.paTrackEvent = function(name, params){
+      var c = readConsent();
+      if (!c || !c.analytics) return;
+      loadGA();
+      if (window.gtag) window.gtag('event', name, params || {});
     };
     init();
   });
