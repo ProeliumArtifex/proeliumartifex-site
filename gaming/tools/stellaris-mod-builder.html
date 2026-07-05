@@ -7018,13 +7018,17 @@ const USAGE_INFO={
   misc_system_init:"General galaxy-generation pool — the system can spawn anywhere in the galaxy as a normal explorable system (this is how most vanilla unique systems spawn).",
   fallen_empire_init:"Fallen Empire home system pool — picked when Fallen Empires are placed at galaxy generation.",
 };
-// System flag explanations (v0.40o). set_star_flag values scripts commonly check.
+// System flag explanations (v0.40o, key names corrected v0.40y). set_star_flag values
+// vanilla scripts actually check (verified via full-text search of common/+events/):
+// lcluster_system -> lcluster, crisis_sphere -> crisis_sphere_system, terminal_system -> terminal_egress
+// were all wrong keys in the picker — the flag written to the system would never match
+// what any vanilla script looks for. Fixed to the real has_star_flag values.
 const SYS_FLAG_INFO={
   empire_home_system:"Marks this as an empire capital system. Many vanilla events/scripts check this flag to avoid spawning hostiles or anomalies in player capitals.",
-  lcluster_system:"Tags the system as part of the L-Cluster. L-Gate scripts treat it as behind the L-Gates (inaccessible until the L-Gate opens).",
-  crisis_sphere:"Used by end-game crisis scripts (e.g. Contingency sterilization hubs area). Only set if you are scripting crisis content.",
-  caravaneer_home:"Marks a Caravaneer fleet home system — CaravaneerS scripts route traffic here. Needs Caravaneer country scripting to function.",
-  terminal_system:"The L-Cluster's Terminal Egress-style entry system. Checked by L-Gate arrival scripts.",
+  lcluster:"Tags the system as part of the L-Cluster. L-Gate scripts (gray_goo_effects, 00_rules, distant_stars deposits/anomalies) treat it as behind the L-Gates (inaccessible until the L-Gate opens).",
+  crisis_sphere_system:"Used by end-game crisis scripts (Contingency sterilization sphere area). Note: vanilla's own checks append the owning empire's id (has_star_flag = crisis_sphere_system@root.owner) — for custom scripting you may need the same per-owner suffix rather than a bare flag.",
+  caravaneer_home:"Marks a Caravaneer fleet home system — Caravaneer scripts (nomads_effects) route traffic here. Needs Caravaneer country scripting to function.",
+  terminal_egress:"The Machine Age crisis's Terminal Egress entry system (checked by machine_age_crisis_events). Not an L-Cluster flag despite the similar theming.",
 };
 
 const DLC_OPTS=[
@@ -8076,6 +8080,22 @@ Generator: compendium_gen.py v1.0.0
 */
 // ══ CHANGELOG ════════════════════════════════════════════════════════════════
 const CHANGELOG = [
+  {v:"0.40y", date:"2026-07-05", milestone:false, notes:[
+    "[Data][Fix] PRE-DEMO SWEEP vs v4.4.4 (full extraction of every d_*/pc_*/pm_*/building_*/district_* key referenced in the planet+system data files, cross-checked against every matching vanilla common/ definition): found 4 planet modifiers offered in the UI that do not exist anywhere in the game -- pm_energy_rich, pm_underground_resources, pm_strip_mined (Planet Init Flags picker) and pm_ancient_cryo_chamber (Sleeping Soldiers event-chain seed). All 4 would have force-written a broken add_modifier reference into an exported mod. The 3 picker entries were removed outright rather than guessing at an unverified substitute; the event-chain seed keeps its real set_planet_flag and building_ancient_cryo_chamber warning, just without the fake modifier line.",
+    "[Data][Fix] SYSTEM FLAG PICKER HAD 3 WRONG KEYS: lcluster_system, crisis_sphere and terminal_system were never the actual has_star_flag values any vanilla script checks -- verified real ones are lcluster, crisis_sphere_system (vanilla appends the owning empire's id: has_star_flag = crisis_sphere_system@root.owner, noted in the tooltip) and terminal_egress (Machine Age crisis, not L-Cluster). Every place that reads/writes these flags (desktop, mobile, SYS_FLAG_INFO tooltips) is now consistent with the corrected keys.",
+    "[Data][Note] EVERYTHING ELSE IN THE SWEEP CAME BACK CLEAN: all 587 vanilla deposit ids referenced by STAR_RESOURCE_DEPOSITS/SYSTEM_OBJECTS/PLANET_EVENT_CHAINS stems, all 6 ASTEROID_BELT_TYPES, all 6 colony_type (col_*) keys, and every building_*/district_* candidate turned up either genuinely valid or already-documented historical-name comments from prior cleanups (not live bugs). No duplicate/stale copy of SYSTEM_OBJECTS found. Spawner audit (data-lp-quick/mob-obj/obj-cls) found no further silent field-drop bugs beyond the one already fixed in 0.40x.",
+  ]},
+  {v:"0.40x", date:"2026-07-05", milestone:false, notes:[
+    "[Systems][Fix] SYSTEM_OBJECTS QUICK-ADD BODIES AUDITED vs v4.4.4 (user request): checked every deposit against the game's own can_have_*_deposits scripted triggers. pc_barren only ever passes can_have_mineral_deposits (not alloys/engineering) -- Ship Graveyard, Derelict Station and Battle Wreckage were carrying invalid d_alloys_X/d_engineering_X deposits, swapped for valid mineral deposits. Broken World's d_engineering_1 (invalid on pc_broken) swapped for d_alloys_2 (valid). Removed deposits with zero valid class anywhere in 4.4.4: Cracked World's d_minerals_2, Infested World's d_alloys_2, Habitat's d_engineering_2, Shielded World's d_minerals_2/d_energy_2. Added a genuinely valid d_zro_deposit_1 to Shrouded World (pc_shrouded passes can_have_zro_deposits). Fixed sizes to match vanilla's fixed (non-range) planet_size: Cracked World 16->20, Habitat 12->6.",
+    "[Systems][Fix] MISLEADING QUICK-ADD NOTES: set_planet_flag = has_ship_graveyard / has_ruined_station / has_ruins / has_ruined_megastructure are not referenced ANYWHERE in v4.4.4's common/ or events/ -- the old notes claimed these 'trigger a survey anomaly' or 'archaeological event chain', which is false. They're inert tags for the mod-maker's own custom event scripting. Notes corrected; the two entries that DO get a working dig site (Ancient Ruins, Precursor Site) do so via the real d_archaeological_site deposit, not the flag.",
+    "[Systems][New] SHIELDED WORLD now defaults Prevent Anomaly on (matching all 3 vanilla shielded-world instances -- Armistice Initiative, Time Loop World, FE Xenophobe Citadel -- which all set it) and carries no default deposits (pc_shielded passes no can_have_*_deposits trigger). Note now documents the vanilla change_pc pattern for hiding a species/pre-FTL world behind a shield: build it as a real habitable class first, add species/deposits normally, then convert with a custom 'change_pc = { class = pc_shielded inherit_entity = yes }' init flag as the LAST flag, rather than picking pc_shielded as the class directly.",
+    "[Systems][Fix] QUICK ADD BODY DROPPED DEPOSITS/FLAGS (found during the audit): the desktop left-pane Quick Add Body/Structure button handler (data-lp-quick) never looked up the SYSTEM_OBJECTS definition -- it only copied class/size/name, silently discarding every deps/initFlags value defined for that preset, unlike the modal Add Object flow and the mobile quick-add which both did this correctly. All three spawners now also copy a preset's prevent_anomaly flag.",
+    "[UI][New] CLICK-TO-VIEW HELP ICONS: every quick-add picker item (System Objects Quick Add, Bypasses, Ambient Objects -- desktop left pane) now has a small (?) icon next to it that opens a description popup on click/tap, instead of relying on hover-only title tooltips which don't work on touch devices. New shared showObjHelp() renders emoji/tags/description/effect/warnings/suggested-use in a modal via the existing openModal() infrastructure.",
+  ]},
+  {v:"0.40w", date:"2026-07-05", milestone:false, notes:[
+    "[Systems][New] AMBIENT OBJECT \"SUGGESTED USE\" HINTS (user request: guidance for non-modders): every entry in AMBIENT_OBJECTS (12_ambient-objects.js) now carries a short use: field alongside its existing desc: — beginner-facing guidance on when/why to place it (e.g. Large Debris Field -> \"Best for a system that had a major battle or catastrophe\"). Shown as a green tip line under the description in the ambient object mid-pane editor, and folded into the hover tooltip on every ambient-object button across the desktop left pane, mobile view, and the New System wizard.",
+    "[Docs][Note] Horizon Needle (Machine Age) use: line flags it as a scripted event prop only (spawned mid Horizon Signal crisis chain in vanilla) -- placing it manually via the builder will not trigger the story chain, so it is not recommended for hand-placed systems despite being selectable.",
+  ]},
   {v:"0.40v", date:"2026-07-04", milestone:false, notes:[
     "[Origins][Fix] ORIGIN STARTING EFFECTS NEVER FIRED (user-reported: origin selectable and loads, but starting buildings/deposits/techs/modifiers missing): genOriginOnAction() wrote a planet_event INTO common/on_actions/ (the game only parses on_actions blocks there), with NO namespace declaration, hooked to empire_init_capital_planet — an on_action that does not exist in v4.4.4 (verified: zero definitions in common/on_actions). Rewired to the vanilla origin pattern (clones.2 / origin.4005): on_actions hook file registers <origin>.1 on on_game_start_country; a separate events/ file declares the namespace and a country_event with trigger has_origin, applying buildings/deposits via capital_scope and techs/modifiers in country scope. All 4 export paths (split, combined, full-mode, origin-mode) now write the events file.",
     "[Export][Fix] EMPIRE GAME-START EVENT NEVER FIRED: genGameStartEvent() (re-applies homeworld deposits wiped by generate_home_system_resources + origin/event-only buildings) was hooked to the same nonexistent empire_init_capital_planet. Now a colony_event fired from empire_init_capital_colony — the v4.4.4 rename of that hook and the exact slot where vanilla places starting buildings (game_start.12). Targeted precisely: genInit() auto-injects a <system>_home_system star flag on home systems and the event requires it — the old is_country_type=default trigger would have hit EVERY default empire's capital.",
@@ -10044,21 +10064,31 @@ const SYSTEM_OBJECTS = [
   // worlds (barren, frozen, molten, toxic, barren_cold) are NOT listed here — use the
   // planet class selector when adding a planet normally.
   // ── Debris, ruins, wreckage ────────────────────────────────────────────────
+  // Deposit choices below are verified against v4.4.4 can_have_*_deposits scripted triggers —
+  // e.g. pc_barren only ever passes can_have_mineral_deposits (no alloys/engineering), while
+  // pc_broken/pc_shattered pass BOTH mineral and alloy deposits. add_deposit force-adds
+  // regardless, but off-trigger deposits get flagged by validate()/terraform-culled, so these
+  // are now all deposits vanilla's own rules actually allow for the class.
   {cat:"body", emoji:"<i class=si-star></i>", label:"Debris Field",        cls:"pc_shattered",         size:10, deps:["d_minerals_2","d_alloys_1"], initFlags:[],                                   note:"Shattered world fragments. Mineral and alloy deposits from the collision."},
-  {cat:"body", emoji:"<i class=si-moon></i>", label:"Broken World",        cls:"pc_broken",            size:16, deps:["d_minerals_2","d_engineering_1"], initFlags:[],                     note:"Fractured but largely intact remnant. Leviathans / scripted events."},
-  {cat:"body", emoji:"<i class=si-ship></i>", label:"Ship Graveyard",      cls:"pc_barren",            size:12, deps:["d_alloys_2","d_engineering_1"], initFlags:["set_planet_flag = has_ship_graveyard"], note:"Battlefield debris. Triggers special survey anomaly. Alloy salvage."},
-  {cat:"body", emoji:"<i class=si-ship></i>", label:"Derelict Station",    cls:"pc_barren",            size:8,  deps:["d_engineering_2","d_alloys_1"], initFlags:["set_planet_flag = has_ruined_station"], note:"Ruined orbital station. Survey triggers anomaly event."},
-  {cat:"body", emoji:"<i class=si-gear></i>",  label:"Battle Wreckage",    cls:"pc_barren",            size:12, deps:["d_alloys_2","d_minerals_1"], initFlags:["set_planet_flag = has_ruins"],       note:"General battle debris. Triggers archaeological event chain."},
-  {cat:"body", emoji:"<i class=si-build></i>",  label:"Ancient Ruins",      cls:"pc_relic",             size:18, deps:["d_city_ruins","d_archaeological_site"], initFlags:["set_planet_flag = has_ruins"], note:"Ancient relic world with active dig sites. Ancient Relics DLC."},
-  {cat:"body", emoji:"<i class=si-build></i>",  label:"Megastructure Ruins",cls:"pc_relic",             size:22, deps:["d_city_ruins","d_archaeological_site"], initFlags:["set_planet_flag = has_ruins","set_planet_flag = has_ruined_megastructure"], note:"Remains of an ancient megastructure. Triggers unique anomaly chain."},
-  {cat:"body", emoji:"<i class=si-science></i>",  label:"Precursor Site",     cls:"pc_barren",            size:14, deps:["d_archaeological_site"], initFlags:["set_planet_flag = has_ruins","prevent_anomaly = yes"], note:"Barren world with precursor dig site. Ancient Relics DLC."},
+  {cat:"body", emoji:"<i class=si-moon></i>", label:"Broken World",        cls:"pc_broken",            size:16, deps:["d_minerals_2","d_alloys_2"], initFlags:[],                     note:"Fractured but largely intact remnant. Leviathans / scripted events."},
+  {cat:"body", emoji:"<i class=si-ship></i>", label:"Ship Graveyard",      cls:"pc_barren",            size:12, deps:["d_minerals_2","d_minerals_1"], initFlags:["set_planet_flag = has_ship_graveyard"], note:"Battlefield debris on an ordinary barren world. Mineral salvage (pc_barren only supports mineral deposits, not alloys/engineering). The has_ship_graveyard flag is NOT checked anywhere in vanilla — it's an inert tag for your own custom event scripting, not an automatic anomaly."},
+  {cat:"body", emoji:"<i class=si-ship></i>", label:"Derelict Station",    cls:"pc_barren",            size:8,  deps:["d_minerals_1"], initFlags:["set_planet_flag = has_ruined_station"], note:"Ruined orbital station over a barren world. The has_ruined_station flag is NOT checked anywhere in vanilla — inert tag for your own scripting, no automatic event."},
+  {cat:"body", emoji:"<i class=si-gear></i>",  label:"Battle Wreckage",    cls:"pc_barren",            size:12, deps:["d_minerals_2","d_minerals_1"], initFlags:["set_planet_flag = has_ruins"],       note:"General battle debris on a barren world. The has_ruins flag alone does NOT trigger vanilla's archaeological dig site — that requires the d_archaeological_site deposit (see Ancient Ruins/Precursor Site). This is a flavour tag only."},
+  {cat:"body", emoji:"<i class=si-build></i>",  label:"Ancient Ruins",      cls:"pc_relic",             size:18, deps:["d_city_ruins","d_archaeological_site"], initFlags:["set_planet_flag = has_ruins"], note:"Ancient relic world with active dig sites. Ancient Relics DLC. The dig site comes from the d_archaeological_site deposit itself (vanilla's own mechanism); the has_ruins flag is just a descriptive tag. Colonisable — a normal survey/anomaly can still occur unless you also tick Prevent Anomaly."},
+  {cat:"body", emoji:"<i class=si-build></i>",  label:"Megastructure Ruins",cls:"pc_relic",             size:22, deps:["d_city_ruins","d_archaeological_site"], initFlags:["set_planet_flag = has_ruins","set_planet_flag = has_ruined_megastructure"], note:"Remains of an ancient megastructure. As with Ancient Ruins, the dig site comes from d_archaeological_site — both planet flags here are inert descriptive tags, not automatic triggers."},
+  {cat:"body", emoji:"<i class=si-science></i>",  label:"Precursor Site",     cls:"pc_barren",            size:14, deps:["d_archaeological_site"], initFlags:["set_planet_flag = has_ruins","prevent_anomaly = yes"], note:"Barren world with precursor dig site. Ancient Relics DLC. Matches the vanilla pattern exactly: real dig-site deposit + prevent_anomaly so a random anomaly can't compete with it."},
   // ── Special / Event worlds ──────────────────────────────────────────────────
-  {cat:"body", emoji:"<i class=si-life></i>", label:"Cracked World",       cls:"pc_egg_cracked",       size:16, deps:["d_minerals_2"],       initFlags:[],                                           note:"Hollow cracked shell world. Distant Stars DLC. Unique survey event chain."},
-  {cat:"body", emoji:"<i class=si-galaxy></i>", label:"Shrouded World",      cls:"pc_shrouded",          size:16, deps:[],                     initFlags:[],                                           note:"Enveloped in Shroud energy. Psionic event. Utopia DLC."},
-  {cat:"body", emoji:"<i class=si-life></i>", label:"Infested World",      cls:"pc_infested",          size:18, deps:["d_alloys_2"],         initFlags:[],                                           note:"Crisis-infested uninhabitable world."},
+  // NOTE: none of these classes appear in ANY can_have_*_deposits trigger in 4.4.4, so they
+  // carry no deposits by default — matching how vanilla actually places them (decoration/flags
+  // only, no add_deposit). Also: placing the class alone does not recreate the DLC's full
+  // scripted event chain (that requires the originating system's own on_action/event wiring) —
+  // treat these as visual/flavour placements unless you're writing the matching events yourself.
+  {cat:"body", emoji:"<i class=si-life></i>", label:"Cracked World",       cls:"pc_egg_cracked",       size:20, deps:[],       initFlags:[],                                           note:"Hollow cracked shell world (fixed size 20 in vanilla). Distant Stars DLC. The 'Voidspawn Egg' survey chain is driven by the originating system script, not the class alone — placing this class gives you the visual/flavour body, not the automatic event chain."},
+  {cat:"body", emoji:"<i class=si-galaxy></i>", label:"Shrouded World",      cls:"pc_shrouded",          size:16, deps:["d_zro_deposit_1"],                     initFlags:[],                                           note:"Enveloped in Shroud energy. Utopia DLC. pc_shrouded is one of only two classes (with pc_toxic) that pass can_have_zro_deposits/can_have_society_deposits, so a Zro deposit is a genuine vanilla-valid choice here. Checked by many Shroud/Nomads/origin event chains as a condition, but doesn't fire one specific 'psionic event' automatically just by existing."},
+  {cat:"body", emoji:"<i class=si-life></i>", label:"Infested World",      cls:"pc_infested",          size:18, deps:[],         initFlags:[],                                           note:"Crisis-infested uninhabitable world. No can_have_*_deposits trigger references this class in 4.4.4, so it carries no deposits — matches the vanilla Fallen Empire example (deposits cleared, ambient objects only)."},
   {cat:"body", emoji:"<i class=si-circle-g></i>", label:"Nanite World",        cls:"pc_gray_goo",          size:16, deps:[],                     initFlags:[],                                           note:"Consumed by self-replicating nanites. Distant Stars DLC."},
   // ── Megastructures (planet blocks, count toward limit) ──────────────────────
-  {cat:"body", emoji:"<i class=si-home></i>", label:"Habitat",             cls:"pc_habitat",           size:12, deps:["d_engineering_2"], initFlags:[],                                     note:"Orbital habitat. Colonisable. Federations DLC."},
+  {cat:"body", emoji:"<i class=si-home></i>", label:"Habitat",             cls:"pc_habitat",           size:6, deps:[], initFlags:[],                                     note:"Orbital habitat. Colonisable. Federations DLC. Fixed size 6 in vanilla (planet_size is not a range for this class). Habitats use district_set = habitat, not surface deposits — vanilla always places them as a MOON of a deposit-bearing parent body (e.g. an asteroid with add_deposit), and the habitat gets bonus district slots from that nearby deposit's habitat_modifier, not from a deposit on itself. Placed here as a standalone body for convenience; for the resource bonus, add the deposit to a nearby body instead."},
   // Ring world — all 12 segments placed as planet blocks at orbit_distance = 0 around the star.
   // Vanilla format: change_orbit = 45 once, then each segment at orbit_angle = 30 (cumulative delta).
   // 12 × 30° = 360° = complete ring. Pattern: hab, tech, seam × 4 (confirmed from pre_ftl_initializers.txt).
@@ -10091,7 +10121,16 @@ const SYSTEM_OBJECTS = [
   // pc_ancient_manufactory, pc_ancient_guardian and pc_ancient_cracker do NOT exist in
   // Stellaris 4.4.4 common/planet_classes (verified against game files). The game silently
   // skips planet blocks with unknown classes, so these exported as invisible no-ops.
-  {cat:"structure", emoji:"<i class=si-shield></i>", label:"Shielded World",       cls:"pc_shielded",            size:16, deps:["d_minerals_2","d_energy_2"],initFlags:[], note:"Planetary shield (Apocalypse DLC). Impervious to bombardment."},
+  // Shielded World: pc_shielded appears in NO can_have_*_deposits trigger, so it carries no
+  // deposits by default (matching all 3 vanilla instances — Armistice Initiative, Time Loop
+  // World, FE Xenophobe Citadel — none add_deposit directly onto the shielded class itself).
+  // prevent_anomaly defaults ON because ALL THREE vanilla instances set it — a shielded world
+  // is meant to carry a specific, deliberate reveal, not compete with a random anomaly roll.
+  // For a hidden inhabited/pre-FTL world: don't set class to pc_shielded here — instead build
+  // the planet as a normal habitable class with species/primitives/deposits configured
+  // normally, then add a custom init flag 'change_pc = { class = pc_shielded inherit_entity = yes }'
+  // as the LAST flag (vanilla's own pattern for this — see Time Loop World / FE Citadel).
+  {cat:"structure", emoji:"<i class=si-shield></i>", label:"Shielded World",       cls:"pc_shielded",            size:16, deps:[], initFlags:[], prevent_anomaly:true, note:"Planetary shield (Apocalypse DLC). Impervious to bombardment. Non-colonisable — no vanilla deposit is valid on this class directly. Prevent Anomaly is on by default, matching every vanilla shielded-world instance. For a species/pre-FTL world hidden behind a shield, build it as a real habitable class first and convert with change_pc instead of picking this class directly (see comment above)."},
   // NOTE: Orbital rings and Dyson spheres are megastructures — they are NOT placed as planet = {} blocks.
   // Use create_megastructure in init_effect for those (already handled by the Orbital Ring checkbox on habitable planets).
 ];
@@ -10104,6 +10143,7 @@ Generator: compendium_gen.py v1.0.0
 
 === END COMPENDIUM ===
 */
+
 // ══ BYPASSES ══════════════════════════════════════════════════════════════════════════════
 // spawn field controls output syntax in genInit():
 //   "wormhole_cmd"  -> spawn_natural_wormhole = { bypass_type = <k> ... }
@@ -10209,84 +10249,84 @@ Generator: compendium_gen.py v1.0.0
 //       / create_fleet commands, not create_ambient_object.
 const AMBIENT_OBJECTS = [
   // -- Debris & derelicts (base game) ------------------------------------------------
-  {g:"Debris & Derelicts", k:"small_debris_object", l:"Small Debris Field", emoji:"<i class=si-star></i>", desc:"Small floating debris cluster. Decorative. No survey interaction. Base game."},
-  {g:"Debris & Derelicts", k:"medium_debris_01_object", l:"Medium Debris Field", emoji:"<i class=si-rock></i>", desc:"Medium debris field, variant 1. Decorative. Commonly used in abandoned system initializers. Base game."},
-  {g:"Debris & Derelicts", k:"medium_debris_02_object", l:"Medium Debris Field (Alt)", emoji:"<i class=si-rock></i>", desc:"Medium debris field, variant 2. Alternate visual. Base game."},
-  {g:"Debris & Derelicts", k:"large_debris_object", l:"Large Debris Field", emoji:"<i class=si-fire></i>", desc:"Large debris field. Used for destroyed fleet graveyards or ruined structures. Base game."},
-  {g:"Debris & Derelicts", k:"abandoned_ship_object", l:"Abandoned Ship (Selectable)", emoji:"<i class=si-ship></i>", desc:"Derelict ship -- selectable, shows name and tooltip. Survey triggers event. Base game."},
-  {g:"Debris & Derelicts", k:"abandoned_ship_2_object", l:"Abandoned Ship (Background)", emoji:"<i class=si-ship></i>", desc:"Derelict ship -- non-selectable. Purely atmospheric background piece. Base game."},
-  {g:"Debris & Derelicts", k:"derelict_ship_object", l:"Derelict Ship", emoji:"<i class=si-ship></i>", desc:"Named derelict vessel. Selectable. Can trigger salvage or technology events on survey. Base game."},
-  {g:"Debris & Derelicts", k:"abandoned_starbase_01_object", l:"Abandoned Starbase", emoji:"<i class=si-flag></i>", desc:"Ruined starbase hulk. Non-functional. Decorative. Base game."},
-  {g:"Debris & Derelicts", k:"abandoned_station_object", l:"Abandoned Station", emoji:"<i class=si-build></i>", desc:"Abandoned smaller station. Selectable. Federations DLC."},
-  {g:"Debris & Derelicts", k:"ancient_battlefield_object", l:"Ancient Battlefield", emoji:"<i class=si-sword></i>", desc:"Ruins of a long-past battle. Anomaly potential on survey. Base game."},
-  {g:"Debris & Derelicts", k:"ancient_battlefield_02_object", l:"Ancient Battlefield (Large)", emoji:"<i class=si-sword></i>", desc:"Larger battlefield ruin field. Base game."},
-  {g:"Debris & Derelicts", k:"old_fleet_parking_lot_object", l:"Old Fleet Parking Lot", emoji:"<i class=si-flag></i>", desc:"Cluster of old mothballed ships. Federations DLC. Decorative."},
-  {g:"Debris & Derelicts", k:"sublight_probe_object", l:"Sublight Probe", emoji:"<i class=si-megaphone></i>", desc:"Ancient automated probe drifting in system. Selectable. Survey triggers a unique tech event. Base game."},
+  {g:"Debris & Derelicts", k:"small_debris_object", l:"Small Debris Field", emoji:"<i class=si-star></i>", desc:"Small floating debris cluster. Decorative. No survey interaction. Base game.", use:"Fill an otherwise-empty system with a bit of visual clutter — no gameplay effect either way."},
+  {g:"Debris & Derelicts", k:"medium_debris_01_object", l:"Medium Debris Field", emoji:"<i class=si-rock></i>", desc:"Medium debris field, variant 1. Decorative. Commonly used in abandoned system initializers. Base game.", use:"Good default choice for an 'abandoned' or fought-over system — pair with a ruined starbase or wreck."},
+  {g:"Debris & Derelicts", k:"medium_debris_02_object", l:"Medium Debris Field (Alt)", emoji:"<i class=si-rock></i>", desc:"Medium debris field, variant 2. Alternate visual. Base game.", use:"Same idea as the standard medium field — use this alt visual when placing more than one in a system for variety."},
+  {g:"Debris & Derelicts", k:"large_debris_object", l:"Large Debris Field", emoji:"<i class=si-fire></i>", desc:"Large debris field. Used for destroyed fleet graveyards or ruined structures. Base game.", use:"Best for a system that had a major battle or catastrophe — fleet graveyard, shattered colony, war memorial."},
+  {g:"Debris & Derelicts", k:"abandoned_ship_object", l:"Abandoned Ship (Selectable)", emoji:"<i class=si-ship></i>", desc:"Derelict ship -- selectable, shows name and tooltip. Survey triggers event. Base game.", use:"Use when you want a named wreck the player can click on and survey for a small event/reward."},
+  {g:"Debris & Derelicts", k:"abandoned_ship_2_object", l:"Abandoned Ship (Background)", emoji:"<i class=si-ship></i>", desc:"Derelict ship -- non-selectable. Purely atmospheric background piece. Base game.", use:"Background set-dressing only — add alongside a selectable wreck to make a debris field feel bigger."},
+  {g:"Debris & Derelicts", k:"derelict_ship_object", l:"Derelict Ship", emoji:"<i class=si-ship></i>", desc:"Named derelict vessel. Selectable. Can trigger salvage or technology events on survey. Base game.", use:"Good centerpiece for a 'mystery ship' system built around a salvage or tech-discovery anomaly."},
+  {g:"Debris & Derelicts", k:"abandoned_starbase_01_object", l:"Abandoned Starbase", emoji:"<i class=si-flag></i>", desc:"Ruined starbase hulk. Non-functional. Decorative. Base game.", use:"Signals a system that once had an owner — good for lore/backstory systems (a fallen empire outpost, etc.)."},
+  {g:"Debris & Derelicts", k:"abandoned_station_object", l:"Abandoned Station", emoji:"<i class=si-build></i>", desc:"Abandoned smaller station. Selectable. Federations DLC.", use:"Smaller-scale version of the abandoned starbase — needs Federations active in the target game."},
+  {g:"Debris & Derelicts", k:"ancient_battlefield_object", l:"Ancient Battlefield", emoji:"<i class=si-sword></i>", desc:"Ruins of a long-past battle. Anomaly potential on survey. Base game.", use:"Drop into a system meant to hide an anomaly or dig-site tied to a past war in your mod's lore."},
+  {g:"Debris & Derelicts", k:"ancient_battlefield_02_object", l:"Ancient Battlefield (Large)", emoji:"<i class=si-sword></i>", desc:"Larger battlefield ruin field. Base game.", use:"Same idea, bigger and more dramatic — good as the visual anchor of a marquee 'ancient war' system."},
+  {g:"Debris & Derelicts", k:"old_fleet_parking_lot_object", l:"Old Fleet Parking Lot", emoji:"<i class=si-flag></i>", desc:"Cluster of old mothballed ships. Federations DLC. Decorative.", use:"Nice flavor for a former shipyard, mothball fleet, or forgotten depot system (Federations)."},
+  {g:"Debris & Derelicts", k:"sublight_probe_object", l:"Sublight Probe", emoji:"<i class=si-megaphone></i>", desc:"Ancient automated probe drifting in system. Selectable. Survey triggers a unique tech event. Base game.", use:"Place in an early-game system where you want to guarantee a tech-flavoured anomaly on survey."},
   // -- Event ships & mystery vessels -------------------------------------------------
-  {g:"Event Ships & Mystery Vessels", k:"eventship_01_object", l:"Event Ship (Type 1)", emoji:"<i class=si-ship></i>", desc:"Generic scripted event ship, design 1. Non-selectable background vessel. Base game."},
-  {g:"Event Ships & Mystery Vessels", k:"eventship_02_object", l:"Event Ship (Type 2)", emoji:"<i class=si-ship></i>", desc:"Generic scripted event ship, design 2. Base game."},
-  {g:"Event Ships & Mystery Vessels", k:"eventship_03_object", l:"Event Ship (Type 3)", emoji:"<i class=si-ship></i>", desc:"Generic scripted event ship, design 3. Base game."},
-  {g:"Event Ships & Mystery Vessels", k:"eventship_04_blue_object", l:"Event Ship (Blue)", emoji:"<i class=si-deposit></i>", desc:"Scripted event ship -- blue colour scheme. Base game."},
-  {g:"Event Ships & Mystery Vessels", k:"eventship_05_object", l:"Event Ship (Type 5)", emoji:"<i class=si-ship></i>", desc:"Generic scripted event ship, design 5. Base game."},
-  {g:"Event Ships & Mystery Vessels", k:"eventship_07_object", l:"Event Ship (Type 7)", emoji:"<i class=si-ship></i>", desc:"Generic scripted event ship, design 7. Base game."},
-  {g:"Event Ships & Mystery Vessels", k:"silent_freighter_object", l:"Silent Freighter", emoji:"<i class=si-build></i>", desc:"Mysterious drifting freighter. Selectable. Federations DLC."},
-  {g:"Event Ships & Mystery Vessels", k:"mysterious_space_station_object", l:"Mysterious Space Station", emoji:"<i class=si-science></i>", desc:"Unknown alien space station. Selectable. Federations DLC."},
-  {g:"Event Ships & Mystery Vessels", k:"mysterious_tanker_object", l:"Mysterious Tanker", emoji:"<i class=si-build></i>", desc:"Drifting tanker vessel of uncertain origin. Distant Stars DLC."},
-  {g:"Event Ships & Mystery Vessels", k:"attack_ship_01_object", l:"Attack Ship (Derelict)", emoji:"<i class=si-sword></i>", desc:"Derelict combat vessel. Federations DLC."},
-  {g:"Event Ships & Mystery Vessels", k:"tannhauser_gate_object", l:"Tannhauser Gate", emoji:"<i class=si-star></i>", desc:"Mysterious alien structure. Federations DLC. Decorative."},
+  {g:"Event Ships & Mystery Vessels", k:"eventship_01_object", l:"Event Ship (Type 1)", emoji:"<i class=si-ship></i>", desc:"Generic scripted event ship, design 1. Non-selectable background vessel. Base game.", use:"Purely decorative filler ship — use to make a system feel inhabited or recently active."},
+  {g:"Event Ships & Mystery Vessels", k:"eventship_02_object", l:"Event Ship (Type 2)", emoji:"<i class=si-ship></i>", desc:"Generic scripted event ship, design 2. Base game.", use:"Same purpose as Type 1 — pick whichever silhouette fits your system's theme."},
+  {g:"Event Ships & Mystery Vessels", k:"eventship_03_object", l:"Event Ship (Type 3)", emoji:"<i class=si-ship></i>", desc:"Generic scripted event ship, design 3. Base game.", use:"Decorative filler ship — swap between the numbered variants purely for visual variety."},
+  {g:"Event Ships & Mystery Vessels", k:"eventship_04_blue_object", l:"Event Ship (Blue)", emoji:"<i class=si-deposit></i>", desc:"Scripted event ship -- blue colour scheme. Base game.", use:"Same as the other event ships but with a distinct blue paint job — handy when you want it to stand out."},
+  {g:"Event Ships & Mystery Vessels", k:"eventship_05_object", l:"Event Ship (Type 5)", emoji:"<i class=si-ship></i>", desc:"Generic scripted event ship, design 5. Base game.", use:"Decorative filler ship — one more silhouette option for busy or crowded-looking systems."},
+  {g:"Event Ships & Mystery Vessels", k:"eventship_07_object", l:"Event Ship (Type 7)", emoji:"<i class=si-ship></i>", desc:"Generic scripted event ship, design 7. Base game.", use:"Decorative filler ship — one more silhouette option for busy or crowded-looking systems."},
+  {g:"Event Ships & Mystery Vessels", k:"silent_freighter_object", l:"Silent Freighter", emoji:"<i class=si-build></i>", desc:"Mysterious drifting freighter. Selectable. Federations DLC.", use:"Good for a 'derelict trade route' or first-contact mystery system (Federations)."},
+  {g:"Event Ships & Mystery Vessels", k:"mysterious_space_station_object", l:"Mysterious Space Station", emoji:"<i class=si-science></i>", desc:"Unknown alien space station. Selectable. Federations DLC.", use:"Strong pick for an unexplained alien-tech mystery system (Federations)."},
+  {g:"Event Ships & Mystery Vessels", k:"mysterious_tanker_object", l:"Mysterious Tanker", emoji:"<i class=si-build></i>", desc:"Drifting tanker vessel of uncertain origin. Distant Stars DLC.", use:"Fits a Distant Stars-flavoured exploration/mystery system."},
+  {g:"Event Ships & Mystery Vessels", k:"attack_ship_01_object", l:"Attack Ship (Derelict)", emoji:"<i class=si-sword></i>", desc:"Derelict combat vessel. Federations DLC.", use:"Signals a past combat encounter or pirate ambush — pairs well with a debris field (Federations)."},
+  {g:"Event Ships & Mystery Vessels", k:"tannhauser_gate_object", l:"Tannhauser Gate", emoji:"<i class=si-star></i>", desc:"Mysterious alien structure. Federations DLC. Decorative.", use:"Purely decorative alien-structure flavor for a mystery system (Federations)."},
   // -- Nebulae (base game) ------------------------------------------------------------
-  {g:"Nebulae", k:"nebula_L3_entity", l:"Nebula (Small)", emoji:"<i class=si-cloud></i>", desc:"Small nebula cloud. Visual-only. Decorative. Base game."},
-  {g:"Nebulae", k:"nebula_L4_entity", l:"Nebula (Medium)", emoji:"<i class=si-cloud></i>", desc:"Medium nebula cloud. Decorative. Base game."},
-  {g:"Nebulae", k:"nebula_L6_entity", l:"Nebula (Large)", emoji:"<i class=si-galaxy></i>", desc:"Large nebula cloud. Decorative. Base game."},
-  {g:"Nebulae", k:"nebula_L8_entity", l:"Nebula (Very Large)", emoji:"<i class=si-galaxy></i>", desc:"Very large nebula cloud. Used in several vanilla unique system initializers. Base game."},
-  {g:"Nebulae", k:"nebula_L10_entity", l:"Nebula (Massive)", emoji:"<i class=si-galaxy></i>", desc:"Massive nebula filling the system. Decorative. Base game."},
+  {g:"Nebulae", k:"nebula_L3_entity", l:"Nebula (Small)", emoji:"<i class=si-cloud></i>", desc:"Small nebula cloud. Visual-only. Decorative. Base game.", use:"Subtle backdrop atmosphere for a small or quiet system — visual only, no gameplay effect."},
+  {g:"Nebulae", k:"nebula_L4_entity", l:"Nebula (Medium)", emoji:"<i class=si-cloud></i>", desc:"Medium nebula cloud. Decorative. Base game.", use:"Middle-ground nebula size — good general-purpose atmosphere for most systems."},
+  {g:"Nebulae", k:"nebula_L6_entity", l:"Nebula (Large)", emoji:"<i class=si-galaxy></i>", desc:"Large nebula cloud. Decorative. Base game.", use:"Makes a system feel more dramatic/remote — good for a frontier or unexplored-feeling system."},
+  {g:"Nebulae", k:"nebula_L8_entity", l:"Nebula (Very Large)", emoji:"<i class=si-galaxy></i>", desc:"Very large nebula cloud. Used in several vanilla unique system initializers. Base game.", use:"Reserve for a marquee/unique system you want to visually stand out on the galaxy map."},
+  {g:"Nebulae", k:"nebula_L10_entity", l:"Nebula (Massive)", emoji:"<i class=si-galaxy></i>", desc:"Massive nebula filling the system. Decorative. Base game.", use:"The biggest option — use sparingly, for a single signature system rather than routine placement."},
   // -- System weather effects (system_effects.txt) -----------------------------------
-  {g:"Storms & Weather", k:"solar_storm", l:"Solar Storm", emoji:"<i class=si-sun></i>", desc:"Active solar storm visual effect. Decorative. Base game."},
-  {g:"Storms & Weather", k:"electric_storm", l:"Electric Storm", emoji:"<i class=si-event></i>", desc:"Electrical plasma storm ambient effect. Decorative. Base game."},
-  {g:"Storms & Weather", k:"magnetic_storm", l:"Magnetic Storm", emoji:"<i class=si-magnet></i>", desc:"Magnetic field disturbance effect. Decorative. Base game."},
-  {g:"Storms & Weather", k:"gravity_storm", l:"Gravity Storm", emoji:"<i class=si-galaxy></i>", desc:"Gravitational anomaly visual effect. Decorative. Base game."},
-  {g:"Storms & Weather", k:"particle_storm", l:"Particle Storm", emoji:"<i class=si-star></i>", desc:"Charged particle cloud storm. Decorative. Base game."},
-  {g:"Storms & Weather", k:"space_storm_1", l:"Space Storm (Type 1)", emoji:"<i class=si-cloud></i>", desc:"Ambient space storm, variant 1. Decorative. Base game."},
-  {g:"Storms & Weather", k:"space_storm_2", l:"Space Storm (Type 2)", emoji:"<i class=si-cloud></i>", desc:"Ambient space storm, variant 2. Base game."},
-  {g:"Storms & Weather", k:"nebula_1", l:"Nebula Effect (1)", emoji:"<i class=si-cloud></i>", desc:"System-scale nebula atmosphere effect 1. Decorative. Base game."},
-  {g:"Storms & Weather", k:"nebula_2", l:"Nebula Effect (2)", emoji:"<i class=si-cloud></i>", desc:"System-scale nebula atmosphere effect 2. Base game."},
-  {g:"Storms & Weather", k:"nebula_3", l:"Nebula Effect (3)", emoji:"<i class=si-cloud></i>", desc:"System-scale nebula atmosphere effect 3. Base game."},
-  {g:"Storms & Weather", k:"nebula_4", l:"Nebula Effect (4)", emoji:"<i class=si-cloud></i>", desc:"System-scale nebula atmosphere effect 4. Base game."},
-  {g:"Storms & Weather", k:"rare_nebula_1", l:"Rare Nebula (1)", emoji:"<i class=si-deposit></i>", desc:"Rare nebula effect variant 1. More visually distinct than standard nebulae. Base game."},
-  {g:"Storms & Weather", k:"rare_nebula_2", l:"Rare Nebula (2)", emoji:"<i class=si-deposit></i>", desc:"Rare nebula effect variant 2. Base game."},
-  {g:"Storms & Weather", k:"shroud_storm", l:"Shroud Storm", emoji:"<i class=si-circle-p></i>", desc:"Shroud energy storm visual. Used in psionic event system contexts. Base game."},
-  {g:"Storms & Weather", k:"psi_storm_1", l:"Psi Storm", emoji:"<i class=si-science></i>", desc:"Psionic storm effect. Decorative. Base game."},
+  {g:"Storms & Weather", k:"solar_storm", l:"Solar Storm", emoji:"<i class=si-sun></i>", desc:"Active solar storm visual effect. Decorative. Base game.", use:"Good for a volatile star system that feels dangerous or unstable to visit."},
+  {g:"Storms & Weather", k:"electric_storm", l:"Electric Storm", emoji:"<i class=si-event></i>", desc:"Electrical plasma storm ambient effect. Decorative. Base game.", use:"Gives a system an ominous, charged-atmosphere feel — pairs well with a crisis or hazard system."},
+  {g:"Storms & Weather", k:"magnetic_storm", l:"Magnetic Storm", emoji:"<i class=si-magnet></i>", desc:"Magnetic field disturbance effect. Decorative. Base game.", use:"Good for an anomalous or 'something's wrong here' feeling system."},
+  {g:"Storms & Weather", k:"gravity_storm", l:"Gravity Storm", emoji:"<i class=si-galaxy></i>", desc:"Gravitational anomaly visual effect. Decorative. Base game.", use:"Fits a system built around a black hole, singularity, or other exotic-space theme."},
+  {g:"Storms & Weather", k:"particle_storm", l:"Particle Storm", emoji:"<i class=si-star></i>", desc:"Charged particle cloud storm. Decorative. Base game.", use:"General-purpose hazardous-looking weather — use for any system meant to feel unwelcoming."},
+  {g:"Storms & Weather", k:"space_storm_1", l:"Space Storm (Type 1)", emoji:"<i class=si-cloud></i>", desc:"Ambient space storm, variant 1. Decorative. Base game.", use:"General atmospheric storm — pick whichever variant looks best against your star colour."},
+  {g:"Storms & Weather", k:"space_storm_2", l:"Space Storm (Type 2)", emoji:"<i class=si-cloud></i>", desc:"Ambient space storm, variant 2. Base game.", use:"Alternate look for the same purpose as variant 1 — swap for visual variety across systems."},
+  {g:"Storms & Weather", k:"nebula_1", l:"Nebula Effect (1)", emoji:"<i class=si-cloud></i>", desc:"System-scale nebula atmosphere effect 1. Decorative. Base game.", use:"Softer atmospheric haze rather than a full nebula object — good subtle backdrop."},
+  {g:"Storms & Weather", k:"nebula_2", l:"Nebula Effect (2)", emoji:"<i class=si-cloud></i>", desc:"System-scale nebula atmosphere effect 2. Base game.", use:"Same purpose as effect 1, different colour/shape — pick for visual variety."},
+  {g:"Storms & Weather", k:"nebula_3", l:"Nebula Effect (3)", emoji:"<i class=si-cloud></i>", desc:"System-scale nebula atmosphere effect 3. Base game.", use:"Same purpose as the other nebula effects — pick for visual variety."},
+  {g:"Storms & Weather", k:"nebula_4", l:"Nebula Effect (4)", emoji:"<i class=si-cloud></i>", desc:"System-scale nebula atmosphere effect 4. Base game.", use:"Same purpose as the other nebula effects — pick for visual variety."},
+  {g:"Storms & Weather", k:"rare_nebula_1", l:"Rare Nebula (1)", emoji:"<i class=si-deposit></i>", desc:"Rare nebula effect variant 1. More visually distinct than standard nebulae. Base game.", use:"Use for a system you want to visually stand out from ordinary nebula systems — a rare/special location."},
+  {g:"Storms & Weather", k:"rare_nebula_2", l:"Rare Nebula (2)", emoji:"<i class=si-deposit></i>", desc:"Rare nebula effect variant 2. Base game.", use:"Same purpose as Rare Nebula 1 — alternate look for a standout system."},
+  {g:"Storms & Weather", k:"shroud_storm", l:"Shroud Storm", emoji:"<i class=si-circle-p></i>", desc:"Shroud energy storm visual. Used in psionic event system contexts. Base game.", use:"Best for a psionic-themed system — Shroud rifts, Shroudwalker content, psychic anomalies."},
+  {g:"Storms & Weather", k:"psi_storm_1", l:"Psi Storm", emoji:"<i class=si-science></i>", desc:"Psionic storm effect. Decorative. Base game.", use:"Same psionic-flavour use case as Shroud Storm — pick whichever effect fits your system's look."},
   // -- Leviathans DLC ----------------------------------------------------------------
-  {g:"Leviathans", k:"dormant_hive_base_object", l:"Hive (Dormant Lair)", emoji:"<i class=si-life></i>", desc:"Dormant Ether Drake / swarm hive lair structure. Leviathans DLC."},
-  {g:"Leviathans", k:"dormant_hive_base_2_object", l:"Hive (Dormant Lair Alt)", emoji:"<i class=si-life></i>", desc:"Alternate dormant hive base. Leviathans DLC."},
-  {g:"Leviathans", k:"hive_asteroid_01_object", l:"Hive Asteroid (Small)", emoji:"<i class=si-rock></i>", desc:"Small asteroid colonised by swarm organism. Leviathans DLC."},
-  {g:"Leviathans", k:"hive_asteroid_02_object", l:"Hive Asteroid (Medium)", emoji:"<i class=si-rock></i>", desc:"Medium swarm-colonised asteroid. Leviathans DLC."},
-  {g:"Leviathans", k:"hive_asteroid_03_object", l:"Hive Asteroid (Large)", emoji:"<i class=si-rock></i>", desc:"Large swarm-colonised asteroid. Leviathans DLC."},
-  {g:"Leviathans", k:"dreadnought_object", l:"Automated Dreadnought (Wreck)", emoji:"<i class=si-gear></i>", desc:"Derelict Automated Dreadnought hull. Leviathans DLC."},
-  {g:"Leviathans", k:"stellarite_object", l:"Stellarite (Remains)", emoji:"<i class=si-star></i>", desc:"Remnants of the Stellarite Devourer. Leviathans DLC."},
-  {g:"Leviathans", k:"dead_enigmatic_fortress_object", l:"Enigmatic Fortress (Defeated)", emoji:"<i class=si-link></i>", desc:"The Enigmatic Fortress ambient structure after defeat. Leviathans DLC."},
-  {g:"Leviathans", k:"dimensional_horrorling_object", l:"Dimensional Horrorling", emoji:"<i class=si-eye></i>", desc:"Small Horror entity ambient object. Leviathans DLC."},
-  {g:"Leviathans", k:"small_dead_tiyanki_object", l:"Dead Tiyanki (Small)", emoji:"<i class=si-life></i>", desc:"Carcass of a small Tiyanki. Distant Stars DLC."},
-  {g:"Leviathans", k:"elderly_tiyanki_dead_object", l:"Dead Elderly Tiyanki (Named)", emoji:"<i class=si-life></i>", desc:"Selectable carcass of the Elderly Tiyanki guardian. Distant Stars DLC."},
-  {g:"Leviathans", k:"elderly_tiyanki_dead_object_no_name", l:"Dead Elderly Tiyanki (Background)", emoji:"<i class=si-life></i>", desc:"Non-selectable Elderly Tiyanki carcass. Distant Stars DLC."},
+  {g:"Leviathans", k:"dormant_hive_base_object", l:"Hive (Dormant Lair)", emoji:"<i class=si-life></i>", desc:"Dormant Ether Drake / swarm hive lair structure. Leviathans DLC.", use:"Centerpiece for a 'sleeping monster' system — pairs with hive asteroids around it for a nest scene."},
+  {g:"Leviathans", k:"dormant_hive_base_2_object", l:"Hive (Dormant Lair Alt)", emoji:"<i class=si-life></i>", desc:"Alternate dormant hive base. Leviathans DLC.", use:"Same use as the standard dormant hive — alternate visual for a second hive-themed system."},
+  {g:"Leviathans", k:"hive_asteroid_01_object", l:"Hive Asteroid (Small)", emoji:"<i class=si-rock></i>", desc:"Small asteroid colonised by swarm organism. Leviathans DLC.", use:"Scatter a few of these around a Dormant Hive Base to build out a nest/lair system."},
+  {g:"Leviathans", k:"hive_asteroid_02_object", l:"Hive Asteroid (Medium)", emoji:"<i class=si-rock></i>", desc:"Medium swarm-colonised asteroid. Leviathans DLC.", use:"Same purpose as the small hive asteroid — mix sizes for a more natural-looking asteroid cluster."},
+  {g:"Leviathans", k:"hive_asteroid_03_object", l:"Hive Asteroid (Large)", emoji:"<i class=si-rock></i>", desc:"Large swarm-colonised asteroid. Leviathans DLC.", use:"Same purpose as the other hive asteroids — mix sizes for a more natural-looking asteroid cluster."},
+  {g:"Leviathans", k:"dreadnought_object", l:"Automated Dreadnought (Wreck)", emoji:"<i class=si-gear></i>", desc:"Derelict Automated Dreadnought hull. Leviathans DLC.", use:"Good centerpiece for a machine-crisis or ancient-war themed derelict system."},
+  {g:"Leviathans", k:"stellarite_object", l:"Stellarite (Remains)", emoji:"<i class=si-star></i>", desc:"Remnants of the Stellarite Devourer. Leviathans DLC.", use:"Flavor for a system where a Stellarite Devourer was defeated — aftermath/trophy system."},
+  {g:"Leviathans", k:"dead_enigmatic_fortress_object", l:"Enigmatic Fortress (Defeated)", emoji:"<i class=si-link></i>", desc:"The Enigmatic Fortress ambient structure after defeat. Leviathans DLC.", use:"Use for a system depicting the aftermath of the Enigmatic Fortress leviathan fight."},
+  {g:"Leviathans", k:"dimensional_horrorling_object", l:"Dimensional Horrorling", emoji:"<i class=si-eye></i>", desc:"Small Horror entity ambient object. Leviathans DLC.", use:"Small, unsettling prop for a system with a Dimensional Horror / astral theme."},
+  {g:"Leviathans", k:"small_dead_tiyanki_object", l:"Dead Tiyanki (Small)", emoji:"<i class=si-life></i>", desc:"Carcass of a small Tiyanki. Distant Stars DLC.", use:"Flavor for a Tiyanki migration route or a system where space fauna was hunted/killed."},
+  {g:"Leviathans", k:"elderly_tiyanki_dead_object", l:"Dead Elderly Tiyanki (Named)", emoji:"<i class=si-life></i>", desc:"Selectable carcass of the Elderly Tiyanki guardian. Distant Stars DLC.", use:"Use as a named, surveyable centerpiece for a Tiyanki-themed mystery/lore system."},
+  {g:"Leviathans", k:"elderly_tiyanki_dead_object_no_name", l:"Dead Elderly Tiyanki (Background)", emoji:"<i class=si-life></i>", desc:"Non-selectable Elderly Tiyanki carcass. Distant Stars DLC.", use:"Background-only version — use alongside other Tiyanki props without adding another clickable object."},
   // -- Overlord DLC -----------------------------------------------------------------
-  {g:"Overlord", k:"shroud_rift_object", l:"Shroud Rift", emoji:"<i class=si-galaxy></i>", desc:"Tear in the fabric of reality. Decorative/atmospheric. Overlord DLC."},
-  {g:"Overlord", k:"ruined_quantum_catapult_object", l:"Ruined Quantum Catapult", emoji:"<i class=si-target></i>", desc:"Destroyed quantum catapult megastructure remains. Overlord DLC."},
-  {g:"Overlord", k:"enclave_shroudwalker_starbase_ruined", l:"Ruined Shroudwalker Starbase", emoji:"<i class=si-build></i>", desc:"Destroyed Shroudwalker Enclave starbase. Overlord DLC."},
-  {g:"Overlord", k:"enclave_mercenary_starbase_ruined", l:"Ruined Mercenary Starbase", emoji:"<i class=si-build></i>", desc:"Destroyed Mercenary Enclave starbase. Overlord DLC."},
-  {g:"Overlord", k:"enclave_salvager_starbase_ruined", l:"Ruined Salvager Starbase", emoji:"<i class=si-build></i>", desc:"Destroyed Salvager Enclave starbase. Overlord DLC."},
-  {g:"Overlord", k:"shroud_tunnel_object", l:"Shroud Tunnel", emoji:"<i class=si-circle-p></i>", desc:"Shroud tunnel portal object. Overlord / Shroud DLC."},
+  {g:"Overlord", k:"shroud_rift_object", l:"Shroud Rift", emoji:"<i class=si-galaxy></i>", desc:"Tear in the fabric of reality. Decorative/atmospheric. Overlord DLC.", use:"Good atmosphere for a Shroud/psionic-themed system, or near a Shroud Tunnel bypass."},
+  {g:"Overlord", k:"ruined_quantum_catapult_object", l:"Ruined Quantum Catapult", emoji:"<i class=si-target></i>", desc:"Destroyed quantum catapult megastructure remains. Overlord DLC.", use:"Decorative-only alternative to the working Quantum Catapult bypass — for a system where one was destroyed."},
+  {g:"Overlord", k:"enclave_shroudwalker_starbase_ruined", l:"Ruined Shroudwalker Starbase", emoji:"<i class=si-build></i>", desc:"Destroyed Shroudwalker Enclave starbase. Overlord DLC.", use:"Use for a system depicting a destroyed or abandoned Shroudwalker Enclave outpost."},
+  {g:"Overlord", k:"enclave_mercenary_starbase_ruined", l:"Ruined Mercenary Starbase", emoji:"<i class=si-build></i>", desc:"Destroyed Mercenary Enclave starbase. Overlord DLC.", use:"Use for a system depicting a destroyed or abandoned Mercenary Enclave outpost."},
+  {g:"Overlord", k:"enclave_salvager_starbase_ruined", l:"Ruined Salvager Starbase", emoji:"<i class=si-build></i>", desc:"Destroyed Salvager Enclave starbase. Overlord DLC.", use:"Use for a system depicting a destroyed or abandoned Salvager Enclave outpost."},
+  {g:"Overlord", k:"shroud_tunnel_object", l:"Shroud Tunnel", emoji:"<i class=si-circle-p></i>", desc:"Shroud tunnel portal object. Overlord / Shroud DLC.", use:"Decorative companion piece for a system that also has the Shroud Tunnel bypass."},
   // -- Grand Archive DLC ------------------------------------------------------------
-  {g:"Grand Archive", k:"voidworm_broken_nest", l:"Voidworm Broken Nest", emoji:"<i class=si-life></i>", desc:"Destroyed voidworm nest. Grand Archive DLC."},
-  {g:"Grand Archive", k:"voidworm_carcass_01_object", l:"Voidworm Carcass", emoji:"<i class=si-life></i>", desc:"Dead voidworm body. Grand Archive DLC."},
+  {g:"Grand Archive", k:"voidworm_broken_nest", l:"Voidworm Broken Nest", emoji:"<i class=si-life></i>", desc:"Destroyed voidworm nest. Grand Archive DLC.", use:"Use for an aftermath system where a Voidworm nest was cleared out."},
+  {g:"Grand Archive", k:"voidworm_carcass_01_object", l:"Voidworm Carcass", emoji:"<i class=si-life></i>", desc:"Dead voidworm body. Grand Archive DLC.", use:"Pairs with the broken nest for a more complete 'voidworm was here' scene."},
   // -- Machine Age DLC --------------------------------------------------------------
-  {g:"Machine Age", k:"horizon_needle_dive", l:"Horizon Needle (Worm-in-Waiting)", emoji:"<i class=si-life></i>", unique:true, desc:"The Worm-in-Waiting entity. Machine Age DLC. Unique -- only one per game. Triggers the Horizon Signal event chain."},
+  {g:"Machine Age", k:"horizon_needle_dive", l:"Horizon Needle (Worm-in-Waiting)", emoji:"<i class=si-life></i>", unique:true, desc:"The Worm-in-Waiting entity. Machine Age DLC. Unique -- only one per game. Triggers the Horizon Signal event chain.", use:"This is a scripted event prop, not a hand-placement object — vanilla only spawns it mid-crisis-event. Avoid placing it manually; it won't trigger the story chain on its own."},
   // -- Megacorp DLC -----------------------------------------------------------------
-  {g:"Megacorp", k:"galactic_market_station", l:"Galactic Market Station", emoji:"<i class=si-build></i>", desc:"The Galactic Market station object. Megacorp DLC."},
+  {g:"Megacorp", k:"galactic_market_station", l:"Galactic Market Station", emoji:"<i class=si-build></i>", desc:"The Galactic Market station object. Megacorp DLC.", use:"Use to signal a major trade-hub system in your mod's lore (Megacorp flavor)."},
   // -- Nemesis DLC ------------------------------------------------------------------
-  {g:"Nemesis", k:"crisis_sphere_1", l:"Crisis Sphere (Stage 1)", emoji:"<i class=si-circle-r></i>", desc:"End-game crisis sphere stage 1. Nemesis DLC."},
-  {g:"Nemesis", k:"crisis_sphere_2", l:"Crisis Sphere (Stage 2)", emoji:"<i class=si-circle-r></i>", desc:"End-game crisis sphere stage 2. Nemesis DLC."},
-  {g:"Nemesis", k:"crisis_sphere_3", l:"Crisis Sphere (Stage 3)", emoji:"<i class=si-circle-r></i>", desc:"End-game crisis sphere stage 3 (maximum). Nemesis DLC."},
+  {g:"Nemesis", k:"crisis_sphere_1", l:"Crisis Sphere (Stage 1)", emoji:"<i class=si-circle-r></i>", desc:"End-game crisis sphere stage 1. Nemesis DLC.", use:"Reserve for a system meant to look overrun by an end-game crisis — early stage."},
+  {g:"Nemesis", k:"crisis_sphere_2", l:"Crisis Sphere (Stage 2)", emoji:"<i class=si-circle-r></i>", desc:"End-game crisis sphere stage 2. Nemesis DLC.", use:"Same as Stage 1 but for a more advanced-looking crisis system."},
+  {g:"Nemesis", k:"crisis_sphere_3", l:"Crisis Sphere (Stage 3)", emoji:"<i class=si-circle-r></i>", desc:"End-game crisis sphere stage 3 (maximum). Nemesis DLC.", use:"The most severe stage — use for the crisis's epicenter/home system."},
 ];
 
 
@@ -10420,9 +10460,12 @@ const PLANET_INIT_FLAGS = [
   {g:"Nemesis", k:"add_modifier = { modifier = pm_natural_beauty days = -1 }",    l:"<i class=si-mountain></i> Modifier: Natural Beauty",      desc:"Exceptional scenery. Small happiness and amenity bonus. Permanent."},
   {g:"Nemesis", k:"add_modifier = { modifier = pm_mineral_rich days = -1 }",      l:"<i class=si-pick></i> Modifier: Mineral Rich",         desc:"Rich subsurface minerals. Bonus mining output. Permanent."},
   {g:"Nemesis", k:"add_modifier = { modifier = pm_ultra_rich days = -1 }",        l:"<i class=si-deposit></i> Modifier: Ultra Rich",           desc:"Exceptionally abundant minerals. Large mining bonus. Rare. Permanent."},
-  {g:"Nemesis", k:"add_modifier = { modifier = pm_energy_rich days = -1 }",       l:"<i class=si-event></i> Modifier: Energy Rich",          desc:"Energy-rich world. Bonus generator output. Permanent."},
-  {g:"Nemesis", k:"add_modifier = { modifier = pm_underground_resources days = -1 }",l:"<i class=si-rock></i> Modifier: Underground Resources",desc:"Deep underground reserves. Mining and energy bonus. Permanent."},
-  {g:"Nemesis", k:"add_modifier = { modifier = pm_strip_mined days = -1 }",       l:"<i class=si-build></i> Modifier: Strip Mined",          desc:"Stripped world. Mining bonus but habitability penalty. Permanent."},
+  // pm_energy_rich, pm_underground_resources, pm_strip_mined REMOVED (v0.40y) — none of these
+  // three keys exist anywhere in v4.4.4 common/planet_modifiers or common/static_modifiers
+  // (confirmed via full-text search); add_modifier would have force-written a broken
+  // reference into the exported mod. No safe vanilla substitute carries the same specific
+  // flavour without its own untested class/trigger gating, so these were removed rather
+  // than guessed at.
   {g:"Nemesis", k:"add_modifier = { modifier = pm_titanic_life days = -1 }",      l:"<i class=si-life></i> Modifier: Titanic Life",         desc:"Giant fauna. District penalty until cleared. Triggers related events. Permanent."},
   {g:"Nemesis", k:"add_modifier = { modifier = pm_tidal_locked days = -1 }",      l:"<i class=si-moon></i> Modifier: Tidally Locked",       desc:"Permanent day side. Energy bonus but habitability penalty. Permanent."},
   {g:"Nemesis", k:"add_modifier = { modifier = pm_atmospheric_hallucinogen days = -1 }",l:"<i class=si-galaxy></i> Modifier: Hallucinogen Atmosphere",desc:"Psychoactive atmosphere. Unity bonus, stability penalty. Permanent."},
@@ -12558,6 +12601,25 @@ function openHelp(topic){
   openModal(h.title,'help',body,true);
 
 }
+// v0.40w: shared click-to-open description popup for quick-add pickers (system objects,
+// bypasses, ambient objects) — the (?) icon on each picker item calls this instead of
+// relying on hover-only title tooltips, which don't work on touch devices.
+function showObjHelp(emoji,title,tags,desc,extra){
+  const tagsHTML=(tags||[]).filter(Boolean).map(function(t){
+    return '<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;background:rgba(255,160,50,0.15);color:#ffa032;border:1px solid rgba(255,160,50,0.3)">'+t+'</span>';
+  }).join(' ');
+  const extraHTML=(extra||[]).filter(Boolean).map(function(e){
+    return '<div style="font-size:11px;color:var(--green);margin-top:8px;line-height:1.5">→ '+e+'</div>';
+  }).join('');
+  const body='<div style="display:flex;align-items:flex-start;gap:10px">'
+    +'<span style="font-size:24px;flex-shrink:0">'+(emoji||'')+'</span>'
+    +'<div style="min-width:0">'
+    +(tagsHTML?'<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px">'+tagsHTML+'</div>':'')
+    +'<div style="font-size:12px;line-height:1.6;color:var(--t2)">'+(desc||'')+'</div>'
+    +extraHTML
+    +'</div></div>';
+  openModal(title,'help',body,true);
+}
 function applyBuilderToSystem(sysId){
   const pb=S.planetBuilder;if(!pb)return;
   const sys=S.systems.find(s=>s.id===sysId);if(!sys)return;
@@ -14100,7 +14162,7 @@ const PLANET_EVENT_CHAINS = [
     icon:'<i class=si-bed></i>',
     category:'Colonisation',
     dlc:null,
-    flags:['set_planet_flag = has_ancient_cryo_chambers','add_modifier = { modifier = pm_ancient_cryo_chamber days = -1 }'],
+    flags:['set_planet_flag = has_ancient_cryo_chambers'], // v0.40y: pm_ancient_cryo_chamber removed — not a real modifier in v4.4.4 (confirmed, zero hits anywhere in common/); the flag + building_ancient_cryo_chamber (see warning) are the real hooks.
     desc:'Ancient cryogenic chambers are discovered on colonisation. Sleeping soldiers from a lost war await reactivation.',
     effects:'On colonisation: chain offering to revive dormant soldiers. Reward: free army units or tech.',
     warning:'Requires add_building = building_ancient_cryo_chamber to properly seed the vanilla chain.',
@@ -18003,7 +18065,7 @@ function renderMobile(){
               <div style="flex:1;min-width:140px">
                 <div class="lbl" style="margin-bottom:4px">System Flags</div>
                 <div style="display:flex;flex-wrap:wrap;gap:4px">
-                  ${['empire_home_system','lcluster_system','crisis_sphere','caravaneer_home','terminal_system'].map(f=>{const has=(sys.flags||[]).includes(f);return `<button class="dchip${has?' has':''}" data-mob-syflag="${f}" style="font-size:10px">${f.replace(/_/g,' ')}</button>`;}).join('')}
+                  ${['empire_home_system','lcluster','crisis_sphere_system','caravaneer_home','terminal_egress'].map(f=>{const has=(sys.flags||[]).includes(f);return `<button class="dchip${has?' has':''}" data-mob-syflag="${f}" style="font-size:10px">${f.replace(/_/g,' ')}</button>`;}).join('')}
                 </div>
               </div>
             </div>
@@ -18021,7 +18083,7 @@ function renderMobile(){
               <div class="lbl">Ambient Objects <span class="tag tag-ghost" style="font-size:10px">${(sys.ambient_objects||[]).length}</span></div>
             </div>
             <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px">
-              ${AMBIENT_OBJECTS.map(a=>{const count=(sys.ambient_objects||[]).filter(x=>x===a.k).length;return `<button class="dchip${count?' has':''}" data-mob-ambient="${a.k}" title="${a.desc} — tap to add, long-press to remove">${a.emoji} ${a.l}${count?' ×'+count:''}</button>`;}).join('')}
+              ${AMBIENT_OBJECTS.map(a=>{const count=(sys.ambient_objects||[]).filter(x=>x===a.k).length;const _useLine=a.use?`\n\nSuggested use: ${a.use}`:'';return `<button class="dchip${count?' has':''}" data-mob-ambient="${a.k}" title="${a.desc}${_useLine} — tap to add, long-press to remove">${a.emoji} ${a.l}${count?' ×'+count:''}</button>`;}).join('')}
             </div>
             <div style="font-size:10px;color:var(--t4)">Tap to add. Tap again to remove one.</div>
           </div>
@@ -18305,6 +18367,7 @@ function renderMobile(){
           ?sys.asteroid_belts.reduce((a,b)=>Math.abs(a.radius-baseOd)<Math.abs(b.radius-baseOd)?a:b).radius+Math.floor(Math.random()*16-8)
           :baseOd;
         const p={id:uid(),name:baseName+" "+i,cls,size:+sizeStr,od:Math.max(15,od),oa:Math.floor(Math.random()*360),hw:false,moons:[],deps:[...(objDef.deps||[])],blds:[],initFlags:[...(objDef.initFlags||[])]};
+        if(objDef.prevent_anomaly) p.prevent_anomaly=true;
         Object.assign(p,placeOrbit(sys,p.od));
         sys.planets.push(p);S.activePlanet=p.id;save();sheet.remove();renderMobile();
       }));
@@ -19456,7 +19519,7 @@ function renderLeftPane(sys){
     <div style="border-top:1px solid var(--b1);padding:8px 14px 4px">
       <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);margin-bottom:8px">Bypasses <span class="tag tag-ghost" style="font-size:10px">${(sys.bypasses||[]).length}</span></div>
       <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px">
-        ${BYPASSES.map(b=>{const has=(sys.bypasses||[]).some(x=>(x.type||x)===b.k);return `<button class="dchip${has?' has':''}" data-lp-bypass="${b.k}" title="${b.desc}">${b.emoji} ${b.l}</button>`;}).join('')}
+        ${BYPASSES.map(b=>{const has=(sys.bypasses||[]).some(x=>(x.type||x)===b.k);return `<span style="display:inline-flex;gap:2px;align-items:center"><button class="dchip${has?' has':''}" data-lp-bypass="${b.k}" title="${b.desc}">${b.emoji} ${b.l}</button><button class="help-icon" data-help-bypass="${b.k}" title="More info">?</button></span>`;}).join('')}
       </div>
       <div style="font-size:10px;color:var(--t4);margin-bottom:10px">Toggle on/off. Wormholes pair randomly at game start.</div>
 
@@ -19474,7 +19537,7 @@ function renderLeftPane(sys){
             return `<details data-ao-grp="${g}"${openG?' open':''} style="margin-bottom:4px;border:1px solid var(--b1);border-radius:8px;padding:4px 8px">
               <summary style="font-size:10px;font-weight:700;color:var(--t3);cursor:pointer;list-style:none;padding:2px 0">▸ ${g} <span class="tag tag-ghost" style="font-size:9px">${items.length}</span>${placedN?` <span class="tag tag-ok" style="font-size:9px">${placedN} placed</span>`:''}</summary>
               <div style="display:flex;flex-wrap:wrap;gap:5px;padding:4px 0">
-                ${items.map(a=>{const count=(sys.ambient_objects||[]).filter(x=>(x.type||x)===a.k).length;const unique=a.unique;return `<button class="btn btn-ghost btn-sm${count&&unique?' active':''}" data-lp-ambient="${a.k}" title="${a.desc}${unique?' Unique — do not place multiple':' — click to add, right-click to remove'}" style="font-size:11px">${a.emoji} ${a.l}${count>1?' ×'+count:count?' <i class=si-ok></i>':''}</button>`;}).join('')}
+                ${items.map(a=>{const count=(sys.ambient_objects||[]).filter(x=>(x.type||x)===a.k).length;const unique=a.unique;const _useLine=a.use?`\n\nSuggested use: ${a.use}`:'';return `<span style="display:inline-flex;gap:2px;align-items:center"><button class="btn btn-ghost btn-sm${count&&unique?' active':''}" data-lp-ambient="${a.k}" title="${a.desc}${_useLine}${unique?'\n\nUnique — do not place multiple':' — click to add, right-click to remove'}" style="font-size:11px">${a.emoji} ${a.l}${count>1?' ×'+count:count?' <i class=si-ok></i>':''}</button><button class="help-icon" data-help-ambient="${a.k}" title="More info" style="font-size:9px">?</button></span>`;}).join('')}
               </div>
             </details>`;
           }).join('');
@@ -19490,9 +19553,9 @@ function renderLeftPane(sys){
   var bodies=SYSTEM_OBJECTS.filter(function(o){return o.cat==='body';});
   var structs=SYSTEM_OBJECTS.filter(function(o){return o.cat==='structure';});
   var out='<div style="font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--t4);margin-bottom:3px">Bodies</div>';
-  out+=bodies.map(function(o){return '<button class="btn btn-ghost btn-sm" data-lp-quick="'+o.cls+':'+o.size+':'+o.label+':body" title="'+o.note+'" style="font-size:10px;padding:3px 7px">'+o.emoji+' '+o.label+'</button>';}).join('');
+  out+=bodies.map(function(o){return '<span style="display:inline-flex;gap:2px;align-items:center"><button class="btn btn-ghost btn-sm" data-lp-quick="'+o.cls+':'+o.size+':'+o.label+':body" title="'+o.note+'" style="font-size:10px;padding:3px 7px">'+o.emoji+' '+o.label+'</button><button class="help-icon" data-help-sysobj="'+o.cls+':'+o.label+'" title="More info" style="font-size:9px">?</button></span>';}).join('');
   out+='<div style="font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--t4);margin-top:6px;margin-bottom:3px">Scripted Structures</div>';
-  out+=structs.map(function(o){return '<button class="btn btn-ghost btn-sm" data-lp-quick="'+o.cls+':'+o.size+':'+o.label+':structure" title="'+o.note+'" style="font-size:10px;padding:3px 7px;border-color:rgba(255,180,50,.3);color:var(--amber)">'+o.emoji+' '+o.label+'</button>';}).join('');
+  out+=structs.map(function(o){return '<span style="display:inline-flex;gap:2px;align-items:center"><button class="btn btn-ghost btn-sm" data-lp-quick="'+o.cls+':'+o.size+':'+o.label+':structure" title="'+o.note+'" style="font-size:10px;padding:3px 7px;border-color:rgba(255,180,50,.3);color:var(--amber)">'+o.emoji+' '+o.label+'</button><button class="help-icon" data-help-sysobj="'+o.cls+':'+o.label+'" title="More info" style="font-size:9px">?</button></span>';}).join('');
   return out;
 })()}
         </div>
@@ -19513,8 +19576,8 @@ function renderLeftPane(sys){
           <div class="lbl">System Flags</div>
           <div class="field-desc" style="margin-bottom:4px;line-height:1.5">Markers set with <code>set_star_flag</code> — they do nothing by themselves, but events and scripts check them. Hover a flag for what it means; add your own for custom event scripting.</div>
           <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">
-            ${['empire_home_system','lcluster_system','crisis_sphere','caravaneer_home','terminal_system'].map(f=>{const has=(sys.flags||[]).includes(f);return `<button class="dchip${has?' has':''}" data-lp-flag="${f}" title="${(typeof SYS_FLAG_INFO!=='undefined'&&SYS_FLAG_INFO[f])||f}" style="font-size:10px">${f.replace(/_/g,' ')}</button>`;}).join('')}
-            ${(sys.flags||[]).filter(f=>!['empire_home_system','lcluster_system','crisis_sphere','caravaneer_home','terminal_system'].includes(f)).map(f=>`<button class="dchip has" data-lp-flag="${f}" title="Custom flag — click to remove" style="font-size:10px;font-family:monospace">${f} ×</button>`).join('')}
+            ${['empire_home_system','lcluster','crisis_sphere_system','caravaneer_home','terminal_egress'].map(f=>{const has=(sys.flags||[]).includes(f);return `<button class="dchip${has?' has':''}" data-lp-flag="${f}" title="${(typeof SYS_FLAG_INFO!=='undefined'&&SYS_FLAG_INFO[f])||f}" style="font-size:10px">${f.replace(/_/g,' ')}</button>`;}).join('')}
+            ${(sys.flags||[]).filter(f=>!['empire_home_system','lcluster','crisis_sphere_system','caravaneer_home','terminal_egress'].includes(f)).map(f=>`<button class="dchip has" data-lp-flag="${f}" title="Custom flag — click to remove" style="font-size:10px;font-family:monospace">${f} ×</button>`).join('')}
           </div>
           <input id="lp-flag-custom" placeholder="+ custom flag, press Enter (a-z 0-9 _)" style="width:100%;font-size:10px;font-family:monospace;margin-top:5px"/>
           <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2);cursor:pointer;margin-top:6px"><input type="checkbox" id="lp-prevent-anomalies" ${sys.prevent_anomalies?"checked":""}> <span>Prevent anomalies <span style="color:var(--t4)">(system-wide)</span></span></label>
@@ -19563,10 +19626,17 @@ function renderLeftPane(sys){
   document.querySelectorAll("[data-lp-quick]").forEach(btn=>btn.addEventListener("click",()=>{
     if(!sys) return;
     const [cls,size,label,cat]=btn.dataset.lpQuick.split(':');
+    // v0.40w fix: this handler used to only set cls/size/name and silently drop the
+    // deps/initFlags/prevent_anomaly defined on the SYSTEM_OBJECTS entry — the modal-based
+    // Add Object flow and the mobile quick-add both looked this up correctly, this one didn't.
+    const objDef=SYSTEM_OBJECTS.find(o=>o.cls===cls&&o.label===label)||SYSTEM_OBJECTS.find(o=>o.cls===cls)||{deps:[],initFlags:[]};
     const p=mkPlanet(sys.planets.length+1);
     p.cls=cls; p.size=parseInt(size)||10; p.name=label+' '+(sys.planets.length+1);
     p.od=Math.min(200,60+(sys.planets.length*25)); p.oa=Math.round(Math.random()*360);
     p.cat=cat||'body';
+    p.deps=[...(objDef.deps||[])];
+    p.initFlags=[...(objDef.initFlags||[])];
+    if(objDef.prevent_anomaly) p.prevent_anomaly=true;
     sys.planets.push(p); save(); renderAll();
   }));
   document.querySelectorAll("[data-lp-bypass]").forEach(btn=>btn.addEventListener("click",()=>{
@@ -19594,6 +19664,37 @@ function renderLeftPane(sys){
       if(i!=null){sys.ambient_objects.splice(i,1);save();renderAll();}
     });
   });
+  // v0.40w: (?) help-icon handlers for the quick-add pickers — click-to-view descriptions
+  // that work on touch devices, instead of relying on hover-only title tooltips.
+  document.querySelectorAll("[data-help-bypass]").forEach(btn=>btn.addEventListener("click",e=>{
+    e.stopPropagation();
+    const def=BYPASSES.find(x=>x.k===btn.dataset.helpBypass);
+    if(!def)return;
+    const tags=[def.dlc?def.dlc+' DLC':null, (def.spawn||'')==='megastructure'?'Megastructure bypass':'Wormhole bypass'];
+    const extra=[def.effect?('Effect: '+def.effect):null, def.pairs&&def.pairs.note?('Pairing: '+def.pairs.note):null].concat((def.warns||[]).map(w=>'Warning: '+w));
+    showObjHelp(def.emoji,def.l,tags,def.desc,extra);
+  }));
+  document.querySelectorAll("[data-help-ambient]").forEach(btn=>btn.addEventListener("click",e=>{
+    e.stopPropagation();
+    const def=AMBIENT_OBJECTS.find(x=>x.k===btn.dataset.helpAmbient);
+    if(!def)return;
+    const tags=[def.g||null, def.unique?'Unique — one per game':null];
+    const extra=[def.use?('Suggested use: '+def.use):null];
+    showObjHelp(def.emoji,def.l,tags,def.desc,extra);
+  }));
+  document.querySelectorAll("[data-help-sysobj]").forEach(btn=>btn.addEventListener("click",e=>{
+    e.stopPropagation();
+    const [cls,label]=btn.dataset.helpSysobj.split(':');
+    const def=SYSTEM_OBJECTS.find(o=>o.cls===cls&&o.label===label)||SYSTEM_OBJECTS.find(o=>o.cls===cls);
+    if(!def)return;
+    const tags=[def.cat==='structure'?'Scripted structure':'Body', def.cls];
+    const extra=[
+      (def.deps&&def.deps.length)?('Default deposits: '+def.deps.join(', ')):'No default deposits',
+      (def.initFlags&&def.initFlags.length)?('Default init flags: '+def.initFlags.join(', ')):null,
+      def.prevent_anomaly?'Prevent Anomaly is on by default for this preset.':null
+    ];
+    showObjHelp(def.emoji,def.label,tags,def.note,extra);
+  }));
   document.querySelectorAll("[data-lp-flag]").forEach(btn=>btn.addEventListener("click",()=>{
     if(!sys.flags)sys.flags=[];
     const k=btn.dataset.lpFlag;
@@ -20133,7 +20234,8 @@ function renderMidPane(sys,ap){
             <div style="font-size:11px;color:var(--t4);margin-top:2px">${_def.desc}</div>
           </div>
         </div>
-        <div class="notice n-ghost" style="font-size:11px;margin-bottom:14px">
+        ${_def.use?`<div style="font-size:11px;color:var(--green);margin:8px 0 0;line-height:1.4">→ ${_def.use}</div>`:''}
+        <div class="notice n-ghost" style="font-size:11px;margin-bottom:14px;margin-top:10px">
           Ambient objects are placed via <code>create_ambient_object</code> in the system's <code>init_effect</code>.
           Position is relative to the star.
         </div>
@@ -21330,6 +21432,7 @@ function renderRightPane(sys,ap){
         blds:[],initFlags:[...(objDef.initFlags||[])],
         cat:objDef.cat||'body'
       };
+      if(objDef.prevent_anomaly) p.prevent_anomaly=true;
       Object.assign(p,placeOrbit(sys,p.od));
       sys.planets.push(p);S.activePlanet=p.id;save();renderAll();
     }));
@@ -22699,6 +22802,7 @@ const ORIGIN_DETAILS = {
     export_key:"origin_subterranean"
   },
 };
+
 // ══ ORIGIN BUILDER ════════════════════════════════════════════════════════════
 // Generates: common/governments/civics/custom_origins.txt
 //            common/on_actions/custom_origin_on_actions.txt  (on_actions hook only)
@@ -26499,7 +26603,7 @@ function wizardStep_System(w){
         </div>
         <div style="font-size:11px;font-weight:700;color:var(--t3);margin-bottom:6px">Ambient Objects</div>
         <div style="display:flex;flex-wrap:wrap;gap:5px">
-          ${AMBIENT_OBJECTS.map(a=>{const count=(sys.ambient_objects||[]).filter(x=>x===a.k).length;return `<button class="btn btn-ghost btn-sm" data-wiz-ambient="${a.k}" title="${a.desc} — click add / right-click remove" style="font-size:11px">${a.emoji} ${a.l}${count?' ×'+count:''}</button>`;}).join('')}
+          ${AMBIENT_OBJECTS.map(a=>{const count=(sys.ambient_objects||[]).filter(x=>x===a.k).length;const _useLine=a.use?`\n\nSuggested use: ${a.use}`:'';return `<button class="btn btn-ghost btn-sm" data-wiz-ambient="${a.k}" title="${a.desc}${_useLine} — click add / right-click remove" style="font-size:11px">${a.emoji} ${a.l}${count?' ×'+count:''}</button>`;}).join('')}
         </div>
       </div>
     </details>
