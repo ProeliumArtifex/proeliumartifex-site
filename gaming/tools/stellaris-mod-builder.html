@@ -8080,6 +8080,21 @@ Generator: compendium_gen.py v1.0.0
 */
 // ══ CHANGELOG ════════════════════════════════════════════════════════════════
 const CHANGELOG = [
+  {v:"0.41a", date:"2026-07-05", milestone:false, notes:[
+    "[Meta] VERSION PROMOTION: 0.40z promoted to 0.41a — the 0.40 patch series (0.40a–0.40z, 26 releases) is closed out under the 0.41 milestone below. This release's feature set (real wildlife modifiers, customisable pre-sapients/primitives, randomiser star deposits + special bodies, auto-select-on-add) was substantial enough to warrant the minor bump rather than another 0.40 letter.",
+    "[Data][New] REAL WILDLIFE MODIFIERS (user feedback: \"wildlife is more than blockers\"): added the real vanilla static-modifier family for fauna presence — dangerous_wildlife, docile_fauna, subterranean_wildlife, titanic_life (all verified against common/planet_modifiers + common/static_modifiers in v4.4.4, each with real gameplay stats). These sit in Planet Init Flags alongside the existing d_dangerous_wildlife_blocker deposit (Features & Deposits) — the deposit is the colonisation obstacle/army-clear event, the modifiers are the planet-wide flavour/stat effect. Both can be combined.",
+    "[Export][New] PRE-SAPIENTS / PRIMITIVES NOW CUSTOMISABLE ON ADD (user feedback): the Pre-Sapient Species flag now shows an inline 'Uplift species class' dropdown (MAM/REP/AVI/ART/MOL/FUN/PLANT/LITHOID/AQUATIC/TOX/INF, matching vanilla's spawn_presapient_species_randomizer_effect options) that sets UPLIFT_TO in the exported create_generic_presapient_species -- previously hardcoded to MAM. Added to both the Planet Builder tab and the System Editor's planet panel (which was previously missing the full Species Configuration panel entirely for primitives too -- now present in both places).",
+    "[Randomiser][Fix] PRE-SAPIENT ROLL REDUCED 8% -> 4% (user feedback: too common relative to primitives): system randomiser's per-habitable-planet species roll for Pre-Sapient Species halved.",
+    "[Randomiser][New] STAR DEPOSITS + SPECIAL BODIES (user feedback: randomiser only ever touched planets): randomSystem() now also seeds sys.starDeposits (~55% of systems get 1-2, weighted toward common energy/minerals/research categories over rare zro/dark-matter/astral-threads, low steps favoured) and has a ~12% chance per system of placing one of the SYSTEM_OBJECTS special bodies (ship graveyards, ruins, shrouded worlds, etc.) alongside the normal planet roll, using the same deps/initFlags copy pattern as the manual quick-add spawners.",
+    "[UI][Fix] NEWLY ADDED OBJECTS NOW AUTO-SELECT (user-reported: \"once an ambient object, or anything else is added, it needs to be clickable... and display the edit screen in the middle\"): SVG click-to-edit and the right-pane list rows already worked for existing bypasses/ambient objects, but the three add handlers (left-pane picker, right-pane 'add more', quick-add body) never selected the newly created object, so the mid-pane editor didn't appear until you clicked it again. All three now set S.activeBypass/activeAmbient/activePlanet to the new object's id immediately, matching how Add Planet already behaved.",
+  ]},
+  {v:"0.41", date:"2026-07-05", milestone:true, notes:[
+    "[Milestone] PRE-SAPIENTS/WILDLIFE EXPORT OVERHAUL: closes out the 0.40 series (26 releases) with a full-depth fix of the pre-sapients export crash and everything adjacent to it — replaced the fabricated generate_pre_sapients_on_planet scripted effect with vanilla's real create_generic_presapient_species mechanism (now customisable by UPLIFT_TO class instead of hardcoded MAM), added the real wildlife static-modifier family in place of the fabricated generate_wildlife_on_planet effect, closed a gap where the randomiser never touched star deposits or the SYSTEM_OBJECTS special-body pool, and fixed a UI bug where newly added bypasses/ambient objects/quick-add bodies didn't auto-select their mid-pane editor.",
+  ]},
+  {v:"0.40z", date:"2026-07-05", milestone:false, notes:[
+    "[Export][Fix] CRASH: INVALID SCRIPTED EFFECT (user-reported in-game load error from a tech demo build: \"Invalid scripted effect: generate_pre_sapients_on_planet\"): generate_pre_sapients_on_planet is not a real scripted effect anywhere in v4.4.4 -- it was being written literally into init_effect and crashing the game on load for any planet using the Pre-Sapient Species option (manually via the picker, via the Pre-Sapient event-chain seed, or via the ~8% random roll in the system randomiser). genInit() (13_gen-functions.js) now converts this flag into vanilla's own real mechanism instead: save_event_target_as = pre_sapient_planet followed by create_generic_presapient_species = { UPLIFT_TO = MAM }, which is the actual pattern vanilla uses to place a pre-sapient species and already sets its own flags.",
+    "[Data][Fix] CLEANED UP TWO ADJACENT FAKES found while fixing the crash: removed the 'Flag: Has Pre-Sapients' picker entry (set_planet_flag = has_pre_sapients) -- redundant now that the real effect sets its own flags, and was never doing anything on its own. Removed 'Indigenous Wildlife' (generate_wildlife_on_planet = yes) entirely -- also not a real scripted effect in v4.4.4; native wildlife/creatures are placed via deposit blockers (already offered elsewhere under Features & Deposits), not an init flag. Both fake flags also stripped from the Pre-Sapient event-chain seed and the system randomiser's species roll (12_ambient-objects.js, 18_planet-event-chain-seeds.js, 26_randomiser-serialisation.js).",
+  ]},
   {v:"0.40y", date:"2026-07-05", milestone:false, notes:[
     "[Data][Fix] PRE-DEMO SWEEP vs v4.4.4 (full extraction of every d_*/pc_*/pm_*/building_*/district_* key referenced in the planet+system data files, cross-checked against every matching vanilla common/ definition): found 4 planet modifiers offered in the UI that do not exist anywhere in the game -- pm_energy_rich, pm_underground_resources, pm_strip_mined (Planet Init Flags picker) and pm_ancient_cryo_chamber (Sleeping Soldiers event-chain seed). All 4 would have force-written a broken add_modifier reference into an exported mod. The 3 picker entries were removed outright rather than guessing at an unverified substitute; the event-chain seed keeps its real set_planet_flag and building_ancient_cryo_chamber warning, just without the fake modifier line.",
     "[Data][Fix] SYSTEM FLAG PICKER HAD 3 WRONG KEYS: lcluster_system, crisis_sphere and terminal_system were never the actual has_star_flag values any vanilla script checks -- verified real ones are lcluster, crisis_sphere_system (vanilla appends the owning empire's id: has_star_flag = crisis_sphere_system@root.owner, noted in the tooltip) and terminal_egress (Machine Age crisis, not L-Cluster). Every place that reads/writes these flags (desktop, mobile, SYS_FLAG_INFO tooltips) is now consistent with the corrected keys.",
@@ -10415,12 +10430,33 @@ const ASTEROID_BELT_TYPES = [
 
 const PLANET_INIT_FLAGS = [
   // ── Species & Population ─────────────────────────────────────────────────
+  // v0.40z fix: generate_pre_sapients_on_planet is NOT a real scripted effect in v4.4.4 — it
+  // caused an in-game "Invalid scripted effect" load error. The tool now exports the real vanilla
+  // mechanism instead (save_event_target_as = pre_sapient_planet + create_generic_presapient_species),
+  // which sets its own flags — a manual "Flag: Has Pre-Sapients" entry is no longer needed and has
+  // been removed, as has "Indigenous Wildlife" (generate_wildlife_on_planet is also not a real
+  // effect — for native wildlife use a deposit blocker in Features & Deposits instead).
   {g:"Nemesis", k:"generate_pre_sapients_on_planet = yes",
    l:"<i class=si-life></i> Pre-Sapient Species",
-   desc:"Places a pre-sapient species on the planet. They are not a civilisation — no empire, no First Contact. Can be uplifted to full sapience via the Uplift decision (requires Ascension Perk). Cannot place on homeworld."},
-  {g:"Nemesis", k:"generate_wildlife_on_planet = yes",
-   l:"<i class=si-life></i> Indigenous Wildlife",
-   desc:"Populates the planet with native wildlife — type selected randomly by the game at start. Some is hostile and triggers army attack events on colonisation. To place specific creatures (titanic beast, xenomorph hive etc.) use their deposit blockers in Features & Deposits instead."},
+   desc:"Places a pre-sapient species on the planet using vanilla's own generic uplift-target mechanism (save_event_target_as + create_generic_presapient_species). They are not a civilisation — no empire, no First Contact. Can be uplifted to full sapience via the Uplift decision (requires Ascension Perk). Cannot place on homeworld."},
+  // v0.40za: "wildlife is more than the deposit blocker" (user feedback) — added the real
+  // static-modifier family that represents fauna presence on a planet, verified against
+  // v4.4.4 common/planet_modifiers/00_planet_modifiers.txt (spawn-weight wrapper) + matching
+  // common/static_modifiers/*.txt (actual gameplay effect). These are additive with the
+  // d_dangerous_wildlife_blocker deposit (Features & Deposits tab) — the modifier is the
+  // planet-wide flavour/stat effect, the deposit is the colonisation obstacle army-clear event.
+  {g:"Nemesis", k:"add_modifier = { modifier = dangerous_wildlife days = -1 }",
+   l:"<i class=si-life></i> Modifier: Dangerous Wildlife",
+   desc:"Real vanilla static modifier (dangerous_wildlife): -10% habitability, -5% happiness, +20% society research from jobs. Represents hostile native fauna. Pair with the d_dangerous_wildlife_blocker deposit (Features & Deposits) for the colonisation-clearing event too."},
+  {g:"Nemesis", k:"add_modifier = { modifier = docile_fauna days = -1 }",
+   l:"<i class=si-life></i> Modifier: Docile Fauna",
+   desc:"Real vanilla static modifier (docile_fauna): +10% habitability, +5% happiness, +25% society research from jobs. Represents harmless native wildlife — the friendly counterpart to Dangerous Wildlife."},
+  {g:"Nemesis", k:"add_modifier = { modifier = subterranean_wildlife days = -1 }",
+   l:"<i class=si-life></i> Modifier: Subterranean Wildlife",
+   desc:"Real vanilla static modifier (subterranean_wildlife): +2 max districts, +1 miner society research, +4 to mining district resource add, -20% structure upkeep. Represents creatures living in cave systems below the surface."},
+  {g:"Nemesis", k:"add_modifier = { modifier = titanic_life days = -1 }",
+   l:"<i class=si-life></i> Modifier: Titanic Life",
+   desc:"Real vanilla static modifier (titanic_life): +25% society research from jobs. Represents giant fauna roaming the planet (vanilla's titanic-creature flavour, distinct from the space-borne Void Clouds/Tiyanki)."},
   {g:"Nemesis", k:"generate_primitives_on_planet = yes",
    l:"<i class=si-rock></i> Primitive Civilisation (Stone Age)",
    desc:"Generates a stone-age pre-FTL civilisation on the planet. Triggers First Contact protocol on discovery. Can be observed, infiltrated, or bombed based on your ethics. Cannot place on homeworld."},
@@ -10430,9 +10466,6 @@ const PLANET_INIT_FLAGS = [
   {g:"Nemesis", k:"generate_primitives_on_planet = yes\nprimitive_age = atomic",
    l:"<i class=si-radiation></i> Primitive Civilisation (Atomic Age)",
    desc:"Generates an atomic-age pre-FTL civilisation — the most advanced primitive tier, nearest to FTL. Most volatile First Contact. Nuclear launch alerts possible. Cannot place on homeworld."},
-  {g:"Nemesis", k:"set_planet_flag = has_pre_sapients",
-   l:"<i class=si-life></i> Flag: Has Pre-Sapients",
-   desc:"Sets the has_pre_sapients flag. Required for the Uplift decision to appear in-game. Pair with generate_pre_sapients_on_planet = yes."},
   {g:"Nemesis", k:"prevent_anomaly = yes",               l:"Prevent Anomalies",
    desc:"Stops random anomaly generation on survey. Use for controlled planets."},
   {g:"Nemesis", k:"clear_deposits = yes",                l:"Clear All Deposits",
@@ -10497,256 +10530,10 @@ const mkSys = ()=>({
   starDeposits:[]
 });
 /*
-=== APP COMPENDIUM (AUTO-GENERATED) ===
-File    : 12_gen-functions.js
-Updated : 2026-06-16 20:41
-Ext     : .js
-Generator: compendium_gen.py v1.0.0
-
-FUNCTIONS:
-  L.2     genInit
-  L.111   treeFromPaths
-  L.119   genSysLocLines
-  L.127   genEmpLocLines
-  L.136   genSplitFiles
-  L.168   genLoc
-  L.196   genCountry
-  L.403   genDescriptor
-  L.414   genGameStartEvent
-  L.438   genModFiles
-  L.1576  uid
-  L.1616  _blankEmpire
-  L.1619  setActiveEmpire
-  L.1620  _empIsBlank
-  L.1621  _normaliseEmpires
-  L.1629  genAllCountries
-  L.1632  _normaliseSystems
-  L.1650  _applyProjectData
-  L.1683  migrateFromV2
-  L.1701  saveState
-  L.1713  loadState
-  L.1720  save
-  L.1729  _uiRaw
-  L.1730  _uiWrite
-  L.1731  getProjects
-  L.1732  setProjects
-  L.1733  getActiveId
-  L.1734  setActiveId
-  L.1735  getActivePrj
-  L.1736  createPrj
-  L.1737  saveActivePrj
-  L.1738  emptyProjectData
-  L.1744  getPackages
-  L.1745  setPackages
-  L.1746  getActivePkgId
-  L.1747  setActivePkgId
-  L.1748  getActivePkg
-  L.1749  savePkg
-  L.1750  createPkg
-  L.1759  assembleExportState
-  L.1779  buildPkgPanel
-  L.1809  saveUI
-  L.1815  loadUI
-  L.1823  applyTheme
-  L.1828  dlFile
-  L.1837  buildZipMap
-  L.1892  doZip
-  L.1913  exportProject
-  L.1934  importProject
-  L.1958  clearAll
-  L.1975  activeSys
-  L.1978  activePlanet
-  L.1984  openModal
-  L.2022  openHelp
-  L.2054  applyBuilderToSystem
-  L.2068  copySys
-  L.2077  copyPlanet
-  L.2086  loadTemplate
-  L.2716  validatePlanet
-  L.2904  applyDepositRules
-  L.2918  checkDepositRemoval
-  L.2928  showIssuesBadge
-  L.2958  validate
-  L.3299  checklist
-  L.3314  planetVisual
-  L.3354  buildSVG
-  L.3609  generatePlanetDesc
-  L.3717  getOrbitalDeps
-  L.3724  stripOrbitalFromRolled
-  L.3737  helpIcon
-  L.3740  buildFeaturePicker
-  L.3841  attachFeaturePickerEvents
-  L.3979  buildBuildingPicker
-  L.4217  buildDistrictSection
-  L.4283  buildOrbitalRingSection
-  L.4342  buildBuildingsOnlyPicker
-  L.4410  attachBuildingPickerEvents
-  L.4647  isMobile
-  L.4649  renderAll
-  L.4668  initNav
-  L.4748  initHdr
-  L.4763  updateNav
-  L.4815  updateHdr
-  L.4816  renderHdr
-  L.4819  openProjectSwitcher
-  L.4885  renderBody
-  L.4899  renderTemplates
-  L.5385  renderPlanetBuilder
-  L.5871  renderHome
-  L.5918  renderMobile
-  L.6394  _renderMobPlanetBuilder
-  L.6734  _renderMobEmpire
-  L.6857  _renderMobExport
-  L.6956  openTemplatePickerModal
-  L.7083  openEmpireTemplatePickerModal
-  L.7134  renderSystems
-  L.7150  initSplitters
-  L.7183  renderSystemsStartScreen
-  L.7273  renderLeftPane
-  L.7482  buildPlanetPreview
-  L.7751  renderMidPane
-  L.8279  renderRightPane
-  L.8489  _reEmp
-  L.8490  renderEmpire
-  L.8736  renderExport
-  L.9113  closeModal
-  L.9115  renderOverlays
-  L.9490  _renderMobSimple
-  L.9610  genOriginCivic
-  L.9641  genOriginOnAction
-  L.9676  genOriginLoc
-  L.9682  renderOrigins
-  L.10017 genEventCode
-  L.10051 renderEvents
-  L.10302 openWizard
-  L.10326 closeWizard
-  L.10331 renderWizardOverlay
-  L.10498 wizardTotalSteps
-  L.10502 wizardNavState
-  L.10522 wizardStepContent
-  L.10575 wizardStep_ModName
-  L.10589 wizardStep_EmpireIdentity
-  L.10629 wizardStep_EthicsCivics
-  L.10669 wizardStep_System
-  L.10795 wizardStep_Planets
-  L.10828 wizardStep_OriginBasics
-  L.10846 wizardStep_EventBasics
-  L.10865 wizardStep_Review
-  L.10934 wizardStep_OriginRequirements
-  L.10949 wizardStep_EventEffects
-  L.10971 wizardStep_PlanetBlueprint
-  L.10990 attachWizardInputs
-  L.11302 updateWizNext
-  L.11310 wizardNext
-  L.11322 wizardCommit
-  L.11424 builderHasContent
-  L.11434 loadPlanetIntoBuilder
-  L.11500 renderLibrary
-  L.11715 wizardStep_RandomMode
-  L.11739 wizardStep_RandomConfig
-  L.11831 wizardStep_RandomPreview
-  L.11904 mkPRNG
-  L.11922 randomSeed
-  L.11927 seedFromStr
-  L.11933 wpick
-  L.11945 wpickN
-  L.11956 randomPlanet
-  L.12430 randomSystem
-  L.12620 randomEmpire
-  L.12779 openSystemPlanetRandomiser
-  L.12792 _sysPlanetRandPreview
-  L.12822 _genSysPlanets
-  L.12908 _renderSysPlanetRandModal
-  L.12970 _attachSysPlanetRandEvents
-  L.13058 openSysRandomiserPanel
-  L.13069 closeSysRandomiserPanel
-  L.13080 buildSysRandPanelHTML
-  L.13167 attachSysRandPanelEvents
-  L.13273 openRandomiser
-  L.13286 renderRandomiserModal
-  L.13458 attachRandomiserEvents
-
-STATES:
-  L.10294 lives in wizardState (not persisted — transient UI only).
-
-QUIRKS:
-  L.2225  d_mountain_range_blocker, d_volatile_motes_blocker, d_noxious_swamp_blocker, d_deep_sinkhole_blocker confirmed invalid in 4.x — removed
-  L.2748  Stellaris 4.0 reworked districts/deposits to use district SETS (deposit-gated), not
-  L.8158  setPointerCapture makes e.target === wrap, not the SVG element,
-  L.12072 d_mountain_range_blocker, d_deep_sinkhole_blocker, d_volatile_motes_blocker,
-
-ELEMENT_IDS:
-  L.3825  fp-items-
-  L.3831  fpicker-
-  L.3837  fp-body-
-  L.3838  fp-sel-
-  L.4050  bp-items-
-  L.4206  bpicker-
-  L.4206  bp-body-
-  L.4206  bp-sel-
-  L.4226  dist-sec-
-  L.4289  or-sec-
-  L.4399  bp-cat-
-  L.4685  app-nav-logo
-  L.4686  nav-pkg-info
-  L.4687  nav-pkg-name-el
-  L.4688  nav-pkg-type-el
-  L.4690  app-nav-items
-  L.4693  app-nav-bottom
-  L.4796  mod-hdr-left
-  L.4797  mod-hdr-right
-  L.4901  pane-single
-  L.5475  pb-lbl-size
-  L.5477  pb-lbl-od
-  L.5478  pb-lbl-oa
-  L.6140  mob-lbl-size
-  L.6141  mob-lbl-od
-  L.6143  mob-lbl-oa
-  L.6149  mob-flag-list
-  L.6437  mob-pb-lbl-size
-  L.6439  mob-pb-lbl-od
-  L.6440  mob-pb-lbl-oa
-  L.7144  pane-left
-  L.7144  splitter-left
-  L.7144  pane-mid
-  L.7144  splitter-right
-  L.7144  pane-right
-  L.7224  start-blank-sys
-  L.7229  start-blank-empire
-  L.7757  svgwrap
-  L.7817  lbl-size
-  L.7821  lbl-od
-  L.7822  lbl-oa
-  L.7839  mid-flag-list
-  L.9122  sett-back
-  L.9125  sett-tabs
-  L.9171  upload-zone
-  L.9214  known-override-summary
-  L.9225  custom-overrides-list
-  L.9281  help-topic-list
-  L.10415 wizard-modal
-  L.10426 wiz-body
-  L.10775 wiz-p-sz-lbl
-  L.10777 wiz-p-od-lbl
-  L.10983 wiz-bp-sz-lbl
-  L.11772 wrf-minp-lbl
-  L.11774 wrf-maxp-lbl
-  L.11791 wrf-mins-lbl
-  L.11793 wrf-maxs-lbl
-  L.12920 spr-minp-lbl
-  L.12922 spr-maxp-lbl
-  L.12953 spr-preview
-  L.13137 srand-minp-lbl
-  L.13139 srand-maxp-lbl
-  L.13152 srand-preview
-  L.13350 rf-minp-lbl
-  L.13352 rf-maxp-lbl
-  L.13369 rf-mins-lbl
-  L.13371 rf-maxs-lbl
-  L.13434 rand-preview
-
+=== APP COMPENDIUM (AUTO-GENERATED, truncated by NTFS write, closed manually) ===
 === END COMPENDIUM ===
 */
+
 // ══ GEN FUNCTIONS ═════════════════════════════════════════════════════════════
 
 const INVALID_DEPOSITS_4X_G=new Set(['d_carbon_deposits','d_frozen_gas_giant','d_tidal_locked_day','d_buried_metallic_veins','d_underwater_vent_fields','d_gases_1','d_gases_2','d_gases_3','d_ruined_station','d_mountain_range_blocker','d_volatile_motes_blocker','d_noxious_swamp_blocker','d_deep_sinkhole_blocker','d_subterranean_alien_nest','d_first_league_ruins','d_tempestuous_terrain','d_mountain_in_the_sky','d_vast_plain','d_ancient_power_hub','d_zroni_ruins','d_vultaum_ruins','d_yuht_ruins','d_baol_ruins','d_engineering_research_1','d_engineering_research_2','d_engineering_research_3','d_engineering_research_4','d_xenomorph_hive','d_titanic_beast_lair','d_poisonous_plant_life','d_toxic_kelp_blocker','d_dragon_lair','d_astral_threads','d_relic_metals','d_mineral_stripmining_site','d_underground_caverns','d_coastal_settlement','d_natural_wonder','d_spawning_pool','d_astral_anchor','d_relic_unstable_tectonics','d_relic_engineering_data','d_relic_society_data','d_relic_physics_data','d_sr_dark_matter_2','d_first_league_offices','d_ecumenopolis_ruins','d_physics_research_1','d_physics_research_2','d_physics_research_3','d_physics_research_4','d_society_research_1','d_society_research_2','d_society_research_3','d_society_research_4','d_dust_storm_blocker','d_ancient_cryo_chamber','d_relic_collapsed_spire','d_relic_betharian_deposit','d_alien_zoo','d_ancient_manufactory','d_ancient_palace','d_ancient_robot_depot','d_atmospheric_aphrodisiac','d_atmospheric_hallucinogen','d_aurora_phenomenon','d_electromagnetic_storm','d_honeycomb_landscape','d_ice_cap','d_nanotech_labs','d_orbital_debris','d_rampaging_robots','d_riotous_vegetation','d_ship_graveyard_2','d_strange_glowing_crystals','d_submerged_ruins','d_temperate_farmland','d_tidal_locked_night','d_towering_mushrooms','d_white_hell','d_wilderness','d_ancient_power_generator','d_crystal_studded_land','d_sr_crystals','d_sr_zro_1','d_sr_dark_matter_1']);
@@ -10808,22 +10595,27 @@ function genInit(sys){
       return `\n\t\tmoon = {\n\t\t\tname = "${m.name}"\n\t\t\tclass = ${m.cls}\n\t\t\torbit_distance = ${m.od}\n\t\t\torbit_angle = ${m.oa}\n\t\t\tsize = ${m.size}${mPreventAnomaly}${mInitBody?`\n\t\t\tinit_effect = {${mInitBody}\n\t\t\t}`:""}\n\t\t}`;
     }).join("");
     const deps=(p.deps||[]).filter(d=>d&&typeof d==='string'&&d.trim()).filter(d=>(S.settings?.moddedGame)||!INVALID_DEPOSITS_4X_G.has(d)).map(d=>`\n\t\t\tadd_deposit = ${d}`).join("");
-    // generate_primitives_on_planet / generate_wildlife_on_planet need a country/pop set up,
-    // so they are stripped here and, when a speciesConfig is present, converted to
-    // create_species + create_country/create_pop below.
-    // EXCEPTION: generate_pre_sapients_on_planet IS a valid planet-scope effect — it spawns a
-    // pre-sapient species (pops only, no country, no First Contact) and is separate from pre-FTL
-    // primitives. When the user has not supplied a custom species config we keep the vanilla
-    // generator flag (and its has_pre_sapients flag) so the pre-sapients are actually written to
-    // the export instead of being silently dropped.
+    // generate_primitives_on_planet / generate_wildlife_on_planet / generate_pre_sapients_on_planet
+    // are NOT real scripted effects in v4.4.4 (confirmed 2026-07-05 via full-text search of
+    // common/+events/ — generate_pre_sapients_on_planet caused an in-game "Invalid scripted
+    // effect" load error). All three are stripped unconditionally from init_effect output.
+    // Primitives/wildlife need a full custom species, so they only produce output when a
+    // speciesConfig is present (converted to create_species + create_country/create_pop below).
+    // Pre-sapients use vanilla's OWN generic mechanism instead (no custom species needed) —
+    // see the presapientBlock below, built from the real vanilla pattern used in
+    // pre_ftl_scripted_effects.txt / distant_stars_events_1.txt: `save_event_target_as =
+    // pre_sapient_planet` then `create_generic_presapient_species = { UPLIFT_TO = <class> }`.
+    // That effect already sets its own star/planet flags — no manual has_pre_sapients flag needed.
     let speciesBlock = '';
+    let presapientBlock = '';
+    if((p.initFlags||[]).some(f=>f.startsWith('generate_pre_sapients'))){
+      const upliftTo=(p.presapientClass&&p.presapientClass.trim())||'MAM';
+      presapientBlock=`\n\t\tsave_event_target_as = pre_sapient_planet\n\t\tcreate_generic_presapient_species = { UPLIFT_TO = ${upliftTo} }`;
+    }
     let activeFlags = (p.initFlags||[]).filter(f=>{
       if(f.includes('primitive_age')) return false;
-      if(f.startsWith('generate_')){
-        // keep pre-sapients generator when there's no custom species config to emit instead
-        if(f.startsWith('generate_pre_sapients') && !p.speciesConfig) return true;
-        return false;
-      }
+      if(f.startsWith('generate_')) return false;
+      if(f==='set_planet_flag = has_pre_sapients') return false; // redundant: the real effect above sets its own flags
       return true;
     });
     if(p.speciesConfig){
@@ -10878,7 +10670,7 @@ function genInit(sys){
 		add_deposit = d_archaeological_site
 		set_planet_flag = has_ruins
 		set_planet_flag = arch_site_${p.arch_site.trim()}`:'';
-    const initBody = deps+blds+speciesBlock+flags+dists+specs+orExport+distMod+pAnomaly+pSurveyed+pArchSite;
+    const initBody = deps+blds+speciesBlock+presapientBlock+flags+dists+specs+orExport+distMod+pAnomaly+pSurveyed+pArchSite;
     // Ring world segments: confirmed vanilla format uses change_orbit = 45 before first segment,
     // orbit_distance = 0 for every segment (effective radius = 45 from change_orbit),
     // and orbit_angle = 30 for ALL segments. Without change_orbit = 45 the segments end up
@@ -14254,7 +14046,7 @@ const PLANET_EVENT_CHAINS = [
     icon:'<i class=si-life></i>',
     category:'Pre-FTL',
     dlc:'Utopia required for Uplift',
-    flags:['generate_pre_sapients_on_planet = yes','set_planet_flag = has_pre_sapients'],
+    flags:['generate_pre_sapients_on_planet = yes'], // v0.40z: genInit() converts this to the real vanilla effect; redundant has_pre_sapients flag removed
     desc:'Early tool-using pre-sapient species. Can eventually be uplifted to full sapience with Utopia DLC. No first contact — they are not yet civilised.',
     effects:'On colonisation: pre-sapient study events. With Utopia: Uplift decision available.',
     warning:'Uplift requires Utopia DLC and the Evolutionary Mastery or Genetic Ascension perk.',
@@ -14523,7 +14315,6 @@ document.addEventListener('click', function(e){
   }
 });
 
-// (validate + checklist moved to 15_validation.js -- 2026-07-03)
 
 // ══ SVG PREVIEW ═══════════════════════════════════════════════════════════════
 
@@ -17515,19 +17306,38 @@ function renderPlanetBuilder(body){
                 });
                 return flags.map(function(f){
                   var active=(pb.initFlags||[]).includes(f.k);
+                  var isPresapient=f.k.startsWith('generate_pre_sapients');
+                  var upliftRow='';
+                  if(isPresapient&&active){
+                    // v0.40za (user feedback: pre-sapients need to be customisable on add) —
+                    // UPLIFT_TO options verified against common/scripted_effects/pre_ftl_scripted_effects.txt
+                    // spawn_presapient_species_randomizer_effect (NECROID is commented out there — excluded).
+                    var UPLIFT_OPTS=[{v:"MAM",l:"Mammalian"},{v:"REP",l:"Reptilian"},{v:"AVI",l:"Avian"},{v:"ART",l:"Arthropoid"},{v:"MOL",l:"Molluscoid"},{v:"FUN",l:"Fungoid"},{v:"PLANT",l:"Plantoid (DLC)"},{v:"LITHOID",l:"Lithoid (DLC)"},{v:"AQUATIC",l:"Aquatic (DLC)"},{v:"TOX",l:"Toxoid (DLC)"},{v:"INF",l:"Infernal (DLC)"}];
+                    var cur=pb.presapientClass||"MAM";
+                    upliftRow='<div style="margin-top:6px;display:flex;align-items:center;gap:8px">'
+                      +'<div class="lbl" style="font-size:10px;white-space:nowrap">Uplift species class</div>'
+                      +'<select id="pb-presapient-class" style="font-size:11px;padding:3px 6px">'
+                      +UPLIFT_OPTS.map(function(o){return '<option value="'+o.v+'"'+(cur===o.v?' selected':'')+'>'+o.l+'</option>';}).join('')
+                      +'</select></div>'
+                      +'<div style="font-size:10px;color:var(--t4);margin-top:3px">Sets UPLIFT_TO in create_generic_presapient_species. Name/portrait/traits are always vanilla-randomised for this effect — only the base class is choosable.</div>';
+                  }
                   return '<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;background:var(--s2);border-radius:8px;border-left:3px solid '+(active?'var(--green)':'var(--b2)') +'">'
                     +'<span style="font-size:18px;flex-shrink:0">'+(f.l.split(" ")[0])+'</span>'
                     +'<div style="flex:1;min-width:0">'
                     +'<div style="font-size:12px;font-weight:700;color:var(--t1)">'+(f.l.replace(/^\S+\s/,""))+'</div>'
                     +'<div style="font-size:11px;color:var(--t3);margin-top:2px">'+f.desc+'</div>'
                     +'<div style="font-size:10px;color:var(--t4);font-family:monospace;margin-top:2px">'+f.k.split("\n")[0]+(f.k.includes("\n")?"…":"")+'</div>'
+                    +upliftRow
                     +'</div>'
                     +'<button data-pb-species-flag="'+encodeURIComponent(f.k)+'" style="background:none;border:1px solid var(--b2);border-radius:5px;padding:3px 9px;font-size:10px;color:'+(active?'var(--green)':'var(--t4)')+';cursor:pointer;flex-shrink:0">'+(active?"<i class=si-ok></i> Active":"+ Add")+'</button>'
                     +"</div>";
                 }).join("");
               })()}
               ${(function(){
-                const hasSpeciesFlag=(pb.initFlags||[]).some(f=>f.startsWith('generate_'));
+                // Only primitives use the full name/plural/class/portrait/traits config —
+                // pre-sapients always use vanilla's own generic uplift mechanism (class-only,
+                // see the Uplift species class dropdown above), so they don't trigger this panel.
+                const hasSpeciesFlag=(pb.initFlags||[]).some(f=>f.startsWith('generate_primitives'));
                 if(!hasSpeciesFlag) return '';
                 const sc=pb.speciesConfig;
                 const expanded=!!sc;
@@ -17770,6 +17580,7 @@ function renderPlanetBuilder(body){
     save(); update();
   });
   document.getElementById("pb-sp-portrait")?.addEventListener("change", e=>{if(pb.speciesConfig)pb.speciesConfig.portrait=e.target.value;save();});
+  document.getElementById("pb-presapient-class")?.addEventListener("change", e=>{pb.presapientClass=e.target.value;save();});
   document.querySelectorAll("[data-pb-sp-trait]").forEach(btn=>btn.addEventListener("click",()=>{
     if(!pb.speciesConfig)return;
     const t=btn.dataset.pbSpTrait;
@@ -19637,13 +19448,20 @@ function renderLeftPane(sys){
     p.deps=[...(objDef.deps||[])];
     p.initFlags=[...(objDef.initFlags||[])];
     if(objDef.prevent_anomaly) p.prevent_anomaly=true;
-    sys.planets.push(p); save(); renderAll();
+    sys.planets.push(p); S.activePlanet=p.id; S.activeBypass=null; S.activeAmbient=null; save(); renderAll();
   }));
   document.querySelectorAll("[data-lp-bypass]").forEach(btn=>btn.addEventListener("click",()=>{
     if(!sys.bypasses)sys.bypasses=[];
     const k=btn.dataset.lpBypass;
-    if(sys.bypasses.some(x=>(x.type||x)===k)) sys.bypasses=sys.bypasses.filter(x=>(x.type||x)!==k);
-    else sys.bypasses.push({id:uid(),type:k,orbit_distance:120,orbit_angle:180});
+    if(sys.bypasses.some(x=>(x.type||x)===k)){
+      sys.bypasses=sys.bypasses.filter(x=>(x.type||x)!==k);
+      if(S.activeBypass&&!sys.bypasses.some(x=>x.id===S.activeBypass)) S.activeBypass=null;
+    } else {
+      const nb={id:uid(),type:k,orbit_distance:120,orbit_angle:180};
+      sys.bypasses.push(nb);
+      // v0.40za: auto-select on add so the mid-pane editor opens immediately, matching planets
+      S.activeBypass=nb.id; S.activeAmbient=null; S.activePlanet=null;
+    }
     save();renderAll();
   }));
   document.querySelectorAll("[data-lp-ambient]").forEach(btn=>{
@@ -19653,7 +19471,10 @@ function renderLeftPane(sys){
       const k=btn.dataset.lpAmbient;
       const ao=AMBIENT_OBJECTS.find(x=>x.k===k);
       if(ao&&ao.unique&&sys.ambient_objects.some(x=>(x.type||x)===k))return;
-      sys.ambient_objects.push({id:uid(),type:k,orbit_distance:150,orbit_angle:90});
+      const na={id:uid(),type:k,orbit_distance:150,orbit_angle:90};
+      sys.ambient_objects.push(na);
+      // v0.40za: auto-select on add so the mid-pane editor opens immediately, matching planets
+      S.activeAmbient=na.id; S.activeBypass=null; S.activePlanet=null;
       save();renderAll();
     });
     btn.addEventListener("contextmenu",e=>{
@@ -20605,15 +20426,62 @@ function renderMidPane(sys,ap){
               var flags=PLANET_INIT_FLAGS.filter(function(f){return f.k.startsWith('generate_')||f.k.includes('primitive_age')||f.k.includes('pre_sapient')||f.k.includes('has_pre_sapients');});
               return flags.map(function(f){
                 var active=(ap.initFlags||[]).includes(f.k);
+                var isPresapient=f.k.startsWith('generate_pre_sapients');
+                var upliftRow='';
+                if(isPresapient&&active){
+                  // v0.40za (user feedback: pre-sapients need to be customisable on add) —
+                  // UPLIFT_TO options verified against pre_ftl_scripted_effects.txt (NECROID excluded, it's commented out there).
+                  var UPLIFT_OPTS=[{v:"MAM",l:"Mammalian"},{v:"REP",l:"Reptilian"},{v:"AVI",l:"Avian"},{v:"ART",l:"Arthropoid"},{v:"MOL",l:"Molluscoid"},{v:"FUN",l:"Fungoid"},{v:"PLANT",l:"Plantoid (DLC)"},{v:"LITHOID",l:"Lithoid (DLC)"},{v:"AQUATIC",l:"Aquatic (DLC)"},{v:"TOX",l:"Toxoid (DLC)"},{v:"INF",l:"Infernal (DLC)"}];
+                  var cur=ap.presapientClass||"MAM";
+                  upliftRow='<div style="margin-top:6px;display:flex;align-items:center;gap:8px">'
+                    +'<div class="lbl" style="font-size:10px;white-space:nowrap">Uplift species class</div>'
+                    +'<select id="mid-presapient-class" style="font-size:11px;padding:3px 6px">'
+                    +UPLIFT_OPTS.map(function(o){return '<option value="'+o.v+'"'+(cur===o.v?' selected':'')+'>'+o.l+'</option>';}).join('')
+                    +'</select></div>'
+                    +'<div style="font-size:10px;color:var(--t4);margin-top:3px">Sets UPLIFT_TO in create_generic_presapient_species. Name/portrait/traits are always vanilla-randomised for this effect.</div>';
+                }
                 return '<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;background:var(--s2);border-radius:8px;border-left:3px solid '+(active?'var(--green)':'var(--b2)')+'">'
                   +'<span style="font-size:18px;flex-shrink:0">'+(f.l.split(" ")[0])+'</span>'
                   +'<div style="flex:1;min-width:0">'
                   +'<div style="font-size:12px;font-weight:700;color:var(--t1)">'+(f.l.replace(/^\S+\s/,""))+'</div>'
                   +'<div style="font-size:11px;color:var(--t3);margin-top:2px">'+f.desc+'</div>'
+                  +upliftRow
                   +'</div>'
                   +'<button data-mid-species-flag="'+encodeURIComponent(f.k)+'" style="background:none;border:1px solid var(--b2);border-radius:5px;padding:3px 9px;font-size:10px;color:'+(active?'var(--green)':'var(--t4)')+';cursor:pointer;flex-shrink:0">'+(active?"<i class=si-ok></i> Active":"+ Add")+'</button>'
                   +"</div>";
               }).join("");
+            })()}
+            ${(function(){
+              // Only primitives use full name/plural/class/portrait/traits config — pre-sapients
+              // always use vanilla's own generic uplift mechanism (class-only, see dropdown above).
+              const hasSpeciesFlag=(ap.initFlags||[]).some(f=>f.startsWith('generate_primitives'));
+              if(!hasSpeciesFlag) return '';
+              const sc=ap.speciesConfig;
+              const expanded=!!sc;
+              const spClsOpts=SPC.map(s=>`<option value="${s.code}"${sc&&sc.spClass===s.code?' selected':''}>${s.l}</option>`).join('');
+              const portOpts=(PORTRAITS[(sc&&sc.spClass)||'MAM']||PORTRAITS.MAM).map(p=>`<option value="${p}"${sc&&sc.portrait===p?' selected':''}>${p}</option>`).join('');
+              const traitBtns=[...(TRAITS_POS||[]),...(TRAITS_NEG||[])].map(t=>{
+                const key=(typeof TRAIT_KEY_OVERRIDES!=='undefined'&&TRAIT_KEY_OVERRIDES[t.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'')])||'trait_'+t.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/_+$/,'');
+                const act=(sc&&sc.traits||[]).includes(key);
+                return '<button class="dchip'+(act?' has':'')+'" data-mid-sp-trait="'+key+'" style="font-size:10px">'+t+'</button>';
+              }).join('');
+              return `<div style="margin-top:10px;padding:10px;background:var(--s1);border-radius:8px;border:1px solid var(--b2)">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                  <div style="font-size:11px;font-weight:700;color:var(--t2)">Species Configuration</div>
+                  <label style="display:flex;align-items:center;gap:6px;font-size:11px;cursor:pointer">
+                    <input type="checkbox" id="mid-sp-specific" ${expanded?'checked':''}> Specify species
+                  </label>
+                </div>
+                ${expanded
+                  ? `<div style="font-size:10px;color:var(--t4);margin-bottom:8px">Exports as create_species + create_country/create_pop in init_effect instead of random generate.</div>
+                  <div class="grid2"><div class="field"><div class="lbl" style="font-size:10px">Name</div><input id="mid-sp-name" value="${sc.name||''}"/></div>
+                  <div class="field"><div class="lbl" style="font-size:10px">Plural</div><input id="mid-sp-plural" value="${sc.plural||''}"/></div>
+                  <div class="field"><div class="lbl" style="font-size:10px">Class</div><select id="mid-sp-class">${spClsOpts}</select></div>
+                  <div class="field"><div class="lbl" style="font-size:10px">Portrait</div><select id="mid-sp-portrait">${portOpts}</select></div></div>
+                  <div style="margin-top:6px"><div class="lbl" style="font-size:10px;margin-bottom:4px">Traits</div><div style="display:flex;flex-wrap:wrap;gap:4px">${traitBtns}</div></div>`
+                  : '<div style="font-size:11px;color:var(--t4);font-style:italic">Unchecked — vanilla random species generation.</div>'
+                }
+              </div>`;
             })()}
           </div>
         </div>
@@ -21069,6 +20937,32 @@ function renderMidPane(sys,ap){
       if(idx>=0){ ap.initFlags.splice(idx,1); } else { ap.initFlags.push(fk); }
       save(); renderMidPane(sys,ap);
     }));
+    // v0.40za: pre-sapient uplift class + full species config (primitives only) — system editor
+    document.getElementById("mid-presapient-class")?.addEventListener("change", e=>{
+      ap.presapientClass=e.target.value; save();
+    });
+    document.getElementById("mid-sp-specific")?.addEventListener("change", e=>{
+      ap.speciesConfig=e.target.checked?{name:"",plural:"",spClass:"MAM",portrait:"mam1",traits:[]}:null;
+      save(); renderMidPane(sys,ap);
+    });
+    document.getElementById("mid-sp-name")?.addEventListener("input", e=>{if(ap.speciesConfig)ap.speciesConfig.name=e.target.value;save();});
+    document.getElementById("mid-sp-plural")?.addEventListener("input", e=>{if(ap.speciesConfig)ap.speciesConfig.plural=e.target.value;save();});
+    document.getElementById("mid-sp-class")?.addEventListener("change", e=>{
+      if(!ap.speciesConfig)return;
+      ap.speciesConfig.spClass=e.target.value;
+      ap.speciesConfig.portrait=(PORTRAITS[e.target.value]||PORTRAITS.MAM)[0];
+      save(); renderMidPane(sys,ap);
+    });
+    document.getElementById("mid-sp-portrait")?.addEventListener("change", e=>{if(ap.speciesConfig)ap.speciesConfig.portrait=e.target.value;save();});
+    document.querySelectorAll("[data-mid-sp-trait]").forEach(btn=>btn.addEventListener("click",()=>{
+      if(!ap.speciesConfig)return;
+      const t=btn.dataset.midSpTrait;
+      if(!ap.speciesConfig.traits)ap.speciesConfig.traits=[];
+      const i=ap.speciesConfig.traits.indexOf(t);
+      if(i>=0)ap.speciesConfig.traits.splice(i,1);
+      else if(ap.speciesConfig.traits.length<5)ap.speciesConfig.traits.push(t);
+      save(); renderMidPane(sys,ap);
+    }));
     // Event chain seed toggles (mid-pane)
     document.querySelectorAll("[data-mid-chain]").forEach(btn=>btn.addEventListener("click",()=>{
       const chain=PLANET_EVENT_CHAINS.find(ec=>ec.k===btn.dataset.midChain);
@@ -21286,8 +21180,11 @@ function renderRightPane(sys,ap){
   document.querySelectorAll("[data-rp-bypass]").forEach(btn=>btn.addEventListener("click",()=>{
     if(!sys.bypasses) sys.bypasses=[];
     const k=btn.dataset.rpBypass;
-    sys.bypasses.push({id:uid(),type:k,orbit_distance:120,orbit_angle:180});
-    save(); renderMidPane(sys,ap); renderRightPane(sys,ap);
+    const nb={id:uid(),type:k,orbit_distance:120,orbit_angle:180};
+    sys.bypasses.push(nb);
+    // v0.40za: auto-select on add so the mid-pane editor opens immediately
+    S.activeBypass=nb.id; S.activeAmbient=null; S.activePlanet=null;
+    save(); renderMidPane(sys,null); renderRightPane(sys,null);
   }));
   document.querySelectorAll("[data-bypass-row]").forEach(row=>{
     row.addEventListener("click",e=>{
@@ -27875,11 +27772,13 @@ function randomPlanet(seedStr, opts={}){
   // Only for habitable worlds (not gas giant, asteroid etc.)
   if(isHab && opts.species!==false){
     const speciesRoll=rng();
-    if(speciesRoll<0.08){
-      // Pre-sapient species (~8%)
+    if(speciesRoll<0.04){
+      // Pre-sapient species (~4%, reduced from 8% per user feedback — rarer than primitives).
+      // genInit() converts this flag into the real vanilla effect (save_event_target_as +
+      // create_generic_presapient_species), which sets its own flags — no manual
+      // has_pre_sapients push needed (v0.40z).
       initFlags.push('generate_pre_sapients_on_planet = yes');
-      initFlags.push('set_planet_flag = has_pre_sapients');
-    } else if(speciesRoll<0.18){
+    } else if(speciesRoll<0.14){
       // Primitive civilisation (~10%)
       const primRoll=rng();
       if(primRoll<0.50){
@@ -27891,11 +27790,11 @@ function randomPlanet(seedStr, opts={}){
         initFlags.push('generate_primitives_on_planet = yes');
         initFlags.push('primitive_age = atomic');
       }
-    } else if(speciesRoll<0.23){
-      // Wildlife only (~5%)
-      initFlags.push('generate_wildlife_on_planet = yes');
     }
-    // has_pre_sapients combined with wildlife is rare but valid — skip for simplicity
+    // v0.40z: removed the ~5% "wildlife only" branch — generate_wildlife_on_planet is not a
+    // real scripted effect in v4.4.4 (confirmed alongside the pre-sapients crash fix). Native
+    // wildlife/creatures are placed via deposit blockers, a different subsystem than initFlags,
+    // and aren't randomised here.
   }
 
   // ── Event chain seeds ────────────────────────────────────────────────────
@@ -28148,12 +28047,63 @@ function randomSystem(seedStr, opts={}){
   else if(bypassRoll<0.05)  bypasses.push({type:'gateway',orbit_distance:140+Math.floor(rng()*40),orbit_angle:Math.floor(rng()*360)});
   else if(bypassRoll<0.13)  bypasses.push({type:'wormhole',orbit_distance:100+Math.floor(rng()*60),orbit_angle:Math.floor(rng()*360)});
 
+  // ── Star deposits (v0.40za, user feedback: randomiser only ever populated planets —
+  // the star itself never got any of the STAR_RESOURCE_DEPOSITS). Vanilla galaxy gen leaves
+  // most stars bare, so we model that: ~45% chance of none, else 1-2 deposits. Common resource
+  // categories (energy/minerals/research/trade) are weighted much higher than rare strategic
+  // resources (zro/dark matter/astral threads), and lower step values are favoured over higher
+  // ones, matching how vanilla galaxy gen skews toward small deposits.
+  const starDeposits=[];
+  const starDepRoll=rng();
+  if(starDepRoll>=0.45){
+    const nStarDep=starDepRoll<0.85?1:2;
+    const RARE_STEMS=new Set(['d_zro_deposit','d_dark_matter_deposit','d_astral_threads_deposit']);
+    const UNCOMMON_STEMS=new Set(['d_exotic_gases','d_rare_crystals','d_volatile_motes']);
+    const starDepWeights=STAR_RESOURCE_DEPOSITS.map(d=>({
+      v:d, w:RARE_STEMS.has(d.stem)?1:UNCOMMON_STEMS.has(d.stem)?4:8
+    }));
+    const usedStems=new Set();
+    for(let sdi=0;sdi<nStarDep;sdi++){
+      const availWeights=starDepWeights.filter(x=>!usedStems.has(x.v.stem));
+      if(!availWeights.length) break;
+      const pick=wpick(rng,availWeights);
+      if(!pick) break;
+      usedStems.add(pick.stem);
+      const stepWeights=pick.steps.map(s=>({v:s,w:Math.max(1,12-s)}));
+      const step=wpick(rng,stepWeights);
+      starDeposits.push(`${pick.stem}_${step}`);
+    }
+  }
+
+  // ── Occasional special body (v0.40za, user feedback: randomiser never placed any of the
+  // SYSTEM_OBJECTS special bodies — ship graveyards, ruins, shrouded worlds, etc. — only the
+  // plain planet classes in ZONE_CLS above). ~12% chance per system, budget permitting.
+  // Uses the same deps/initFlags/prevent_anomaly copy pattern as the manual quick-add spawners.
+  if(typeof SYSTEM_OBJECTS!=='undefined' && rng()<0.12 && cum+40<=SYS_OUTER_MAX){
+    const specialPool=SYSTEM_OBJECTS.filter(o=>o.cls&&o.cls!=='_ringworld_full'&&o.cls!=='pc_habitat');
+    if(specialPool.length){
+      const obj=specialPool[Math.floor(rng()*specialPool.length)];
+      const step=12+Math.floor(rng()*30);
+      cum=Math.min(SYS_OUTER_MAX,cum+step);
+      const sp={
+        id:uid(), name:obj.label+' '+(planets.length+1), cls:obj.cls, size:obj.size||16,
+        od:step, oa:Math.floor(rng()*360), hw:false, has_ring:false, moons:[],
+        deps:[...(obj.deps||[])], blds:[], initFlags:[...(obj.initFlags||[])],
+        districts:{}, specializations:[], orbitalRing:null, cat:obj.cat||'body',
+        speciesConfig:null
+      };
+      if(obj.prevent_anomaly) sp.prevent_anomaly=true;
+      planets.push(sp);
+    }
+  }
+
   return {
     id:uid(),name,sc,home:_isHomeSys,links:[],
     asteroid_belts:belts,
     planets,
     ambient_objects:ambientObjs,
     bypasses,
+    starDeposits,
     _seed:seed
   };
 }
