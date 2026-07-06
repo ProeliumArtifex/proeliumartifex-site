@@ -909,9 +909,14 @@ details.details-row[open]>.details-summary{color:var(--t1);border-left-color:var
    once the sidebar was collapsed to its 56px icon-only width (both compete for the same
    bottom-left corner). #pa-cc-nav-collapsed is toggled by a small observer script (added
    right after this link) that watches #app-nav's "expanded" class. */
-#pa-privacy-link{transition:bottom .15s ease,padding .15s ease;}
+#pa-privacy-link{position:fixed;left:10px;bottom:8px;z-index:999998;font-family:monospace;font-size:10px;letter-spacing:0.08em;color:#6E7176;text-decoration:none;opacity:0.6;background:rgba(14,16,18,0.6);padding:3px 7px;border-radius:2px;transition:bottom .15s ease,padding .15s ease;}
 #pa-privacy-link .pa-priv-full{display:inline;}
 #pa-privacy-link .pa-priv-icon{display:none;}
+/* v0.42c fix: the previous inline style="...bottom:8px..." on the <a> tag always beat
+   this rule regardless of selector specificity (inline styles win over any stylesheet
+   rule short of !important) -- so this override never actually took effect and the
+   link never moved. Base positioning now lives in #pa-privacy-link above instead of
+   inline, so this class-based override can correctly cascade over it. */
 #pa-privacy-link.pa-cc-nav-collapsed{bottom:44px;padding:4px 6px;}
 #pa-privacy-link.pa-cc-nav-collapsed .pa-priv-full{display:none;}
 #pa-privacy-link.pa-cc-nav-collapsed .pa-priv-icon{display:inline;}
@@ -1034,7 +1039,7 @@ details.details-row[open]>.details-summary{color:var(--t1);border-left-color:var
 })();
 </script>
 <!-- /PA COOKIE CONSENT -->
-<a href="javascript:void(0)" onclick="window.paCookieSettings&&window.paCookieSettings()" id="pa-privacy-link" title="Privacy & Cookies" style="position:fixed;left:10px;bottom:8px;z-index:999998;font-family:monospace;font-size:10px;letter-spacing:0.08em;color:#6E7176;text-decoration:none;opacity:0.6;background:rgba(14,16,18,0.6);padding:3px 7px;border-radius:2px;"><span class="pa-priv-full">Privacy &amp; Cookies</span><span class="pa-priv-icon">&#128274;</span></a>
+<a href="javascript:void(0)" onclick="window.paCookieSettings&&window.paCookieSettings()" id="pa-privacy-link" title="Privacy & Cookies"><span class="pa-priv-full">Privacy &amp; Cookies</span><span class="pa-priv-icon">&#128274;</span></a>
 <script>
 (function(){
   // Keeps the Privacy & Cookies footer link from overlapping the app sidebar's
@@ -11193,6 +11198,12 @@ Generator: compendium_gen.py v1.0.0
 */
 // ══ CHANGELOG ════════════════════════════════════════════════════════════════
 const CHANGELOG = [
+  {v:"0.42d", date:"2026-07-06", milestone:false, notes:[
+    "[Fix] BROWSE POPUPS HAD MESSY NESTED/DOUBLE SCROLLBARS (user report: \"some popup scrollers are scrolling when in the browse popup, and looks messy\"). openCatalogBrowser() -- the shared modal behind every \"Browse\" button (modifiers, tech, deposits, buildings, pictures, components, policies, edicts, traditions, districts, static modifiers, flag examples) -- forced its content wrapper to height:min(70vh,640px) while already nested inside openModal's own .modal-body (overflow-y:auto, itself capped by .modal{max-height:88vh} minus header/footer). Whenever that fixed 70vh/640px exceeded what .modal-body actually had left, the wrapper overflowed its own parent too, so BOTH the outer modal body AND the inner results list became independently scrollable at once -- scroll-wheel input would bounce between the two, and the search box/category pills could scroll out of view unexpectedly. Fixed by using height:100% so the wrapper always exactly fills whatever space .modal-body provides -- only the results list itself scrolls now. Checked every other popup in the app for the same forced-height-inside-scrollable-ancestor pattern (Import modal, Event preview panels, mobile action sheets, quick-add dropdown) -- all of them correctly use max-height (a cap, not a forced height) already, so this was an isolated case.",
+  ]},
+  {v:"0.42c", date:"2026-07-06", milestone:false, notes:[
+    "[Fix] PRIVACY & COOKIES LINK STILL OVERLAPPED THE COLLAPSED SIDEBAR (user report -- the v0.42b fix didn't actually take effect). Root cause: the link's positioning (bottom:8px etc) was left in its inline style=\"\" attribute, and inline styles always win over any external/internal stylesheet rule regardless of selector specificity -- so the new .pa-cc-nav-collapsed{bottom:44px} override could never apply no matter what the observer script did. Moved all of the link's base styling out of the inline attribute and into the stylesheet as the actual #pa-privacy-link rule, so the class-based override now correctly cascades over it when the sidebar is collapsed.",
+  ]},
   {v:"0.42b", date:"2026-07-06", milestone:false, notes:[
     "[Fix][CRITICAL] EVERY ADD/EDIT/DELETE IN ORIGINS, SPECIES & GOV, COMPONENTS & TECH, AND BUILDINGS & DECISIONS SCROLLED THE PANE BACK TO THE TOP (user report from the custom origin demo). Root cause: renderGovSpec(), renderTechComponents(), and renderBuildingsDecisions() (23_event-builder.js) all replace #pane-single wholesale on every single re-render -- since #pane-single is the scrollable element itself (overflow-y:auto), destroying and recreating it as a brand-new DOM node reset scrollTop to 0 every time, on every add-modifier/add-item/delete/field-edit click across all 11 Species & Gov types plus Origins, Technology, Utility Components, Buildings, and Deposits/Decisions. (Events was unaffected -- it already re-renders only its inner left/right content divs, not the pane itself.) Fixed all three functions to capture #pane-single's scrollTop before the wipe and restore it after, but only when staying on the same sub-tab (an actual tab switch still correctly resets to top) -- tracked via a data attribute stamped on the pane so a real tab change isn't mistaken for a same-tab re-render.",
     "[Fix] \"PRIVACY & COOKIES\" FOOTER LINK OVERLAPPED THE SIDEBAR'S COLLAPSE BUTTON (user report). The footer link is fixed at the same bottom-left screen corner regardless of the sidebar's state; once the sidebar collapses to its 56px icon-only width, its collapse button sits centered in that same corner and the full-text link visually collided with it. Now shrinks to a small icon and moves up above the collapse button specifically when the sidebar is collapsed, via a lightweight observer watching the sidebar's expand/collapse class (index.html only -- doesn't touch the app's own render code).",
@@ -14954,7 +14965,17 @@ function openCatalogBrowser(kind,onPick,closeOnPick){
   const cats=_modqCategories(kind);
   const noun=kind==="tech"?"Technologies":kind==="deposit"?"Deposits & Features":kind==="building"?"Buildings":kind==="picture"?"Origin Pictures":kind==="flagexample"?"Flag Examples":kind==="component"?"Ship Components":kind==="policy"?"Policy Options":kind==="edict"?"Edicts & Campaigns":kind==="ascensionperk"?"Ascension Perks":kind==="tradition"?"Traditions":kind==="district"?"Districts":kind==="staticmod"?"Static Modifier Objects":"Modifiers";
   const catPills=cats.length>1?`<div id="cbrowse-cats" style="display:flex;flex-wrap:wrap;gap:6px">${['',...cats].map(c=>`<button type="button" class="pill${c===''?' pill-on':''}" data-cbrowse-cat="${c.replace(/"/g,'&quot;')}">${c||'All'}</button>`).join('')}</div>`:'';
-  const body=`<div style="display:flex;flex-direction:column;gap:10px;height:min(70vh,640px)">
+  // v0.42d fix: this wrapper previously forced its own height:min(70vh,640px) while
+  // ALREADY nested inside openModal's .modal-body (which has its own overflow-y:auto and
+  // is itself capped by .modal{max-height:88vh} minus the header/footer). Whenever that
+  // fixed 70vh/640px was taller than what .modal-body actually had left, the wrapper
+  // overflowed ITS parent too -- so BOTH .modal-body (outer) and #cbrowse-list (inner)
+  // became independently scrollable at once ("nested scrollbars", scroll-wheel events
+  // bubbling from one to the other, messy/janky feel). Using height:100% instead makes
+  // this wrapper always exactly fill whatever .modal-body actually provides (a definite
+  // height, since .modal-body is a flex:1 item of .modal's column flex layout) -- so only
+  // #cbrowse-list itself ever needs to scroll.
+  const body=`<div style="display:flex;flex-direction:column;gap:10px;height:100%">
     <input id="cbrowse-search" placeholder="Search by name, key, or category…" autocomplete="off" style="width:100%;box-sizing:border-box"/>
     ${catPills}
     <div style="font-size:11px;color:var(--t3)" id="cbrowse-count">${catalog.length} entries</div>
