@@ -929,101 +929,26 @@ class Component extends DCLogic {
     </div>
   </div>
 </div>
+<script src="assets/analytics-providers.js"></script>
+<script src="assets/analytics.js"></script>
 <script>
 (function(){
-  var PA_GA_ID = 'G-XXXXXXXXXX'; // TODO: replace with real GA4 Measurement ID when ready
-  var COOKIE_NAME = 'pa_consent';
-  var DAYS = 180;
-
-  function setCookie(name, value, days){
-    var d = new Date(); d.setTime(d.getTime() + days*24*60*60*1000);
-    document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
-  }
-  function getCookie(name){
-    var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
-    return m ? decodeURIComponent(m[1]) : null;
-  }
-  function readConsent(){
-    var raw = getCookie(COOKIE_NAME);
-    if (!raw) { try { raw = localStorage.getItem(COOKIE_NAME); } catch(e){} }
-    if (!raw) return null;
-    try { return JSON.parse(raw); } catch(e){ return null; }
-  }
-  function writeConsent(obj){
-    var raw = JSON.stringify(obj);
-    setCookie(COOKIE_NAME, raw, DAYS);
-    try { localStorage.setItem(COOKIE_NAME, raw); } catch(e){}
-  }
-  function loadGA(){
-    if (window._paGaLoaded || PA_GA_ID.indexOf('XXXX') !== -1) return;
-    window._paGaLoaded = true;
-    var s = document.createElement('script');
-    s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=' + PA_GA_ID;
-    document.head.appendChild(s);
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){ window.dataLayer.push(arguments); }
-    window.gtag = gtag;
-    gtag('js', new Date());
-    gtag('config', PA_GA_ID, { anonymize_ip: true });
-  }
-  function purgeGA(){
-    var names = ['_ga','_gid','_gat','_ga_' + PA_GA_ID.replace('G-','')];
-    for (var i=0;i<names.length;i++){
-      document.cookie = names[i] + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=' + location.hostname;
-      document.cookie = names[i] + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
-    }
-  }
-  function applyConsent(c){ if (c && c.analytics) loadGA(); else purgeGA(); }
-  function showBanner(prefsOpen){
-    var b = document.getElementById('pa-cc-banner');
-    if (!b) return;
-    b.classList.add('pa-cc-show');
-    if (prefsOpen) document.getElementById('pa-cc-prefs').classList.add('pa-cc-show');
-  }
-  function hideBanner(){
-    var b = document.getElementById('pa-cc-banner');
-    if (!b) return;
-    b.classList.remove('pa-cc-show');
-    document.getElementById('pa-cc-prefs').classList.remove('pa-cc-show');
-  }
-  function init(){
-    var existing = readConsent();
-    if (existing) { applyConsent(existing); return; }
-    showBanner(false);
-  }
+  function q(id){ return document.getElementById(id); }
+  function showBanner(prefsOpen){ var b=q('pa-cc-banner'); if(!b) return; b.classList.add('pa-cc-show'); if(prefsOpen) q('pa-cc-prefs').classList.add('pa-cc-show'); }
+  function hideBanner(){ var b=q('pa-cc-banner'); if(!b) return; b.classList.remove('pa-cc-show'); q('pa-cc-prefs').classList.remove('pa-cc-show'); }
   document.addEventListener('DOMContentLoaded', function(){
-    var acceptBtn = document.getElementById('pa-cc-accept-btn');
-    var rejectBtn = document.getElementById('pa-cc-reject-btn');
-    var manageBtn = document.getElementById('pa-cc-manage-btn');
-    var saveBtn = document.getElementById('pa-cc-save-btn');
-    var toggle = document.getElementById('pa-cc-analytics-toggle');
-    if (acceptBtn) acceptBtn.addEventListener('click', function(){
-      var c = { necessary:true, analytics:true, ts:new Date().toISOString() };
-      writeConsent(c); applyConsent(c); hideBanner();
-    });
-    if (rejectBtn) rejectBtn.addEventListener('click', function(){
-      var c = { necessary:true, analytics:false, ts:new Date().toISOString() };
-      writeConsent(c); applyConsent(c); hideBanner();
-    });
-    if (manageBtn) manageBtn.addEventListener('click', function(){
-      document.getElementById('pa-cc-prefs').classList.toggle('pa-cc-show');
-    });
-    if (saveBtn) saveBtn.addEventListener('click', function(){
-      var c = { necessary:true, analytics: !!(toggle && toggle.checked), ts:new Date().toISOString() };
-      writeConsent(c); applyConsent(c); hideBanner();
-    });
-    window.paCookieSettings = function(){
-      var existing = readConsent();
-      if (toggle) toggle.checked = !!(existing && existing.analytics);
-      showBanner(true);
-    };
-    window.paTrackEvent = function(name, params){
-      var c = readConsent();
-      if (!c || !c.analytics) return;
-      loadGA();
-      if (window.gtag) window.gtag('event', name, params || {});
-    };
-    init();
+    var a = window.analytics; if (!a) return;
+    var toggle = q('pa-cc-analytics-toggle');
+    function choose(granted){ a.setConsent(granted); hideBanner(); }
+    var b;
+    if ((b=q('pa-cc-accept-btn'))) b.addEventListener('click', function(){ choose(true); });
+    if ((b=q('pa-cc-reject-btn'))) b.addEventListener('click', function(){ choose(false); });
+    if ((b=q('pa-cc-manage-btn'))) b.addEventListener('click', function(){ q('pa-cc-prefs').classList.toggle('pa-cc-show'); });
+    if ((b=q('pa-cc-save-btn'))) b.addEventListener('click', function(){ choose(!!(toggle && toggle.checked)); });
+    window.paCookieSettings = function(){ var c=a.getConsent(); if (toggle) toggle.checked = !!(c && c.analytics); showBanner(true); };
+    window.paTrackEvent = function(name, params){ a.event(name, params); }; /* legacy shim */
+    if (!a.getConsent()) showBanner(false);
+    a.pageView('homepage');
   });
 })();
 </script>

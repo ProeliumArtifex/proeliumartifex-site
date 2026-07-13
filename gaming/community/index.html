@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Community — Proelium Artifex</title>
+<meta name="description" content="The Proelium Artifex community — what modders are building with our tools: scenarios generated, empires created, systems built and mods exported.">
+<link rel="icon" href="../../assets/favicon_6df2d73334dc.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:#0E1012;color:#F2F0EB;font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+  ::selection{background:#C9A76A;color:#0E1012;}
+  a{color:#C9A76A;}
+  .pa-stat-card{background:#0E1012;padding:34px 28px;text-align:left;transition:background .3s ease;}
+  .pa-stat-card:hover{background:#16181B;}
+  .pa-stat-icon{font-size:1.5rem;display:block;margin-bottom:14px;}
+  .pa-stat-num{font-family:'Cinzel',serif;font-weight:600;font-size:clamp(1.9rem,4vw,2.6rem);letter-spacing:0.02em;color:#C9A76A;line-height:1;display:block;min-height:1em;}
+  .pa-stat-num.pa-stat-pending{color:#6E7176;}
+  .pa-stat-label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#9A9DA3;display:block;margin-top:12px;}
+  @media (max-width:760px){
+    #pa-nav{padding:14px 18px !important;}
+    .pa-wordmark{display:none !important;}
+  }
+</style>
+</head>
+<body>
+<div style="position:relative;width:100%;min-height:100vh;background:#0E1012;overflow-x:hidden;">
+
+  <div style="position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(110,113,118,0.055) 1px,transparent 1px),linear-gradient(90deg,rgba(110,113,118,0.055) 1px,transparent 1px);background-size:72px 72px;-webkit-mask-image:radial-gradient(ellipse 120% 80% at 50% 0%,#000 30%,transparent 72%);mask-image:radial-gradient(ellipse 120% 80% at 50% 0%,#000 30%,transparent 72%);"></div>
+
+  <nav id="pa-nav" style="position:relative;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:18px clamp(20px,5vw,64px);border-bottom:1px solid rgba(110,113,118,0.16);background:rgba(14,16,18,0.82);">
+    <a href="../../index.html" style="display:flex;align-items:center;gap:14px;text-decoration:none;">
+      <img src="../../assets/pa-mark_25718e37b71d.png" alt="Proelium Artifex" style="height:30px;width:auto;display:block;">
+      <span class="pa-wordmark" style="font-family:'Cinzel',serif;font-weight:500;font-size:14px;letter-spacing:0.26em;color:#F2F0EB;">PROELIUM&nbsp;ARTIFEX</span>
+    </a>
+    <div style="display:flex;align-items:center;gap:clamp(12px,2vw,26px);">
+      <a href="../" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#9A9DA3;text-decoration:none;">Gaming</a>
+      <a href="../tools/stellaris-mod-builder/" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#9A9DA3;text-decoration:none;">Mod Builder</a>
+      <a href="../../index.html" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#9A9DA3;text-decoration:none;">Home</a>
+    </div>
+  </nav>
+
+  <section style="position:relative;z-index:3;max-width:900px;margin:0 auto;padding:clamp(60px,10vh,100px) clamp(20px,5vw,64px) 10px;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#C9A76A;margin-bottom:18px;">Gaming &nbsp;·&nbsp; Community</div>
+    <h1 style="font-family:'Cinzel',serif;font-weight:600;font-size:clamp(2.1rem,5.5vw,3.4rem);letter-spacing:0.02em;color:#F2F0EB;margin:0 0 18px;line-height:1.08;">Proelium Artifex Community</h1>
+    <p style="font-family:'Inter',sans-serif;font-weight:300;font-size:clamp(1.05rem,1.7vw,1.25rem);line-height:1.7;color:#9A9DA3;max-width:640px;margin:0 0 28px;">What the community is building with our tools — measured, not guessed. Every number below comes straight from real usage of the tools.</p>
+  </section>
+
+  <section style="position:relative;z-index:3;max-width:900px;margin:0 auto;padding:clamp(30px,5vh,50px) clamp(20px,5vw,64px) 10px;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1px;background:rgba(110,113,118,0.18);border:1px solid rgba(110,113,118,0.18);">
+      <div class="pa-stat-card"><span class="pa-stat-icon">🌌</span><span class="pa-stat-num pa-stat-pending" data-stat="scenarios">—</span><span class="pa-stat-label">Scenarios Generated</span></div>
+      <div class="pa-stat-card"><span class="pa-stat-icon">👑</span><span class="pa-stat-num pa-stat-pending" data-stat="empires">—</span><span class="pa-stat-label">Empires Created</span></div>
+      <div class="pa-stat-card"><span class="pa-stat-icon">🪐</span><span class="pa-stat-num pa-stat-pending" data-stat="systems">—</span><span class="pa-stat-label">Solar Systems Built</span></div>
+      <div class="pa-stat-card"><span class="pa-stat-icon">📦</span><span class="pa-stat-num pa-stat-pending" data-stat="mods">—</span><span class="pa-stat-label">Mods Exported</span></div>
+      <div class="pa-stat-card"><span class="pa-stat-icon">✅</span><span class="pa-stat-num pa-stat-pending" data-stat="validations">—</span><span class="pa-stat-label">Validation Checks Completed</span></div>
+    </div>
+    <p id="pa-stats-note" style="font-family:'Inter',sans-serif;font-weight:300;font-size:0.88rem;line-height:1.6;color:#6E7176;margin:18px 0 0;">Live counters are being wired up. These will show real, measured numbers from the tools — no invented figures — and go live once enough data has accumulated.</p>
+  </section>
+
+  <section style="position:relative;z-index:3;max-width:900px;margin:0 auto;padding:clamp(50px,8vh,80px) clamp(20px,5vw,64px) clamp(70px,10vh,110px);">
+    <h2 style="font-family:'Cinzel',serif;font-weight:600;font-size:clamp(1.6rem,3.4vw,2.2rem);letter-spacing:0.03em;color:#F2F0EB;margin:0 0 18px;">Join in</h2>
+    <p style="font-family:'Inter',sans-serif;font-weight:300;font-size:clamp(1rem,1.4vw,1.08rem);line-height:1.8;color:#B9BBC0;margin:0 0 24px;max-width:640px;">Every scenario generated, empire built and mod exported adds to these numbers. Fire up the Mod Builder and put yours on the board.</p>
+    <a href="../tools/stellaris-mod-builder/" style="display:inline-flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:12.5px;letter-spacing:0.18em;text-transform:uppercase;color:#0E1012;background:#C9A76A;text-decoration:none;padding:16px 32px;transition:opacity .25s;">Open the Mod Builder ↗</a>
+  </section>
+
+</div>
+
+<script>
+/* Community counters — populated ONLY from real data.
+   A scheduled job (e.g. GitHub Action querying the GA4 Data API) can commit
+   stats.json next to this page; until that file exists the cards stay at "—".
+   Expected shape: {"scenarios":0,"empires":0,"systems":0,"mods":0,"validations":0,"updated":"YYYY-MM-DD"} */
+(function(){
+  fetch('stats.json', { cache: 'no-store' }).then(function(r){
+    if (!r.ok) throw new Error('no stats yet');
+    return r.json();
+  }).then(function(s){
+    var any = false;
+    document.querySelectorAll('[data-stat]').forEach(function(el){
+      var v = s[el.dataset.stat];
+      if (typeof v === 'number') { el.textContent = v.toLocaleString(); el.classList.remove('pa-stat-pending'); any = true; }
+    });
+    if (any) {
+      var note = document.getElementById('pa-stats-note');
+      if (note) note.textContent = 'Real numbers, measured directly from the tools.' + (s.updated ? ' Last updated ' + s.updated + '.' : '');
+    }
+  }).catch(function(){ /* stats.json not published yet — cards stay pending */ });
+})();
+</script>
+
+<!-- PA COOKIE CONSENT -->
+<style id="pa-cc-style">
+#pa-cc-banner{position:fixed;left:0;right:0;bottom:0;z-index:999999;background:rgba(14,16,18,0.97);border-top:1px solid rgba(201,167,106,0.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:20px clamp(16px,4vw,40px);font-family:'Inter',system-ui,sans-serif;color:#F2F0EB;display:none;}
+#pa-cc-banner.pa-cc-show{display:block;}
+#pa-cc-inner{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:18px 28px;}
+#pa-cc-text{flex:1 1 380px;font-size:13.5px;line-height:1.6;color:#B9BBC0;font-weight:300;}
+#pa-cc-text a{color:#C9A76A;text-decoration:underline;}
+#pa-cc-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+#pa-cc-actions button{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer;padding:11px 18px;border-radius:2px;white-space:nowrap;}
+.pa-cc-accept{background:#C9A76A;color:#0E1012;border:1px solid #C9A76A;}
+.pa-cc-accept:hover{opacity:0.88;}
+.pa-cc-reject{background:transparent;color:#F2F0EB;border:1px solid rgba(110,113,118,0.5);}
+.pa-cc-reject:hover{border-color:rgba(201,167,106,0.6);}
+.pa-cc-manage{background:transparent;color:#9A9DA3;border:1px solid transparent;text-decoration:underline;padding:11px 6px;}
+#pa-cc-prefs{display:none;max-width:1180px;margin:16px auto 0;padding-top:16px;border-top:1px solid rgba(110,113,118,0.2);}
+#pa-cc-prefs.pa-cc-show{display:block;}
+.pa-cc-row{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:12px 0;}
+.pa-cc-row + .pa-cc-row{border-top:1px solid rgba(110,113,118,0.12);}
+.pa-cc-row-label{font-size:13px;color:#F2F0EB;font-weight:500;}
+.pa-cc-row-desc{font-size:12px;color:#9A9DA3;font-weight:300;margin-top:4px;max-width:60ch;}
+.pa-cc-switch{position:relative;flex:0 0 auto;width:38px;height:22px;}
+.pa-cc-switch input{opacity:0;width:0;height:0;}
+.pa-cc-slider{position:absolute;inset:0;background:rgba(110,113,118,0.4);border-radius:22px;cursor:pointer;transition:background .2s;}
+.pa-cc-slider:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#F2F0EB;border-radius:50%;transition:transform .2s;}
+.pa-cc-switch input:checked + .pa-cc-slider{background:#C9A76A;}
+.pa-cc-switch input:checked + .pa-cc-slider:before{transform:translateX(16px);}
+.pa-cc-switch input:disabled + .pa-cc-slider{opacity:0.5;cursor:not-allowed;}
+@media (max-width:640px){#pa-cc-inner{flex-direction:column;align-items:stretch;}#pa-cc-actions{justify-content:stretch;}#pa-cc-actions button{flex:1;}}
+</style>
+<div id="pa-cc-banner" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <div id="pa-cc-inner">
+    <div id="pa-cc-text">
+      We use a small consent cookie to remember your choice, and — only if you allow it — analytics cookies to see how the site is used. No advertising cookies, ever. See our <a href="../../cookies.html">Cookie Policy</a> and <a href="../../privacy.html">Privacy Policy</a>.
+    </div>
+    <div id="pa-cc-actions">
+      <button type="button" class="pa-cc-manage" id="pa-cc-manage-btn">Manage preferences</button>
+      <button type="button" class="pa-cc-reject" id="pa-cc-reject-btn">Reject non-essential</button>
+      <button type="button" class="pa-cc-accept" id="pa-cc-accept-btn">Accept all</button>
+    </div>
+  </div>
+  <div id="pa-cc-prefs">
+    <div class="pa-cc-row">
+      <div><div class="pa-cc-row-label">Strictly necessary</div><div class="pa-cc-row-desc">Remembers your cookie choice. Always on — the site can't function without it.</div></div>
+      <label class="pa-cc-switch"><input type="checkbox" checked disabled><span class="pa-cc-slider"></span></label>
+    </div>
+    <div class="pa-cc-row">
+      <div><div class="pa-cc-row-label">Analytics</div><div class="pa-cc-row-desc">Google Analytics — helps us see which pages get used. Off by default.</div></div>
+      <label class="pa-cc-switch"><input type="checkbox" id="pa-cc-analytics-toggle"><span class="pa-cc-slider"></span></label>
+    </div>
+    <div style="max-width:1180px;margin:0 auto;">
+      <button type="button" class="pa-cc-accept" id="pa-cc-save-btn" style="margin-top:4px;">Save preferences</button>
+    </div>
+  </div>
+</div>
+<script src="../../assets/analytics-providers.js"></script>
+<script src="../../assets/analytics.js"></script>
+<script>
+(function(){
+  function q(id){ return document.getElementById(id); }
+  function showBanner(prefsOpen){ var b=q('pa-cc-banner'); if(!b) return; b.classList.add('pa-cc-show'); if(prefsOpen) q('pa-cc-prefs').classList.add('pa-cc-show'); }
+  function hideBanner(){ var b=q('pa-cc-banner'); if(!b) return; b.classList.remove('pa-cc-show'); q('pa-cc-prefs').classList.remove('pa-cc-show'); }
+  document.addEventListener('DOMContentLoaded', function(){
+    var a = window.analytics; if (!a) return;
+    var toggle = q('pa-cc-analytics-toggle');
+    function choose(granted){ a.setConsent(granted); hideBanner(); }
+    var b;
+    if ((b=q('pa-cc-accept-btn'))) b.addEventListener('click', function(){ choose(true); });
+    if ((b=q('pa-cc-reject-btn'))) b.addEventListener('click', function(){ choose(false); });
+    if ((b=q('pa-cc-manage-btn'))) b.addEventListener('click', function(){ q('pa-cc-prefs').classList.toggle('pa-cc-show'); });
+    if ((b=q('pa-cc-save-btn'))) b.addEventListener('click', function(){ choose(!!(toggle && toggle.checked)); });
+    window.paCookieSettings = function(){ var c=a.getConsent(); if (toggle) toggle.checked = !!(c && c.analytics); showBanner(true); };
+    window.paTrackEvent = function(name, params){ a.event(name, params); }; /* legacy shim */
+    if (!a.getConsent()) showBanner(false);
+    a.pageView('community');
+  });
+})();
+</script>
+<!-- /PA COOKIE CONSENT -->
+
+</body></html>
